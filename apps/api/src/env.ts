@@ -23,6 +23,8 @@ export const envSchema = z.object({
   CRON_SECRET: optionalString,
   /** Extra comma-separated origins allowed for CORS / auth (e.g. preview deployments). */
   EXTRA_TRUSTED_ORIGINS: optionalString,
+  /** e.g. ".paipai.app" so web (paipai.app) and API (api.paipai.app) share the session cookie. */
+  COOKIE_DOMAIN: optionalString,
   R2_ACCOUNT_ID: optionalString,
   R2_ACCESS_KEY_ID: optionalString,
   R2_SECRET_ACCESS_KEY: optionalString,

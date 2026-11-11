@@ -6,7 +6,7 @@ Personal finance and expense tracking for India (₹ INR, Asia/Kolkata). PaiPai 
 - an **Expo mobile app**
 - one **Hono API** and one **Neon Postgres** database, shared by both
 
-> Status: **Phase 2 done**: monorepo, database, and the API (auth, transactions, categories, analytics). The web and mobile apps come in Phases 3–5.
+> Status: **Phase 3 done**: monorepo, database, API, and the Next.js website (landing page, auth, dashboard, quick add, transactions, analytics). The mobile app comes in Phase 4.
 
 ## Repo layout
 
@@ -72,11 +72,45 @@ Indexes: `(user_id, occurred_at desc)`, `(user_id, category_id)`, `(user_id, low
 
 Deleting a user cascades and removes all of their data.
 
-## API (apps/api)
+## Running locally
 
 ```bash
-pnpm --filter @paipai/api dev     # http://localhost:8787 (reads the repo-root .env)
+pnpm --filter @paipai/api dev        # API on http://localhost:8787 (Neon + Resend from the repo-root .env)
+pnpm --filter @paipai/web dev        # Website on http://localhost:3000
 ```
+
+**Offline sandbox:** `pnpm --filter @paipai/api dev:local` runs the API on in-memory Postgres (PGlite). OTP codes are printed to the terminal instead of emailed. It doesn't touch Neon or Resend, and the data resets when you stop it.
+
+## Website (apps/web)
+
+This is a pure Next.js 16 App Router app (no Expo, no react-native-web) using Tailwind CSS, Radix-based shadcn-style components, Recharts and TanStack Query.
+
+| Route                          | What it is                                                                                                                                      |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `/`                            | Marketing landing page: lime hero, features, app mockups, FAQ, footer. Has SEO metadata, an Open Graph image and a favicon                      |
+| `/signup`, `/login`            | Email + 6-digit OTP (name required at sign-up, 60s resend timer), or Continue with Google                                                       |
+| `/app`                         | Dashboard: balance card with hide/show and count-up, today/week/month, budget bar (amber at 80%, red at 100%), recent activity                  |
+| `/app/transactions`            | Grouped by day with daily totals, plus search, filters, sorting, infinite scroll, edit/duplicate/delete with Undo                               |
+| `/app/analytics`               | Day/Week/Month/Year/Custom, % change, area/bar/donut charts, item-wise totals, top 5, payment methods, day and hour patterns, 12-month overview |
+| `/app/analytics/items/[title]` | History of a single item                                                                                                                        |
+| `/app/welcome`                 | Optional monthly budget after sign-up                                                                                                           |
+
+**Quick Add** opens with the **N** key (or the + buttons). It has the amount field, title autocomplete (fills in the last-used category), note, category grid, payment chips, a Today/Yesterday date picker, and an expense/income toggle.
+
+`/app/*` is protected by `src/proxy.ts` (an optimistic cookie check); the API still verifies every request. Every chart card has a "view as table" toggle. Category colours in charts come from a colour-blind-validated palette (`chartColorFor` in `@paipai/shared/tokens`).
+
+**Environment** (`apps/web/.env.local`, or set in Vercel):
+
+```
+NEXT_PUBLIC_API_URL="https://api.yourdomain.com"
+NEXT_PUBLIC_SITE_URL="https://yourdomain.com"
+```
+
+Both default to the localhost URLs in development.
+
+> **Note:** the site uses Tailwind CSS **v3** (pure JavaScript) on purpose. Tailwind v4 needs a native `.node` binary, and Windows Application Control blocks that binary on this machine, which silently produced empty CSS.
+
+## API (apps/api)
 
 All routes are under `/api` and require a session, except `/api/auth/*` and `/health`. Errors use the shape `{ error: { code, message, details? } }`. Amounts are paise.
 

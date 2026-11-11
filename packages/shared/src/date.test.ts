@@ -125,3 +125,18 @@ describe('misc', () => {
     expect(normalizeTitle('  Auto   Fare ')).toBe('auto fare');
   });
 });
+
+describe('datetime-local helpers', () => {
+  it('round-trips wall-clock time in the user timezone', async () => {
+    const { toDateTimeLocalValue, fromDateTimeLocalValue, shiftDateString } =
+      await import('./date');
+    const instant = new Date('2024-07-09T20:00:00.000Z'); // 01:30 IST on 10 Jul
+    expect(toDateTimeLocalValue(instant, IST)).toBe('2024-07-10T01:30');
+    expect(fromDateTimeLocalValue('2024-07-10T01:30', IST)?.toISOString()).toBe(
+      instant.toISOString(),
+    );
+    expect(fromDateTimeLocalValue('garbage', IST)).toBeNull();
+    expect(shiftDateString('2024-01-31', 'month', 1, IST)).toBe('2024-02-29');
+    expect(shiftDateString('2024-07-10', 'week', -1, IST)).toBe('2024-07-03');
+  });
+});

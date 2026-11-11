@@ -1,0 +1,37 @@
+/*
+ * Tailwind v3 (pure JS; no native binary required). Colour values come from
+ * @paipai/shared tokens, injected as RGB-channel CSS variables by <ThemeVars />.
+ */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  :focus-visible {
+    outline: 2px solid rgb(var(--pp-forest-mid));
+    outline-offset: 2px;
+  }
+  .dark :focus-visible {
+    outline-color: rgb(var(--pp-lime));
+  }
+  /* Tabular numerals for all amounts */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

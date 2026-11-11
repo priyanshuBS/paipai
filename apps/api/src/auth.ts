@@ -99,6 +99,9 @@ export function createAuth({ env, db, mailer }: CreateAuthOptions) {
     advanced: {
       cookiePrefix: 'paipai',
       useSecureCookies: isProd,
+      ...(env.COOKIE_DOMAIN
+        ? { crossSubDomainCookies: { enabled: true, domain: env.COOKIE_DOMAIN } }
+        : {}),
       defaultCookieAttributes: { sameSite: 'lax', httpOnly: true, secure: isProd },
       ipAddress: { ipAddressHeaders: ['cf-connecting-ip', 'x-real-ip', 'x-forwarded-for'] },
     },

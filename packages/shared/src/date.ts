@@ -200,3 +200,45 @@ export function normalizeTitle(title: string): string {
 function pad(n: number): string {
   return String(n).padStart(2, '0');
 }
+
+/** Value for an <input type="datetime-local"> showing `date` as wall-clock time in `tz`. */
+export function toDateTimeLocalValue(date: Date | string, tz: string = DEFAULT_TIMEZONE): string {
+  const d = inTz(new Date(date), tz);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+/** Parse an <input type="datetime-local"> value as wall-clock time in `tz`. */
+export function fromDateTimeLocalValue(value: string, tz: string = DEFAULT_TIMEZONE): Date | null {
+  const m = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/.exec(value);
+  if (!m) return null;
+  const d = new TZDate(
+    Number(m[1]),
+    Number(m[2]) - 1,
+    Number(m[3]),
+    Number(m[4]),
+    Number(m[5]),
+    0,
+    0,
+    tz,
+  );
+  return toUtc(d);
+}
+
+/** Shift a "YYYY-MM-DD" calendar date by whole periods (in `tz`). */
+export function shiftDateString(
+  date: string,
+  period: Period,
+  amount: number,
+  tz: string = DEFAULT_TIMEZONE,
+): string {
+  const d = parseDateInTz(date, tz);
+  const shifted =
+    period === 'day'
+      ? addDays(d, amount)
+      : period === 'week'
+        ? addWeeks(d, amount)
+        : period === 'month'
+          ? addMonths(d, amount)
+          : addYears(d, amount);
+  return dayKey(shifted, tz);
+}
