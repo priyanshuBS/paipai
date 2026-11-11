@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { AccessibilityInfo } from 'react-native';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { Text, cn, type TextProps } from './ui';
 
 /** Animated count-up for headline amounts (skipped when Reduce Motion is on). */
@@ -42,11 +42,11 @@ export function CountUp({
 
   return (
     <Text
-      accessibilityLabel={hidden ? 'Amount hidden' : formatINR(value)}
+      accessibilityLabel={hidden ? 'Amount hidden' : formatMoney(value)}
       style={{ fontVariant: ['tabular-nums'] }}
       {...props}
     >
-      {hidden ? '₹ • • • • •' : formatINR(display)}
+      {hidden ? '₹ • • • • •' : formatMoney(display)}
     </Text>
   );
 }
@@ -67,7 +67,7 @@ export function Amount({
       style={{ fontVariant: ['tabular-nums'] }}
     >
       {type === 'expense' ? '−' : '+'}
-      {formatINR(amount)}
+      {formatMoney(amount)}
     </Text>
   );
 }

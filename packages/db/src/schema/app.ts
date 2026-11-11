@@ -121,6 +121,8 @@ export const budgets = pgTable(
     alertThresholdPercent: integer('alert_threshold_percent').notNull().default(80),
     /** Last period start for which a threshold alert was sent (avoid duplicate pushes). */
     lastAlertedPeriodStart: timestamp('last_alerted_period_start', { withTimezone: true }),
+    /** Highest alert level already sent in that period: 0 = none, 1 = threshold, 2 = over 100%. */
+    lastAlertLevel: integer('last_alert_level').notNull().default(0),
     ...timestamps,
   },
   (t) => [

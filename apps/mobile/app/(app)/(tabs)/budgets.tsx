@@ -1,143 +1,361 @@
-import { Pencil } from 'lucide-react-native';
+import { router } from 'expo-router';
+import { AlertTriangle, Pencil, Plus, Target, Trash2 } from 'lucide-react-native';
 import { useState } from 'react';
-import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native';
+import { Alert, Pressable, RefreshControl, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney, paiseToInputString, parseRupeesToPaise } from '@paipai/shared/money';
+import type { BudgetPeriod, BudgetView } from '@paipai/shared/schemas';
 import { palette } from '@paipai/shared/tokens';
 import { CategoryIcon } from '@/components/category-icon';
-import { Card, Skeleton, Text, cn } from '@/components/ui';
-import { BudgetEditor } from '@/features/budget/budget-editor';
-import { useCategoryBreakdown, useMe, useSummary } from '@/lib/queries';
+import { EmptyState } from '@/components/empty-state';
+import { Sheet } from '@/components/sheet';
+import { useSnackbar } from '@/components/snackbar';
+import {
+  Button,
+  Card,
+  Chip,
+  ErrorState,
+  FieldError,
+  Input,
+  Label,
+  Skeleton,
+  Text,
+  cn,
+} from '@/components/ui';
+import { ApiError } from '@/lib/api';
+import { useBudgetMutations, useBudgets, useCategories } from '@/lib/queries';
+import { useTheme } from '@/theme/theme';
 
-/** Overall monthly budget progress + this month's spend by category. */
+const PERIODS: { value: BudgetPeriod; label: string }[] = [
+  { value: 'weekly', label: 'Weekly' },
+  { value: 'monthly', label: 'Monthly' },
+  { value: 'yearly', label: 'Yearly' },
+];
+
+function BudgetForm({
+  editing,
+  existing,
+  onClose,
+}: {
+  editing: BudgetView | null;
+  existing: BudgetView[];
+  onClose: () => void;
+}) {
+  const { data: categories = [] } = useCategories();
+  const m = useBudgetMutations();
+  const snack = useSnackbar();
+  const [categoryId, setCategoryId] = useState<string | null>(editing?.categoryId ?? null);
+  const [period, setPeriod] = useState<BudgetPeriod>(editing?.period ?? 'monthly');
+  const [amount, setAmount] = useState(editing ? paiseToInputString(editing.amount) : '');
+  const [threshold, setThreshold] = useState(String(editing?.alertThresholdPercent ?? 80));
+  const [error, setError] = useState<string>();
+  const taken = new Set(
+    existing
+      .filter((b) => b.period === period && b.id !== editing?.id)
+      .map((b) => b.categoryId ?? 'overall'),
+  );
+  const cats = categories.filter((c) => c.type === 'expense' && !c.isArchived);
+
+  async function save() {
+    const paise = parseRupeesToPaise(amount);
+    const t = Number(threshold);
+    if (!paise) return setError('Enter a budget amount, e.g. 5000');
+    if (!Number.isInteger(t) || t < 1 || t > 100) return setError('Alert threshold must be 1–100');
+    if (!editing && taken.has(categoryId ?? 'overall'))
+      return setError('That budget already exists for this period');
+    try {
+      if (editing)
+        await m.update.mutateAsync({
+          id: editing.id,
+          body: { amount: paise, alertThresholdPercent: t },
+        });
+      else
+        await m.create.mutateAsync({ categoryId, period, amount: paise, alertThresholdPercent: t });
+      snack(editing ? 'Budget updated' : 'Budget created');
+      onClose();
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : 'Could not save the budget');
+    }
+  }
+
+  return (
+    <Sheet
+      visible
+      title={editing ? 'Edit budget' : 'New budget'}
+      onClose={onClose}
+      footer={
+        <Button
+          title={editing ? 'Save budget' : 'Create budget'}
+          size="lg"
+          loading={m.create.isPending || m.update.isPending}
+          onPress={() => void save()}
+        />
+      }
+    >
+      {!editing && (
+        <>
+          <View>
+            <Label>Period</Label>
+            <View className="flex-row gap-2">
+              {PERIODS.map((p) => (
+                <Chip
+                  key={p.value}
+                  label={p.label}
+                  selected={period === p.value}
+                  onPress={() => setPeriod(p.value)}
+                />
+              ))}
+            </View>
+          </View>
+          <View>
+            <Label>Applies to</Label>
+            <View className="flex-row flex-wrap gap-2">
+              <Chip
+                label="Overall spending"
+                selected={categoryId === null}
+                onPress={() => setCategoryId(null)}
+              />
+              {cats.map((c) => (
+                <Chip
+                  key={c.id}
+                  label={c.name}
+                  left={<CategoryIcon icon={c.icon} color={c.color} size="sm" />}
+                  selected={categoryId === c.id}
+                  onPress={() => setCategoryId(c.id)}
+                />
+              ))}
+            </View>
+          </View>
+        </>
+      )}
+      <View>
+        <Label>Amount (₹)</Label>
+        <Input
+          value={amount}
+          onChangeText={setAmount}
+          keyboardType="decimal-pad"
+          placeholder="5000"
+          autoFocus={!!editing}
+        />
+      </View>
+      <View>
+        <Label>Warn me at (% used)</Label>
+        <Input
+          value={threshold}
+          onChangeText={(v) => setThreshold(v.replace(/\D/g, ''))}
+          keyboardType="number-pad"
+        />
+      </View>
+      <FieldError>{error}</FieldError>
+    </Sheet>
+  );
+}
+
+function BudgetCard({
+  b,
+  onEdit,
+  onDelete,
+}: {
+  b: BudgetView;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  const { colors } = useTheme();
+  const pct = Math.min(b.percent, 100);
+  const name = b.categoryName ?? 'Overall spending';
+  return (
+    <Card>
+      <View className="flex-row items-center gap-3">
+        {b.categoryId ? (
+          <CategoryIcon icon={b.categoryIcon} color={b.categoryColor} />
+        ) : (
+          <View className="h-11 w-11 items-center justify-center rounded-full bg-forest">
+            <Target size={20} color={palette.lime} />
+          </View>
+        )}
+        <View className="flex-1">
+          <Text weight="semibold" numberOfLines={1}>
+            {name}
+          </Text>
+          <Text muted className="text-sm">
+            {PERIODS.find((p) => p.value === b.period)?.label} · alert at {b.alertThresholdPercent}%
+          </Text>
+        </View>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Edit ${name} budget`}
+          onPress={onEdit}
+          className="h-11 w-11 items-center justify-center"
+        >
+          <Pencil size={18} color={colors.text} />
+        </Pressable>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={`Delete ${name} budget`}
+          onPress={onDelete}
+          className="h-11 w-11 items-center justify-center"
+        >
+          <Trash2 size={18} color={colors.expense} />
+        </Pressable>
+      </View>
+      <View className="mt-4 flex-row items-baseline justify-between">
+        <Text weight="semibold">{formatMoney(b.spent)}</Text>
+        <Text muted className="text-sm">
+          of {formatMoney(b.amount)}
+        </Text>
+      </View>
+      <View
+        className="mt-2 h-3 overflow-hidden rounded-full bg-accent-soft dark:bg-surface-muted"
+        accessibilityRole="progressbar"
+        accessibilityLabel={`${name}: ${b.percent}% used`}
+        accessibilityValue={{ min: 0, max: 100, now: Math.round(pct) }}
+      >
+        <View
+          className={cn(
+            'h-full rounded-full',
+            b.status === 'over'
+              ? 'bg-expense'
+              : b.status === 'warning'
+                ? 'bg-warning'
+                : 'bg-forest-mid dark:bg-lime',
+          )}
+          style={{ width: `${pct}%` }}
+        />
+      </View>
+      <Text
+        className={cn(
+          'mt-2 text-sm',
+          b.status === 'over'
+            ? 'text-expense'
+            : b.status === 'warning'
+              ? 'text-warning'
+              : 'text-muted-foreground',
+        )}
+      >
+        {b.status === 'over'
+          ? `Over by ${formatMoney(-b.remaining)} · ${b.percent}%`
+          : `${formatMoney(b.remaining)} left · ${b.percent}% used`}
+      </Text>
+    </Card>
+  );
+}
+
 export default function Budgets() {
-  const { data: me, isLoading } = useMe();
-  const summary = useSummary({ period: 'month', type: 'expense' });
-  const cats = useCategoryBreakdown({ period: 'month', type: 'expense' });
-  const [editing, setEditing] = useState(false);
-  const budget = me?.monthlyBudget ?? null;
-  const spent = summary.data?.thisMonth ?? 0;
-  const pct = budget ? Math.round((spent / budget) * 100) : 0;
-  const state = pct >= 100 ? 'over' : pct >= 80 ? 'warn' : 'ok';
+  const q = useBudgets();
+  const m = useBudgetMutations();
+  const snack = useSnackbar();
+  const [form, setForm] = useState<{ open: boolean; editing: BudgetView | null }>({
+    open: false,
+    editing: null,
+  });
+  const [refreshing, setRefreshing] = useState(false);
+  const budgets = q.data ?? [];
+  const flagged = budgets.filter((b) => b.status !== 'ok');
+
+  const remove = (b: BudgetView) =>
+    Alert.alert('Delete budget?', `Remove the ${b.categoryName ?? 'overall'} budget?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => void m.remove.mutateAsync(b.id).then(() => snack('Budget deleted')),
+      },
+    ]);
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        className="flex-1"
+      <ScrollView
+        contentContainerClassName="gap-4 px-4 pb-10 pt-4"
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            tintColor={palette.forestMid}
+            onRefresh={() => {
+              setRefreshing(true);
+              void q.refetch().finally(() => setRefreshing(false));
+            }}
+          />
+        }
       >
-        <ScrollView
-          keyboardShouldPersistTaps="handled"
-          contentContainerClassName="gap-4 px-4 pb-10 pt-4"
-        >
-          <Text weight="extrabold" className="px-1 text-[28px]" accessibilityRole="header">
+        <View className="flex-row items-center justify-between px-1">
+          <Text weight="extrabold" className="text-[28px]" accessibilityRole="header">
             Budgets
           </Text>
+          <Button
+            title="New"
+            icon={<Plus size={18} color="#fff" />}
+            onPress={() => setForm({ open: true, editing: null })}
+          />
+        </View>
 
-          {isLoading ? (
-            <Skeleton className="h-40 w-full" />
-          ) : !budget || editing ? (
-            <Card>
-              <Text weight="semibold" className="mb-1 text-base">
-                {budget ? 'Edit monthly budget' : 'Set a monthly budget'}
-              </Text>
-              <Text muted className="mb-4 text-sm">
-                We&apos;ll show your progress and warn you at 80% and 100%.
-              </Text>
-              <BudgetEditor initial={budget} onDone={() => setEditing(false)} />
-            </Card>
-          ) : (
-            <View className="rounded-card bg-forest p-5">
-              <View className="flex-row items-center justify-between">
-                <Text className="text-sm text-white/70">Monthly budget</Text>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Edit budget"
-                  onPress={() => setEditing(true)}
-                  className="h-11 w-11 items-center justify-center rounded-full"
-                >
-                  <Pencil size={18} color="#fff" />
-                </Pressable>
-              </View>
-              <Text weight="semibold" className="text-[34px] text-white">
-                {formatINR(Math.max(budget - spent, 0))}
-                <Text className="text-base text-white/70"> left</Text>
-              </Text>
-              <View
-                className="mt-4 h-3 overflow-hidden rounded-full bg-white/15"
-                accessibilityRole="progressbar"
-                accessibilityValue={{ min: 0, max: 100, now: Math.min(pct, 100) }}
-                accessibilityLabel={`Budget used ${pct}%`}
-              >
-                <View
-                  className={cn(
-                    'h-full rounded-full',
-                    state === 'over' ? 'bg-expense' : state === 'warn' ? 'bg-warning' : 'bg-lime',
-                  )}
-                  style={{ width: `${Math.min(pct, 100)}%` }}
-                />
-              </View>
-              <Text className="mt-2 text-sm text-white/80">
-                {formatINR(spent)} of {formatINR(budget)} · {pct}% used
-              </Text>
-              {state !== 'ok' && (
-                <View
-                  className={cn(
-                    'mt-3 rounded-2xl p-3',
-                    state === 'over' ? 'bg-expense' : 'bg-warning',
-                  )}
-                >
-                  <Text weight="semibold" className="text-sm text-white">
-                    {state === 'over'
-                      ? `You're ${formatINR(spent - budget)} over budget this month.`
-                      : `Heads up: you've used ${pct}% of your budget.`}
+        {flagged.length > 0 && (
+          <View
+            accessibilityRole="alert"
+            className="flex-row gap-3 rounded-card border border-warning/40 bg-warning/10 p-4"
+          >
+            <AlertTriangle size={20} color={palette.warning} />
+            <View className="flex-1 gap-1">
+              {flagged.map((b) => (
+                <Text key={b.id} className="text-sm">
+                  <Text weight="semibold" className="text-sm">
+                    {b.categoryName ?? 'Overall'}
                   </Text>
-                </View>
-              )}
+                  :{' '}
+                  {b.status === 'over'
+                    ? `over by ${formatMoney(-b.remaining)}`
+                    : `${b.percent}% used`}
+                </Text>
+              ))}
             </View>
-          )}
+          </View>
+        )}
 
-          <Card>
-            <Text weight="semibold" className="mb-3 text-base">
-              This month by category
-            </Text>
-            {cats.isLoading ? (
-              <Skeleton className="h-32 w-full" />
-            ) : (cats.data ?? []).length === 0 ? (
-              <Text muted className="py-4 text-center text-sm">
-                No spending yet this month
-              </Text>
-            ) : (
-              (cats.data ?? []).map((c) => (
-                <View
-                  key={c.categoryId ?? 'none'}
-                  className="mb-3"
-                  accessible
-                  accessibilityLabel={`${c.name}: ${formatINR(c.total)}, ${c.percent}% of spending`}
-                >
-                  <View className="flex-row items-center gap-3">
-                    <CategoryIcon icon={c.icon} color={c.color} size="sm" />
-                    <Text weight="medium" className="flex-1" numberOfLines={1}>
-                      {c.name}
-                    </Text>
-                    <Text weight="semibold">{formatINR(c.total)}</Text>
-                  </View>
-                  <View className="ml-12 mt-1.5 h-2 overflow-hidden rounded-full bg-surface-muted">
-                    <View
-                      style={{
-                        width: `${Math.max(c.percent, 2)}%`,
-                        height: '100%',
-                        borderRadius: 999,
-                        backgroundColor: palette.forestMid,
-                      }}
-                    />
-                  </View>
-                </View>
-              ))
-            )}
-          </Card>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        {q.isError ? (
+          <ErrorState onRetry={() => void q.refetch()} />
+        ) : q.isLoading ? (
+          <>
+            <Skeleton className="h-40 w-full" />
+            <Skeleton className="h-40 w-full" />
+          </>
+        ) : budgets.length === 0 ? (
+          <EmptyState
+            title="No budgets yet"
+            description="Start with an overall monthly budget, then add limits for categories like Food or Travel."
+            action={
+              <Button
+                title="Create a budget"
+                onPress={() => setForm({ open: true, editing: null })}
+              />
+            }
+          />
+        ) : (
+          budgets.map((b) => (
+            <BudgetCard
+              key={b.id}
+              b={b}
+              onEdit={() => setForm({ open: true, editing: b })}
+              onDelete={() => remove(b)}
+            />
+          ))
+        )}
+
+        <Pressable
+          accessibilityRole="button"
+          onPress={() => router.push('/report')}
+          className="items-center py-3"
+        >
+          <Text weight="semibold" className="text-forest-mid dark:text-lime">
+            View monthly report →
+          </Text>
+        </Pressable>
+      </ScrollView>
+      {form.open && (
+        <BudgetForm
+          editing={form.editing}
+          existing={budgets}
+          onClose={() => setForm({ open: false, editing: null })}
+        />
+      )}
     </SafeAreaView>
   );
 }

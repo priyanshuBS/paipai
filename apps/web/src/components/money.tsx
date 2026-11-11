@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { cn } from '@/lib/utils';
 
 /** Animated count-up for headline amounts (respects reduced motion). */
@@ -41,9 +41,9 @@ export function CountUp({
   return (
     <span
       className={cn('tabular', className)}
-      aria-label={hidden ? 'Amount hidden' : formatINR(value)}
+      aria-label={hidden ? 'Amount hidden' : formatMoney(value)}
     >
-      <span aria-hidden>{hidden ? '₹ • • • • •' : formatINR(display)}</span>
+      <span aria-hidden>{hidden ? '₹ • • • • •' : formatMoney(display)}</span>
     </span>
   );
 }
@@ -67,7 +67,7 @@ export function Amount({
       )}
     >
       {type === 'expense' ? '−' : '+'}
-      {formatINR(amount)}
+      {formatMoney(amount)}
     </span>
   );
 }

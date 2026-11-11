@@ -82,11 +82,25 @@ export interface FormatMoneyOptions {
   signed?: boolean;
 }
 
-/** Format paise as currency using the en-IN locale, e.g. 12345600 -> "₹1,23,456". */
+let displayCurrency: string = DEFAULT_CURRENCY;
+
+/** Set the currency used by `formatMoney` when none is passed (the user's setting). */
+export function setDisplayCurrency(code: string | null | undefined): void {
+  displayCurrency = code && /^[A-Z]{3}$/.test(code) ? code : DEFAULT_CURRENCY;
+}
+
+export function getDisplayCurrency(): string {
+  return displayCurrency;
+}
+
+/**
+ * Format minor units (paise/cents) using the en-IN locale and the user's
+ * display currency, e.g. 12345600 -> "₹1,23,456".
+ */
 export function formatMoney(paise: Paise, options: FormatMoneyOptions = {}): string {
   assertInteger(paise);
   const {
-    currency = DEFAULT_CURRENCY,
+    currency = displayCurrency,
     trimZeroPaise = true,
     compact = false,
     signed = false,

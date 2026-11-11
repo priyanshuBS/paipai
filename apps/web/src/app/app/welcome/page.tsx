@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useState, type FormEvent } from 'react';
-import { formatINR, parseRupeesToPaise } from '@paipai/shared/money';
+import { formatMoney, parseRupeesToPaise } from '@paipai/shared/money';
 import { LogoMark } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { Chip, FieldError } from '@/components/ui/primitives';
@@ -68,7 +68,7 @@ export default function WelcomePage() {
               selected={parseRupeesToPaise(value) === p}
               onClick={() => setValue(String(p / 100))}
             >
-              {formatINR(p)}
+              {formatMoney(p)}
             </Chip>
           ))}
         </div>

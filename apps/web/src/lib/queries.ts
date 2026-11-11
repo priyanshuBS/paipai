@@ -138,6 +138,8 @@ function useInvalidateMoney() {
     Promise.all([
       qc.invalidateQueries({ queryKey: ['transactions'] }),
       qc.invalidateQueries({ queryKey: qk.analytics }),
+      qc.invalidateQueries({ queryKey: ['budgets'] }),
+      qc.invalidateQueries({ queryKey: ['report'] }),
     ]);
 }
 
@@ -179,4 +181,103 @@ export function useDuplicateTransaction() {
     mutationFn: (id: string) => api.duplicateTransaction(id),
     onSuccess: () => invalidate(),
   });
+}
+
+// ── Phase 5: budgets, recurring, reports, uploads ───────────────────────────
+
+export function useBudgets() {
+  return useQuery({ queryKey: ['budgets'], queryFn: api.budgets });
+}
+
+export function useBudgetMutations() {
+  const qc = useQueryClient();
+  const done = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ['budgets'] }),
+      qc.invalidateQueries({ queryKey: ['report'] }),
+    ]);
+  return {
+    create: useMutation({ mutationFn: api.createBudget, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateBudget>[1] }) =>
+        api.updateBudget(v.id, v.body),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: api.deleteBudget, onSuccess: done }),
+  };
+}
+
+export function useRecurring() {
+  return useQuery({ queryKey: ['recurring'], queryFn: api.recurring });
+}
+
+export function useRecurringMutations() {
+  const qc = useQueryClient();
+  const done = () => qc.invalidateQueries({ queryKey: ['recurring'] });
+  return {
+    create: useMutation({ mutationFn: api.createRecurring, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateRecurring>[1] }) =>
+        api.updateRecurring(v.id, v.body),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: api.deleteRecurring, onSuccess: done }),
+  };
+}
+
+export function useMonthlyReport(month: string) {
+  return useQuery({
+    queryKey: ['report', month],
+    queryFn: () => api.monthlyReport(month),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUploadsEnabled() {
+  return (
+    useQuery({ queryKey: ['uploads-config'], queryFn: api.uploadsConfig, staleTime: 10 * 60_000 })
+      .data?.enabled ?? false
+  );
+}
+
+export function useCategoryMutations() {
+  const qc = useQueryClient();
+  const done = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: qk.categories }),
+      qc.invalidateQueries({ queryKey: ['budgets'] }),
+    ]);
+  return {
+    create: useMutation({ mutationFn: api.createCategory, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateCategory>[1] }) =>
+        api.updateCategory(v.id, v.body),
+      onSuccess: done,
+    }),
+    remove: useMutation({
+      mutationFn: (id: string) =>
+        api.request<{ deleted: boolean; archived: boolean }>(`/api/categories/${id}`, {
+          method: 'DELETE',
+        }),
+      onSuccess: done,
+    }),
+    reorder: useMutation({
+      mutationFn: (ids: string[]) =>
+        api.request<{ ok: true }>('/api/categories/reorder', { body: { ids } }),
+      onSuccess: done,
+    }),
+  };
+}
+
+/** Upload an image to storage via a presigned URL; returns its public URL. */
+export async function uploadImage(file: File, kind: 'receipt' | 'avatar'): Promise<string> {
+  const contentType = file.type as 'image/jpeg' | 'image/png' | 'image/webp' | 'image/heic';
+  const { uploadUrl, publicUrl, headers } = await api.presignUpload({
+    kind,
+    contentType,
+    size: file.size,
+  });
+  const res = await fetch(uploadUrl, { method: 'PUT', headers, body: file });
+  if (!res.ok) throw new Error('Upload failed');
+  return publicUrl;
 }

@@ -4,7 +4,7 @@ import { Popover } from 'radix-ui';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Check, Plus, Search, SlidersHorizontal, X } from 'lucide-react';
 import { DEFAULT_TIMEZONE, dayKey, formatDayHeader } from '@paipai/shared/date';
-import { formatINR, parseRupeesToPaise } from '@paipai/shared/money';
+import { formatMoney, parseRupeesToPaise } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -408,13 +408,13 @@ export default function TransactionsPage() {
                         <p className="tabular text-sm text-muted-foreground">
                           {totals.expense > 0 && (
                             <span className="font-semibold text-expense">
-                              −{formatINR(totals.expense)}
+                              −{formatMoney(totals.expense)}
                             </span>
                           )}
                           {totals.expense > 0 && totals.income > 0 && ' · '}
                           {totals.income > 0 && (
                             <span className="font-semibold text-income">
-                              +{formatINR(totals.income)}
+                              +{formatMoney(totals.income)}
                             </span>
                           )}
                         </p>

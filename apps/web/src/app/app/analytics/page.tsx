@@ -14,7 +14,7 @@ import {
   shiftDateString,
   type Period,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -365,7 +365,7 @@ export default function AnalyticsPage() {
           }
           table={{
             columns: [period === 'day' ? 'Hour' : 'Period', 'Amount', 'Count'],
-            rows: mainData.map((p) => [p.fullLabel ?? p.label, formatINR(p.value), p.count ?? 0]),
+            rows: mainData.map((p) => [p.fullLabel ?? p.label, formatMoney(p.value), p.count ?? 0]),
           }}
         >
           {summary.isError ? (
@@ -388,7 +388,7 @@ export default function AnalyticsPage() {
           subtitle={`${shortDay(weekRange.from, tz)} – ${shortDay(weekRange.to, tz)}`}
           table={{
             columns: ['Day', 'Amount'],
-            rows: weekData.map((p) => [p.fullLabel ?? p.label, formatINR(p.value)]),
+            rows: weekData.map((p) => [p.fullLabel ?? p.label, formatMoney(p.value)]),
           }}
         >
           {week.isLoading ? (
@@ -407,7 +407,7 @@ export default function AnalyticsPage() {
           title="By category"
           table={{
             columns: ['Category', 'Amount', '%', 'Count'],
-            rows: catRows.map((c) => [c.name, formatINR(c.total), `${c.percent}%`, c.count]),
+            rows: catRows.map((c) => [c.name, formatMoney(c.total), `${c.percent}%`, c.count]),
           }}
         >
           {cats.isLoading ? (
@@ -430,7 +430,7 @@ export default function AnalyticsPage() {
                     />
                     <CategoryIcon icon={c.icon} color={c.color} size="sm" />
                     <span className="min-w-0 flex-1 truncate font-medium">{c.name}</span>
-                    <span className="tabular font-semibold">{formatINR(c.total)}</span>
+                    <span className="tabular font-semibold">{formatMoney(c.total)}</span>
                     <span className="tabular w-12 text-right text-sm text-muted-foreground">
                       {c.percent}%
                     </span>
@@ -471,7 +471,7 @@ export default function AnalyticsPage() {
                     <span className="w-5 text-sm font-semibold text-muted-foreground">{i + 1}</span>
                     <CategoryIcon icon={c.icon} color={c.color} size="sm" />
                     <span className="flex-1 truncate">{c.name}</span>
-                    <span className="tabular font-semibold">{formatINR(c.total)}</span>
+                    <span className="tabular font-semibold">{formatMoney(c.total)}</span>
                   </li>
                 ))}
                 {top5.length === 0 && (
@@ -493,7 +493,7 @@ export default function AnalyticsPage() {
                       </span>
                       <span className="flex-1 truncate">{it.title}</span>
                       <span className="text-sm text-muted-foreground">{it.count}×</span>
-                      <span className="tabular font-semibold">{formatINR(it.total)}</span>
+                      <span className="tabular font-semibold">{formatMoney(it.total)}</span>
                     </Link>
                   </li>
                 ))}
@@ -549,11 +549,11 @@ export default function AnalyticsPage() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate font-semibold">{it.title}</span>
                       <span className="block text-sm text-muted-foreground">
-                        {formatINR(it.total)} across {it.count} time{it.count === 1 ? '' : 's'} ·
-                        avg {formatINR(it.average)} · last {formatDate(it.lastAt, tz)}
+                        {formatMoney(it.total)} across {it.count} time{it.count === 1 ? '' : 's'} ·
+                        avg {formatMoney(it.average)} · last {formatDate(it.lastAt, tz)}
                       </span>
                     </span>
-                    <span className="tabular font-semibold">{formatINR(it.total)}</span>
+                    <span className="tabular font-semibold">{formatMoney(it.total)}</span>
                     <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
                   </Link>
                 </li>
@@ -568,7 +568,7 @@ export default function AnalyticsPage() {
           subtitle="Which days you spend most"
           table={{
             columns: ['Day', 'Amount', 'Count'],
-            rows: dowData.map((d) => [d.fullLabel ?? d.label, formatINR(d.value), d.count ?? 0]),
+            rows: dowData.map((d) => [d.fullLabel ?? d.label, formatMoney(d.value), d.count ?? 0]),
           }}
         >
           {patterns.isLoading ? (
@@ -585,7 +585,7 @@ export default function AnalyticsPage() {
             columns: ['Hour', 'Amount', 'Count'],
             rows: hourData
               .filter((h) => h.value > 0)
-              .map((h) => [h.fullLabel ?? h.label, formatINR(h.value), h.count ?? 0]),
+              .map((h) => [h.fullLabel ?? h.label, formatMoney(h.value), h.count ?? 0]),
           }}
         >
           {patterns.isLoading ? (
@@ -599,10 +599,10 @@ export default function AnalyticsPage() {
         <ChartCard
           className="lg:col-span-3"
           title={`${yearRange.from.slice(0, 4)} overview`}
-          subtitle={`${formatINR((year.data ?? []).reduce((a, p) => a + p.total, 0))} ${typeWord} this year`}
+          subtitle={`${formatMoney((year.data ?? []).reduce((a, p) => a + p.total, 0))} ${typeWord} this year`}
           table={{
             columns: ['Month', 'Amount', 'Count'],
-            rows: yearData.map((p) => [p.fullLabel ?? p.label, formatINR(p.value), p.count ?? 0]),
+            rows: yearData.map((p) => [p.fullLabel ?? p.label, formatMoney(p.value), p.count ?? 0]),
           }}
         >
           {year.isLoading ? (

@@ -12,7 +12,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { DEFAULT_TIMEZONE, dayKey, formatDayHeader } from '@paipai/shared/date';
-import { formatINR, parseRupeesToPaise } from '@paipai/shared/money';
+import { formatMoney, parseRupeesToPaise } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -201,13 +201,13 @@ export default function TransactionsScreen() {
                   <Text className="text-sm">
                     {totals.expense > 0 && (
                       <Text weight="semibold" className="text-sm text-expense">
-                        −{formatINR(totals.expense)}
+                        −{formatMoney(totals.expense)}
                       </Text>
                     )}
                     {totals.expense > 0 && totals.income > 0 && <Text muted> · </Text>}
                     {totals.income > 0 && (
                       <Text weight="semibold" className="text-sm text-income">
-                        +{formatINR(totals.income)}
+                        +{formatMoney(totals.income)}
                       </Text>
                     )}
                   </Text>

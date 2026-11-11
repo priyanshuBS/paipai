@@ -28,6 +28,7 @@ import {
   Pizza,
   Plane,
   Receipt,
+  Repeat,
   Scissors,
   Shirt,
   ShoppingBag,
@@ -87,6 +88,7 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   'hand-coins': HandCoins,
   'circle-ellipsis': CircleEllipsis,
   'circle-help': CircleHelp,
+  repeat: Repeat,
 };
 
 /** Circular category avatar: pastel background, dark icon. */

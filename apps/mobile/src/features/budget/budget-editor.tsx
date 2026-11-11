@@ -1,7 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { useState } from 'react';
 import { TextInput, View } from 'react-native';
-import { formatINR, paiseToInputString, parseRupeesToPaise } from '@paipai/shared/money';
+import { formatMoney, paiseToInputString, parseRupeesToPaise } from '@paipai/shared/money';
 import { Button, Chip, FieldError, Text } from '@/components/ui';
 import { useUpdateMe } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
@@ -57,7 +57,7 @@ export function BudgetEditor({
         {PRESETS.map((p) => (
           <Chip
             key={p}
-            label={formatINR(p)}
+            label={formatMoney(p)}
             selected={parseRupeesToPaise(value) === p}
             onPress={() => setValue(String(p / 100))}
           />

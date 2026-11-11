@@ -1,5 +1,6 @@
 import DateTimePicker, { type DateTimePickerEvent } from '@react-native-community/datetimepicker';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import * as Crypto from 'expo-crypto';
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
 import { CalendarClock, ChevronDown, Copy, Trash2, X } from 'lucide-react-native';
@@ -20,7 +21,7 @@ import {
   formatTime,
   sameTimeYesterday,
 } from '@paipai/shared/date';
-import { formatINR, paiseToInputString, parseRupeesToPaise } from '@paipai/shared/money';
+import { formatMoney, paiseToInputString, parseRupeesToPaise } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -44,6 +45,8 @@ import {
   cn,
 } from '@/components/ui';
 import { api, ApiError, type TransactionPage } from '@/lib/api';
+import { enqueueTransaction, isOfflineError } from '@/lib/offline-queue';
+import { ReceiptPicker } from '@/features/receipts/receipt-picker';
 import { useCategories, useDuplicateTransaction, useMe, useSaveTransaction } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
 
@@ -135,7 +138,8 @@ function QuickAddForm({
   const [when, setWhen] = useState<Date>(editing ? new Date(editing.occurredAt) : new Date());
   const [picker, setPicker] = useState<null | 'date' | 'time'>(null);
   const [tags, setTags] = useState((editing?.tags ?? []).join(', '));
-  const [showMore, setShowMore] = useState(Boolean(editing?.tags.length));
+  const [showMore, setShowMore] = useState(Boolean(editing?.tags.length || editing?.receiptUrl));
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(editing?.receiptUrl ?? null);
   const [titleFocused, setTitleFocused] = useState(false);
   const [errors, setErrors] = useState<{ amount?: string; title?: string; form?: string }>({});
   const categoryTouched = useRef(Boolean(editing?.categoryId));
@@ -214,18 +218,36 @@ function QuickAddForm({
         .map((t) => t.trim())
         .filter(Boolean)
         .slice(0, 10),
+      receiptUrl,
     };
+    // Client-generated id: lets an offline-queued create be replayed safely.
+    const createPayload = { ...payload, id: Crypto.randomUUID() };
     try {
-      if (editing) await save.mutateAsync({ id: editing.id, update: payload });
-      else await save.mutateAsync({ create: payload });
+      const saved = editing
+        ? await save.mutateAsync({ id: editing.id, update: payload })
+        : await save.mutateAsync({ create: createPayload });
       void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      const alert = saved.budgetAlerts?.at(-1);
       snack(
-        editing
-          ? 'Saved changes'
-          : `${type === 'expense' ? 'Expense' : 'Income'} of ${formatINR(paise)} added`,
+        alert
+          ? {
+              message: `⚠️ ${alert.message}`,
+              tone: alert.level === 'over' ? 'error' : 'default',
+              durationMs: 7000,
+            }
+          : editing
+            ? 'Saved changes'
+            : `${type === 'expense' ? 'Expense' : 'Income'} of ${formatMoney(paise)} added`,
       );
       router.back();
     } catch (err) {
+      if (!editing && isOfflineError(err)) {
+        await enqueueTransaction(createPayload);
+        void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        snack('Saved offline. It will sync when you are back online.');
+        router.back();
+        return;
+      }
       setErrors({
         form: err instanceof ApiError ? err.message : 'Could not save. Please try again.',
       });
@@ -319,7 +341,7 @@ function QuickAddForm({
                     <Pressable
                       key={s.title}
                       accessibilityRole="button"
-                      accessibilityLabel={`Use ${s.title}, last ${formatINR(s.lastAmount)}`}
+                      accessibilityLabel={`Use ${s.title}, last ${formatMoney(s.lastAmount)}`}
                       onPress={() => applySuggestion(s)}
                       className="min-h-12 flex-row items-center gap-3 px-3 py-2 active:bg-surface-muted"
                     >
@@ -328,7 +350,7 @@ function QuickAddForm({
                         {s.title}
                       </Text>
                       <Text muted className="text-xs">
-                        {formatINR(s.lastAmount)} · {s.count}×
+                        {formatMoney(s.lastAmount)} · {s.count}×
                       </Text>
                     </Pressable>
                   );
@@ -481,6 +503,7 @@ function QuickAddForm({
                   autoCapitalize="none"
                   accessibilityLabel="Tags"
                 />
+                <ReceiptPicker value={receiptUrl} onChange={setReceiptUrl} />
               </View>
             )}
           </View>

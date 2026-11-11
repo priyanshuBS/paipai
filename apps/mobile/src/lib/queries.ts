@@ -6,6 +6,7 @@ import {
   useQueryClient,
 } from '@tanstack/react-query';
 import type {
+  Category,
   CreateTransactionInput,
   TransactionType,
   UpdateMeInput,
@@ -131,6 +132,8 @@ function useInvalidateMoney() {
     Promise.all([
       qc.invalidateQueries({ queryKey: ['transactions'] }),
       qc.invalidateQueries({ queryKey: qk.analytics }),
+      qc.invalidateQueries({ queryKey: ['budgets'] }),
+      qc.invalidateQueries({ queryKey: ['report'] }),
     ]);
 }
 
@@ -172,4 +175,89 @@ export function useDuplicateTransaction() {
     mutationFn: (id: string) => api.duplicateTransaction(id),
     onSuccess: () => invalidate(),
   });
+}
+
+// ── Phase 5 ─────────────────────────────────────────────────────────────────
+
+export function useBudgets() {
+  return useQuery({ queryKey: ['budgets'], queryFn: api.budgets });
+}
+
+export function useBudgetMutations() {
+  const qc = useQueryClient();
+  const done = () =>
+    Promise.all([
+      qc.invalidateQueries({ queryKey: ['budgets'] }),
+      qc.invalidateQueries({ queryKey: qk.me }),
+    ]);
+  return {
+    create: useMutation({ mutationFn: api.createBudget, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateBudget>[1] }) =>
+        api.updateBudget(v.id, v.body),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: api.deleteBudget, onSuccess: done }),
+  };
+}
+
+export function useRecurring() {
+  return useQuery({ queryKey: ['recurring'], queryFn: api.recurring });
+}
+
+export function useRecurringMutations() {
+  const qc = useQueryClient();
+  const done = () => qc.invalidateQueries({ queryKey: ['recurring'] });
+  return {
+    create: useMutation({ mutationFn: api.createRecurring, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateRecurring>[1] }) =>
+        api.updateRecurring(v.id, v.body),
+      onSuccess: done,
+    }),
+    remove: useMutation({ mutationFn: api.deleteRecurring, onSuccess: done }),
+  };
+}
+
+export function useMonthlyReport(month: string) {
+  return useQuery({
+    queryKey: ['report', month],
+    queryFn: () => api.monthlyReport(month),
+    placeholderData: keepPreviousData,
+  });
+}
+
+export function useUploadsEnabled() {
+  return (
+    useQuery({ queryKey: ['uploads-config'], queryFn: api.uploadsConfig, staleTime: 10 * 60_000 })
+      .data?.enabled ?? false
+  );
+}
+
+export function useAllCategories() {
+  return useQuery({
+    queryKey: ['categories', 'all'],
+    queryFn: () =>
+      api
+        .request<{ items: Category[] }>('/api/categories', { query: { includeArchived: 'true' } })
+        .then((r) => r.items),
+  });
+}
+
+export function useCategoryMutations() {
+  const qc = useQueryClient();
+  const done = () => qc.invalidateQueries({ queryKey: ['categories'] });
+  return {
+    create: useMutation({ mutationFn: api.createCategory, onSuccess: done }),
+    update: useMutation({
+      mutationFn: (v: { id: string; body: Parameters<typeof api.updateCategory>[1] }) =>
+        api.updateCategory(v.id, v.body),
+      onSuccess: done,
+    }),
+    reorder: useMutation({
+      mutationFn: (ids: string[]) =>
+        api.request<{ ok: true }>('/api/categories/reorder', { body: { ids } }),
+      onSuccess: done,
+    }),
+  };
 }

@@ -1,0 +1,1 @@
+ALTER TABLE "budgets" ADD COLUMN "last_alert_level" integer DEFAULT 0 NOT NULL;

@@ -19,7 +19,7 @@ import {
   toDateTimeLocalValue,
   dayKey,
 } from '@paipai/shared/date';
-import { paiseToInputString, parseRupeesToPaise, formatINR } from '@paipai/shared/money';
+import { paiseToInputString, parseRupeesToPaise, formatMoney } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -27,12 +27,15 @@ import {
   type Transaction,
   type TransactionType,
 } from '@paipai/shared/schemas';
+import { RECEIPT_MAX_BYTES } from '@paipai/shared/settings';
 import { CategoryIcon } from '@/components/category-icon';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Chip, FieldError, Input, Label, Segmented } from '@/components/ui/primitives';
 import { api, ApiError } from '@/lib/api';
 import {
+  uploadImage,
+  useUploadsEnabled,
   useCategories,
   useDeleteTransaction,
   useDuplicateTransaction,
@@ -131,7 +134,28 @@ function QuickAddForm({
   );
   const [tags, setTags] = useState((editing?.tags ?? []).join(', '));
   const [location, setLocation] = useState(editing?.location ?? '');
-  const [showMore, setShowMore] = useState(Boolean(editing?.tags.length || editing?.location));
+  const [showMore, setShowMore] = useState(
+    Boolean(editing?.tags.length || editing?.location || editing?.receiptUrl),
+  );
+  const uploadsEnabled = useUploadsEnabled();
+  const [receiptUrl, setReceiptUrl] = useState<string | null>(editing?.receiptUrl ?? null);
+  const [uploading, setUploading] = useState(false);
+
+  async function onReceipt(file: File | undefined) {
+    if (!file) return;
+    if (file.size > RECEIPT_MAX_BYTES) {
+      toast.error('Receipt must be under 5 MB');
+      return;
+    }
+    setUploading(true);
+    try {
+      setReceiptUrl(await uploadImage(file, 'receipt'));
+    } catch {
+      toast.error('Could not upload the receipt');
+    } finally {
+      setUploading(false);
+    }
+  }
   const [errors, setErrors] = useState<{ amount?: string; title?: string; form?: string }>({});
 
   const [suggestOpen, setSuggestOpen] = useState(false);
@@ -235,15 +259,22 @@ function QuickAddForm({
         .filter(Boolean)
         .slice(0, 10),
       location: location.trim() || null,
+      receiptUrl,
     };
 
     try {
-      if (editing) {
-        await save.mutateAsync({ id: editing.id, update: payload });
-        toast.success('Saved changes');
-      } else {
-        await save.mutateAsync({ create: payload });
-        toast.success(`${type === 'expense' ? 'Expense' : 'Income'} of ${formatINR(paise)} added`);
+      const saved = editing
+        ? await save.mutateAsync({ id: editing.id, update: payload })
+        : await save.mutateAsync({ create: payload });
+      toast.success(
+        editing
+          ? 'Saved changes'
+          : `${type === 'expense' ? 'Expense' : 'Income'} of ${formatMoney(paise)} added`,
+      );
+      // In-app budget warnings (threshold / over 100%)
+      for (const a of saved.budgetAlerts ?? []) {
+        if (a.level === 'over') toast.error(a.message, { duration: 8000 });
+        else toast.warning(a.message, { duration: 8000 });
       }
       onDone();
     } catch (err) {
@@ -350,7 +381,7 @@ function QuickAddForm({
                   <CategoryIcon icon={cat?.icon} color={cat?.color} size="sm" />
                   <span className="flex-1 truncate text-sm font-medium">{s.title}</span>
                   <span className="text-xs text-muted-foreground">
-                    {formatINR(s.lastAmount)} · {s.count}×
+                    {formatMoney(s.lastAmount)} · {s.count}×
                   </span>
                 </li>
               );
@@ -475,6 +506,47 @@ function QuickAddForm({
                 onChange={(e) => setLocation(e.target.value)}
               />
             </div>
+            {uploadsEnabled && (
+              <div className="sm:col-span-2">
+                <Label htmlFor="qa-receipt">Receipt photo</Label>
+                {receiptUrl ? (
+                  <div className="flex items-center gap-3">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={receiptUrl}
+                      alt="Receipt"
+                      className="size-16 rounded-xl object-cover"
+                    />
+                    <a
+                      href={receiptUrl}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-sm font-medium underline"
+                    >
+                      View
+                    </a>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setReceiptUrl(null)}
+                    >
+                      Remove
+                    </Button>
+                  </div>
+                ) : (
+                  <Input
+                    id="qa-receipt"
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/heic"
+                    disabled={uploading}
+                    onChange={(e) => void onReceipt(e.target.files?.[0])}
+                    className="h-auto py-2 file:mr-3 file:rounded-full file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                  />
+                )}
+                {uploading && <p className="mt-1 text-sm text-muted-foreground">Uploading…</p>}
+              </div>
+            )}
           </div>
         )}
       </div>

@@ -15,7 +15,7 @@ import {
   shiftDateString,
   type Period,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import {
   PAYMENT_METHOD_LABELS,
   type PaymentMethod,
@@ -431,7 +431,7 @@ export default function AnalyticsScreen() {
                     key={c.categoryId ?? 'none'}
                     className="min-h-12 flex-row items-center gap-3"
                     accessible
-                    accessibilityLabel={`${c.name}: ${formatINR(c.total)}, ${c.percent}%`}
+                    accessibilityLabel={`${c.name}: ${formatMoney(c.total)}, ${c.percent}%`}
                   >
                     <View
                       style={{
@@ -446,7 +446,7 @@ export default function AnalyticsScreen() {
                     <Text weight="medium" className="flex-1" numberOfLines={1}>
                       {c.name}
                     </Text>
-                    <Text weight="semibold">{formatINR(c.total)}</Text>
+                    <Text weight="semibold">{formatMoney(c.total)}</Text>
                     <Text muted className="w-12 text-right text-sm">
                       {c.percent}%
                     </Text>
@@ -472,7 +472,7 @@ export default function AnalyticsScreen() {
               <Pressable
                 key={it.key}
                 accessibilityRole="button"
-                accessibilityLabel={`${it.title}: ${formatINR(it.total)} across ${it.count} times`}
+                accessibilityLabel={`${it.title}: ${formatMoney(it.total)} across ${it.count} times`}
                 onPress={() =>
                   router.push({ pathname: '/item/[title]', params: { title: it.title } })
                 }
@@ -487,11 +487,11 @@ export default function AnalyticsScreen() {
                     {it.title}
                   </Text>
                   <Text muted className="text-sm" numberOfLines={1}>
-                    {formatINR(it.total)} across {it.count} time{it.count === 1 ? '' : 's'} · avg{' '}
-                    {formatINR(it.average)}
+                    {formatMoney(it.total)} across {it.count} time{it.count === 1 ? '' : 's'} · avg{' '}
+                    {formatMoney(it.average)}
                   </Text>
                 </View>
-                <Text weight="semibold">{formatINR(it.total)}</Text>
+                <Text weight="semibold">{formatMoney(it.total)}</Text>
                 <Go size={16} color={colors.textSecondary} />
               </Pressable>
             ))
@@ -533,7 +533,7 @@ export default function AnalyticsScreen() {
 
         <Section
           title={`${yearRange.from.slice(0, 4)} overview`}
-          subtitle={`${formatINR((year.data ?? []).reduce((a, p) => a + p.total, 0))} ${word} this year`}
+          subtitle={`${formatMoney((year.data ?? []).reduce((a, p) => a + p.total, 0))} ${word} this year`}
         >
           {year.isLoading ? (
             <Skeleton className="h-44 w-full" />

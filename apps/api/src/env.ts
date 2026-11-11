@@ -21,6 +21,8 @@ export const envSchema = z.object({
   RESEND_API_KEY: optionalString,
   EMAIL_FROM: z.string().default('PaiPai <onboarding@resend.dev>'),
   CRON_SECRET: optionalString,
+  /** Set to 1 on serverless hosts that use the cron endpoint instead. */
+  DISABLE_SCHEDULER: z.preprocess((v) => v === '1' || v === 'true', z.boolean()).default(false),
   /** Extra comma-separated origins allowed for CORS / auth (e.g. preview deployments). */
   EXTRA_TRUSTED_ORIGINS: optionalString,
   /** e.g. ".paipai.app" so web (paipai.app) and API (api.paipai.app) share the session cookie. */

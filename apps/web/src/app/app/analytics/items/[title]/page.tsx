@@ -11,7 +11,7 @@ import {
   formatTime,
   parseDateInTz,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { TransactionRow } from '@/components/app/transaction-row';
 import { ChartCard, SpendAreaChart, type ChartPoint } from '@/components/charts/charts';
 import { EmptyState } from '@/components/empty-state';
@@ -85,15 +85,15 @@ export default function ItemDetailPage({ params }: { params: Promise<{ title: st
         <>
           <h1 className="mt-2 text-3xl font-extrabold tracking-tight">{d.title}</h1>
           <p className="mt-1 text-muted-foreground">
-            {formatINR(d.total)} across {d.count} time{d.count === 1 ? '' : 's'}
+            {formatMoney(d.total)} across {d.count} time{d.count === 1 ? '' : 's'}
             {d.firstAt && ` since ${formatDate(d.firstAt, tz)}`}
           </p>
 
           <div className="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
-              ['Total', formatINR(d.total)],
+              ['Total', formatMoney(d.total)],
               ['Times', String(d.count)],
-              ['Average', formatINR(d.average)],
+              ['Average', formatMoney(d.average)],
               ['Last', d.lastAt ? formatDate(d.lastAt, tz) : '—'],
             ].map(([k, v]) => (
               <Card key={k} className="p-4">
@@ -111,7 +111,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ title: st
             }
             table={{
               columns: ['Period', 'Amount', 'Count'],
-              rows: series.map((p) => [p.fullLabel ?? p.label, formatINR(p.value), p.count ?? 0]),
+              rows: series.map((p) => [p.fullLabel ?? p.label, formatMoney(p.value), p.count ?? 0]),
             }}
           >
             <SpendAreaChart data={series} />

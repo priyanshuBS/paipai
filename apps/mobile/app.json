@@ -12,7 +12,8 @@
       "bundleIdentifier": "com.paipai.app",
       "supportsTablet": false,
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSFaceIDUsageDescription": "Allow PaiPai to use Face ID to unlock the app."
       }
     },
     "android": {
@@ -41,7 +42,28 @@
       ],
       "expo-secure-store",
       "expo-web-browser",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "expo-sharing",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/images/adaptive-icon.png",
+          "color": "#B6E36B"
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Allow PaiPai to use Face ID to unlock the app."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Allow PaiPai to attach receipt photos and set your profile picture.",
+          "cameraPermission": "Allow PaiPai to take photos of receipts."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true

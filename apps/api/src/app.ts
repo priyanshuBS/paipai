@@ -13,15 +13,29 @@ import { analyticsRoutes } from './routes/analytics';
 import { categoryRoutes } from './routes/categories';
 import { meRoutes } from './routes/me';
 import { transactionRoutes } from './routes/transactions';
+import {
+  budgetRoutes,
+  exportRoutes,
+  pushTokenRoutes,
+  recurringRoutes,
+  reportRoutes,
+  uploadRoutes,
+} from './routes/phase5';
+import { createExpoNotifier, type Notifier } from './lib/notifier';
+import { createStorage, type StorageProvider } from './lib/storage';
+import { runDueRecurring } from './services/recurring';
+import { timingSafeEqual } from 'node:crypto';
 import type { AppEnv } from './types';
 
 export interface CreateAppOptions {
   env: Env;
   db: Database;
   mailer?: Mailer;
+  notifier?: Notifier;
+  storage?: StorageProvider | null;
 }
 
-export function createApp({ env, db, mailer }: CreateAppOptions) {
+export function createApp({ env, db, mailer, notifier, storage }: CreateAppOptions) {
   const resolvedMailer =
     mailer ??
     (env.RESEND_API_KEY
@@ -33,7 +47,13 @@ export function createApp({ env, db, mailer }: CreateAppOptions) {
         : createConsoleMailer());
 
   const auth = createAuth({ env, db, mailer: resolvedMailer });
-  const deps = { env, db, auth };
+  const deps = {
+    env,
+    db,
+    auth,
+    notifier: notifier ?? createExpoNotifier(db),
+    storage: storage === undefined ? createStorage(env) : storage,
+  };
   const origins = trustedOrigins(env).filter((o) => o.startsWith('http'));
 
   const app = new Hono<AppEnv>();
@@ -77,6 +97,18 @@ export function createApp({ env, db, mailer }: CreateAppOptions) {
   // Better Auth: email OTP, Google OAuth, sessions, sign-out, revoke-sessions …
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));
 
+  // Cron trigger for serverless hosts (Vercel Cron, Render cron job, GitHub Actions…).
+  app.post('/api/cron/recurring', async (c) => {
+    const secret = env.CRON_SECRET;
+    const given = (c.req.header('authorization') ?? '').replace(/^Bearer /, '');
+    const ok =
+      !!secret &&
+      given.length === secret.length &&
+      timingSafeEqual(Buffer.from(given), Buffer.from(secret));
+    if (!ok) throw new AppError(401, 'UNAUTHORIZED', 'Invalid cron secret');
+    return c.json(await runDueRecurring(db));
+  });
+
   const api = new Hono<AppEnv>();
   api.use('*', requireAuth);
   api.use('*', rateLimit({ windowMs: 60_000, max: env.NODE_ENV === 'test' ? 10_000 : 300 }));
@@ -84,12 +116,18 @@ export function createApp({ env, db, mailer }: CreateAppOptions) {
   api.route('/transactions', transactionRoutes);
   api.route('/categories', categoryRoutes);
   api.route('/analytics', analyticsRoutes);
+  api.route('/budgets', budgetRoutes);
+  api.route('/recurring', recurringRoutes);
+  api.route('/push-tokens', pushTokenRoutes);
+  api.route('/export', exportRoutes);
+  api.route('/reports', reportRoutes);
+  api.route('/uploads', uploadRoutes);
   app.route('/api', api);
 
   app.notFound((c) => c.json({ error: { code: 'NOT_FOUND', message: 'Route not found' } }, 404));
   app.onError(errorResponse);
 
-  return { app, auth };
+  return { app, auth, deps };
 }
 
 export type App = ReturnType<typeof createApp>['app'];

@@ -1,7 +1,9 @@
 import { Hono } from 'hono';
 import { eq, users } from '@paipai/db';
 import { updateMeSchema, type Me } from '@paipai/shared/schemas';
-import { notFound } from '../lib/errors';
+import { badRequest, notFound } from '../lib/errors';
+import { isOwnUpload } from '../lib/storage';
+import { syncOverallMonthlyFromUser } from '../services/budgets';
 import { zv } from '../lib/validate';
 import type { AppEnv } from '../types';
 
@@ -33,13 +35,20 @@ export const meRoutes = new Hono<AppEnv>()
     return c.json(toMe(u));
   })
   .patch('/', zv('json', updateMeSchema), async (c) => {
-    const { db } = c.get('deps');
+    const { db, storage } = c.get('deps');
+    const image = c.req.valid('json').image;
+    if (image && !isOwnUpload(storage, c.get('user').id, image)) {
+      throw badRequest('Avatar must be uploaded through PaiPai');
+    }
     const [u] = await db
       .update(users)
       .set(c.req.valid('json'))
       .where(eq(users.id, c.get('user').id))
       .returning();
     if (!u) throw notFound('User');
+    const body = c.req.valid('json');
+    if (body.monthlyBudget !== undefined)
+      await syncOverallMonthlyFromUser(db, u.id, body.monthlyBudget);
     return c.json(toMe(u));
   })
   /** Permanently deletes the account and all data (FK cascades remove sessions, transactions, …). */

@@ -19,12 +19,13 @@ import {
   formatMonthLabel,
   formatTime,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { palette } from '@paipai/shared/tokens';
 import { EmptyState } from '@/components/empty-state';
 import { CountUp } from '@/components/money';
 import { TransactionRow, TransactionRowSkeleton } from '@/components/transaction-row';
 import { Button, Card, ErrorState, IconPill, Skeleton, Text, cn } from '@/components/ui';
+import { flushQueue, usePendingTransactions } from '@/lib/offline-queue';
 import { shouldShowWelcome } from '@/lib/onboarding';
 import { useCategoryMap, useMe, useRecentTransactions, useSummary } from '@/lib/queries';
 
@@ -59,9 +60,9 @@ function BudgetCard({ spent, budget }: { spent: number; budget: number | null })
         <Text weight="semibold">Monthly budget</Text>
         <Text muted className="text-sm">
           <Text weight="semibold" className="text-sm">
-            {formatINR(spent)}
+            {formatMoney(spent)}
           </Text>{' '}
-          of {formatINR(budget)}
+          of {formatMoney(budget)}
         </Text>
       </View>
       <View
@@ -93,10 +94,10 @@ function BudgetCard({ spent, budget }: { spent: number; budget: number | null })
         )}
       >
         {state === 'over'
-          ? `You're ${formatINR(spent - budget)} over budget this month.`
+          ? `You're ${formatMoney(spent - budget)} over budget this month.`
           : state === 'warn'
-            ? `Heads up: ${pct}% used, ${formatINR(budget - spent)} left.`
-            : `${formatINR(budget - spent)} left · ${pct}% used`}
+            ? `Heads up: ${pct}% used, ${formatMoney(budget - spent)} left.`
+            : `${formatMoney(budget - spent)} left · ${pct}% used`}
       </Text>
     </Card>
   );
@@ -110,6 +111,7 @@ export default function Home() {
   const categories = useCategoryMap();
   const [hidden, setHidden] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const pending = usePendingTransactions();
   const s = summary.data;
 
   useEffect(() => {
@@ -194,7 +196,7 @@ export default function Home() {
                 <Text className="text-xs text-white/70">Income</Text>
               </View>
               <Text weight="semibold" className="mt-1 text-white">
-                {s ? (hidden ? '•••••' : formatINR(s.totalIncome)) : '—'}
+                {s ? (hidden ? '•••••' : formatMoney(s.totalIncome)) : '—'}
               </Text>
             </View>
             <View className="flex-1 rounded-2xl bg-lime p-3">
@@ -203,11 +205,25 @@ export default function Home() {
                 <Text className="text-xs text-forest/70">Net balance</Text>
               </View>
               <Text weight="semibold" className="mt-1 text-forest">
-                {s ? (hidden ? '•••••' : formatINR(s.net)) : '—'}
+                {s ? (hidden ? '•••••' : formatMoney(s.net)) : '—'}
               </Text>
             </View>
           </View>
         </View>
+
+        {pending.length > 0 && (
+          <Pressable
+            accessibilityRole="button"
+            accessibilityHint="Tries to sync now"
+            onPress={() => void flushQueue().then(() => onRefresh())}
+            className="mx-5 mt-3 flex-row items-center gap-2 rounded-2xl bg-warning/15 px-4 py-3"
+          >
+            <Text weight="semibold" className="flex-1 text-sm">
+              {pending.length} {pending.length === 1 ? 'entry is' : 'entries are'} waiting to sync
+            </Text>
+            <Text className="text-sm text-forest-mid dark:text-lime">Sync now</Text>
+          </Pressable>
+        )}
 
         {/* Today / week / month */}
         <View className="mx-5 mt-3 flex-row gap-3">
@@ -229,7 +245,7 @@ export default function Home() {
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
-                  {hidden ? '•••' : formatINR(x.value)}
+                  {hidden ? '•••' : formatMoney(x.value)}
                 </Text>
               )}
             </Card>

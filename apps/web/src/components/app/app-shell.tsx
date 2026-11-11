@@ -7,20 +7,26 @@ import { DropdownMenu } from 'radix-ui';
 import { useTheme } from 'next-themes';
 import {
   ChartColumn,
+  FileText,
   House,
   ListOrdered,
   LogOut,
   MonitorSmartphone,
   Moon,
   Plus,
+  Repeat,
+  Settings,
   Sun,
+  Target,
 } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { Fragment, useEffect, useRef, type ReactNode } from 'react';
+import { setDisplayCurrency } from '@paipai/shared/money';
+import type { ThemePreference } from '@paipai/shared/schemas';
 import { toast } from 'sonner';
 import { Logo } from '@/components/brand';
 import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
-import { useMe } from '@/lib/queries';
+import { useMe, useUpdateMe } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 import { QuickAddProvider, useQuickAdd } from './quick-add-context';
 
@@ -28,7 +34,26 @@ const nav = [
   { href: '/app', label: 'Home', icon: House },
   { href: '/app/transactions', label: 'Transactions', icon: ListOrdered },
   { href: '/app/analytics', label: 'Analytics', icon: ChartColumn },
+  { href: '/app/budgets', label: 'Budgets', icon: Target },
+  { href: '/app/recurring', label: 'Recurring', icon: Repeat },
+  { href: '/app/reports', label: 'Reports', icon: FileText },
+  { href: '/app/settings', label: 'Settings', icon: Settings },
 ];
+
+/** Apply the account's currency and theme (synced across devices). */
+function usePreferenceSync() {
+  const { data: me } = useMe();
+  const { theme, setTheme } = useTheme();
+  const applied = useRef(false);
+  if (me) setDisplayCurrency(me.currency);
+  useEffect(() => {
+    if (me && !applied.current) {
+      applied.current = true;
+      if (me.theme !== theme) setTheme(me.theme);
+    }
+  }, [me, theme, setTheme]);
+  return me?.currency ?? 'INR';
+}
 
 function isActive(pathname: string, href: string) {
   return href === '/app' ? pathname === '/app' : pathname.startsWith(href);
@@ -74,6 +99,12 @@ function UserMenu({ compact }: { compact?: boolean }) {
   const router = useRouter();
   const qc = useQueryClient();
   const { theme, setTheme } = useTheme();
+  const updateMe = useUpdateMe();
+  const pathname = usePathname();
+  const changeTheme = (v: string) => {
+    setTheme(v);
+    updateMe.mutate({ theme: v as ThemePreference });
+  };
 
   async function signOut(all: boolean) {
     if (all) {
@@ -118,7 +149,7 @@ function UserMenu({ compact }: { compact?: boolean }) {
           <DropdownMenu.Label className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
             Theme
           </DropdownMenu.Label>
-          <DropdownMenu.RadioGroup value={theme ?? 'system'} onValueChange={setTheme}>
+          <DropdownMenu.RadioGroup value={theme ?? 'system'} onValueChange={changeTheme}>
             {[
               { v: 'light', l: 'Light', i: Sun },
               { v: 'dark', l: 'Dark', i: Moon },
@@ -135,6 +166,21 @@ function UserMenu({ compact }: { compact?: boolean }) {
             ))}
           </DropdownMenu.RadioGroup>
           <DropdownMenu.Separator className="my-1 h-px bg-border" />
+          {/* Extra pages for the compact (mobile web) layout */}
+          <div className="lg:hidden">
+            {nav.slice(3).map((n) => (
+              <DropdownMenu.Item
+                key={n.href}
+                asChild
+                className={cn(item, pathname.startsWith(n.href) && 'font-semibold')}
+              >
+                <Link href={n.href}>
+                  <n.icon className="size-4" aria-hidden /> {n.label}
+                </Link>
+              </DropdownMenu.Item>
+            ))}
+            <DropdownMenu.Separator className="my-1 h-px bg-border" />
+          </div>
           <DropdownMenu.Item className={item} onSelect={() => void signOut(false)}>
             <LogOut className="size-4" aria-hidden /> Log out
           </DropdownMenu.Item>
@@ -192,7 +238,7 @@ function Sidebar() {
 function BottomNav() {
   const pathname = usePathname();
   const { openAdd } = useQuickAdd();
-  const items = [...nav.slice(0, 2), null, ...nav.slice(2)];
+  const items = [...nav.slice(0, 2), null, ...nav.slice(2, 3)];
   return (
     <nav
       aria-label="App"
@@ -246,11 +292,15 @@ function BottomNav() {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const currency = usePreferenceSync();
   return (
     <QuickAddProvider>
       <div className="flex min-h-dvh">
         <Sidebar />
-        <div className="min-w-0 flex-1 pb-28 lg:pb-10">{children}</div>
+        {/* Remount on currency change so every amount re-formats. */}
+        <Fragment key={currency}>
+          <div className="min-w-0 flex-1 pb-28 lg:pb-10">{children}</div>
+        </Fragment>
       </div>
       <BottomNav />
     </QuickAddProvider>

@@ -98,3 +98,15 @@ describe('aggregation helpers', () => {
     expect(percentOf(1, 0)).toBe(0);
   });
 });
+
+describe('display currency', () => {
+  it('formatMoney follows the user setting; formatINR stays INR', async () => {
+    const { formatMoney, setDisplayCurrency } = await import('./money');
+    setDisplayCurrency('USD');
+    expect(formatMoney(123456)).toBe('$1,234.56');
+    expect(formatINR(3000)).toBe('₹30');
+    setDisplayCurrency('bogus');
+    expect(formatMoney(3000)).toBe('₹30');
+    setDisplayCurrency('INR');
+  });
+});

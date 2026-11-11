@@ -11,7 +11,7 @@ import Svg, {
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { chartColorFor, chartPalette, palette } from '@paipai/shared/tokens';
 import { useTheme } from '@/theme/theme';
 import { Text } from '../ui';
@@ -53,7 +53,7 @@ function summary(data: ChartPoint[]) {
   return (
     data
       .filter((d) => d.value > 0)
-      .map((d) => `${d.fullLabel ?? d.label}: ${formatINR(d.value)}`)
+      .map((d) => `${d.fullLabel ?? d.label}: ${formatMoney(d.value)}`)
       .join(', ') || 'No spending in this period'
   );
 }
@@ -75,7 +75,7 @@ function TooltipPill({ point, x, width }: { point: ChartPoint; x: number; width:
         }}
       >
         <Text weight="semibold" className="text-xs" style={{ color: c.tipText }} numberOfLines={1}>
-          {point.fullLabel ?? point.label} · {formatINR(point.value)}
+          {point.fullLabel ?? point.label} · {formatMoney(point.value)}
         </Text>
       </View>
     </View>
@@ -318,7 +318,7 @@ export function Donut({
           Total
         </Text>
         <Text weight="semibold" className="text-base" style={{ fontVariant: ['tabular-nums'] }}>
-          {formatINR(total)}
+          {formatMoney(total)}
         </Text>
       </View>
     </View>
@@ -338,7 +338,7 @@ export function ShareBars({
         <View
           key={r.key}
           accessible
-          accessibilityLabel={`${r.label}: ${formatINR(r.value)}, ${r.percent}%`}
+          accessibilityLabel={`${r.label}: ${formatMoney(r.value)}, ${r.percent}%`}
         >
           <View className="flex-row items-baseline justify-between">
             <Text weight="medium" className="text-sm">
@@ -346,7 +346,7 @@ export function ShareBars({
             </Text>
             <Text muted className="text-sm">
               <Text weight="semibold" className="text-sm">
-                {formatINR(r.value)}
+                {formatMoney(r.value)}
               </Text>{' '}
               · {r.percent}%
             </Text>

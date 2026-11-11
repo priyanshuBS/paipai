@@ -3,10 +3,12 @@ import { createTestDb } from '@paipai/db/testing';
 import { createApp } from '../src/app';
 import { createMemoryMailer } from '../src/email/mailer';
 import { envSchema } from '../src/env';
+import { createMemoryNotifier } from '../src/lib/notifier';
+import type { StorageProvider } from '../src/lib/storage';
 
 export const WEB = 'http://localhost:3000';
 
-export async function setup() {
+export async function setup(opts: { storage?: StorageProvider | null } = {}) {
   const { db, close } = await createTestDb();
   const env = envSchema.parse({
     NODE_ENV: 'test',
@@ -14,9 +16,11 @@ export async function setup() {
     BETTER_AUTH_SECRET: 'test-secret-test-secret-test-secret-123456',
     BETTER_AUTH_URL: 'http://localhost:8787',
     WEB_URL: WEB,
+    CRON_SECRET: 'test-cron-secret-0123456789',
   });
   const mailer = createMemoryMailer();
-  const { app } = createApp({ env, db, mailer });
+  const notifier = createMemoryNotifier();
+  const { app } = createApp({ env, db, mailer, notifier, storage: opts.storage ?? null });
 
   async function request(
     path: string,
@@ -36,7 +40,7 @@ export async function setup() {
       ...(init.body !== undefined ? { body: JSON.stringify(init.body) } : {}),
     });
     const text = await res.text();
-    let json: unknown = null;
+    let json: unknown;
     try {
       json = text ? JSON.parse(text) : null;
     } catch {
@@ -85,7 +89,7 @@ export async function setup() {
     return cookieFrom(r.res);
   }
 
-  return { app, db, mailer, close, call, sendOtp, signIn, cookieFrom };
+  return { app, db, mailer, notifier, close, call, sendOtp, signIn, cookieFrom };
 }
 
 export type TestCtx = Awaited<ReturnType<typeof setup>>;

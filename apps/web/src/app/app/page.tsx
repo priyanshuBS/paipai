@@ -19,7 +19,7 @@ import {
   formatMonthLabel,
   formatTime,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { PageHeader } from '@/components/app/app-shell';
 import { useQuickAdd } from '@/components/app/quick-add-context';
 import { TransactionRow, TransactionRowSkeleton } from '@/components/app/transaction-row';
@@ -27,7 +27,13 @@ import { EmptyState } from '@/components/empty-state';
 import { CountUp } from '@/components/money';
 import { Button, IconPill, buttonVariants } from '@/components/ui/button';
 import { Card, CardHeader, ErrorState, Skeleton } from '@/components/ui/primitives';
-import { useCategoryMap, useMe, useRecentTransactions, useSummary } from '@/lib/queries';
+import {
+  useBudgets,
+  useCategoryMap,
+  useMe,
+  useRecentTransactions,
+  useSummary,
+} from '@/lib/queries';
 import { cn, firstName } from '@/lib/utils';
 
 const HIDE_KEY = 'paipai:hide-balance';
@@ -76,7 +82,7 @@ function BudgetProgress({ spent, budget }: { spent: number; budget: number | nul
           </p>
         </div>
         <Button asChild variant="soft" size="sm">
-          <Link href="/app/welcome">Set budget</Link>
+          <Link href="/app/budgets">Set budget</Link>
         </Button>
       </Card>
     );
@@ -94,8 +100,8 @@ function BudgetProgress({ spent, budget }: { spent: number; budget: number | nul
       <div className="flex items-baseline justify-between">
         <p className="font-semibold">Monthly budget</p>
         <p className="text-sm text-muted-foreground">
-          <span className="tabular font-semibold text-foreground">{formatINR(spent)}</span> of{' '}
-          {formatINR(budget)}
+          <span className="tabular font-semibold text-foreground">{formatMoney(spent)}</span> of{' '}
+          {formatMoney(budget)}
         </p>
       </div>
       <div
@@ -122,11 +128,61 @@ function BudgetProgress({ spent, budget }: { spent: number; budget: number | nul
         )}
       >
         {state === 'over'
-          ? `You're ${formatINR(spent - budget)} over budget this month.`
+          ? `You're ${formatMoney(spent - budget)} over budget this month.`
           : state === 'warn'
-            ? `Heads up: ${pct}% used, ${formatINR(budget - spent)} left.`
-            : `${formatINR(budget - spent)} left · ${pct}% used`}
+            ? `Heads up: ${pct}% used, ${formatMoney(budget - spent)} left.`
+            : `${formatMoney(budget - spent)} left · ${pct}% used`}
       </p>
+    </Card>
+  );
+}
+
+/** Category budgets that are near or over their limit. */
+function CategoryBudgetAlerts() {
+  const { data } = useBudgets();
+  const flagged = (data ?? []).filter((b) => b.categoryId && b.status !== 'ok');
+  if (flagged.length === 0) return null;
+  return (
+    <Card>
+      <CardHeader
+        title="Budget alerts"
+        action={
+          <Link
+            href="/app/budgets"
+            className="text-sm font-semibold text-forest-mid hover:underline dark:text-lime"
+          >
+            Manage
+          </Link>
+        }
+      />
+      <ul className="space-y-3">
+        {flagged.map((b) => (
+          <li key={b.id}>
+            <div className="flex justify-between text-sm">
+              <span className="font-medium">{b.categoryName}</span>
+              <span
+                className={cn(
+                  'font-semibold',
+                  b.status === 'over' ? 'text-expense' : 'text-warning',
+                )}
+              >
+                {b.status === 'over'
+                  ? `Over by ${formatMoney(-b.remaining)}`
+                  : `${b.percent}% used`}
+              </span>
+            </div>
+            <div className="mt-1 h-2 overflow-hidden rounded-full bg-surface-muted" aria-hidden>
+              <div
+                className={cn(
+                  'h-full rounded-full',
+                  b.status === 'over' ? 'bg-expense' : 'bg-warning',
+                )}
+                style={{ width: `${Math.min(b.percent, 100)}%` }}
+              />
+            </div>
+          </li>
+        ))}
+      </ul>
     </Card>
   );
 }
@@ -182,7 +238,7 @@ export default function DashboardPage() {
                 <ArrowDownLeft className="size-3.5" aria-hidden /> Income
               </p>
               <p className="tabular mt-1 font-semibold">
-                {s ? (hidden ? '•••••' : formatINR(s.totalIncome)) : '—'}
+                {s ? (hidden ? '•••••' : formatMoney(s.totalIncome)) : '—'}
               </p>
             </div>
             <div className="rounded-2xl bg-lime p-3 text-forest">
@@ -195,7 +251,7 @@ export default function DashboardPage() {
                 Net balance
               </p>
               <p className="tabular mt-1 font-semibold">
-                {s ? (hidden ? '•••••' : formatINR(s.net)) : '—'}
+                {s ? (hidden ? '•••••' : formatMoney(s.net)) : '—'}
               </p>
             </div>
           </div>
@@ -217,7 +273,7 @@ export default function DashboardPage() {
                 <Skeleton className="mt-1 h-6 w-16" />
               ) : (
                 <p className="tabular mt-1 text-lg font-semibold lg:mt-0">
-                  {hidden ? '•••' : formatINR(x.value)}
+                  {hidden ? '•••' : formatMoney(x.value)}
                 </p>
               )}
             </Card>
@@ -291,8 +347,9 @@ export default function DashboardPage() {
             />
           )}
         </Card>
-        <div>
+        <div className="space-y-4">
           <BudgetProgress spent={s?.thisMonth ?? 0} budget={me?.monthlyBudget ?? null} />
+          <CategoryBudgetAlerts />
         </div>
       </div>
     </div>

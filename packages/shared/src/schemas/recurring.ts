@@ -38,3 +38,19 @@ export const updateRecurringSchema = z
   .partial()
   .refine((v) => Object.keys(v).length > 0, 'Nothing to update');
 export type UpdateRecurringInput = z.infer<typeof updateRecurringSchema>;
+
+export interface RecurringView {
+  id: string;
+  type: 'expense' | 'income';
+  amount: number;
+  title: string;
+  note: string | null;
+  categoryId: string | null;
+  paymentMethod: 'cash' | 'upi' | 'card' | 'bank' | 'other';
+  frequency: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  startAt: string;
+  nextRunAt: string;
+  lastRunAt: string | null;
+  endAt: string | null;
+  isActive: boolean;
+}

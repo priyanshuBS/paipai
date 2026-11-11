@@ -18,7 +18,7 @@ import {
   type TooltipContentProps,
 } from 'recharts';
 import { Table2, ChartColumn } from 'lucide-react';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import {
   chartColorFor,
   chartPalette,
@@ -64,7 +64,7 @@ export function useChartTheme() {
   };
 }
 
-const compactINR = (v: number) => formatINR(v, { compact: true });
+const compactINR = (v: number) => formatMoney(v, { compact: true });
 
 function TooltipPill({ active, payload }: Partial<TooltipContentProps<number, string>>) {
   const t = useChartTheme();
@@ -77,7 +77,7 @@ function TooltipPill({ active, payload }: Partial<TooltipContentProps<number, st
       style={{ background: t.tooltipBg, color: t.tooltipText }}
     >
       <span className="opacity-75">{point.fullLabel ?? point.label}</span>
-      <span className="ml-2 tabular-nums">{formatINR(Number(p.value))}</span>
+      <span className="ml-2 tabular-nums">{formatMoney(Number(p.value))}</span>
       {point.count !== undefined && <span className="ml-1 opacity-75">· {point.count}×</span>}
     </div>
   );
@@ -163,7 +163,7 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
     <div
       style={{ height }}
       role="img"
-      aria-label={`Spending over time, peak ${formatINR(data[peak]?.value ?? 0)} on ${data[peak]?.fullLabel ?? data[peak]?.label ?? ''}`}
+      aria-label={`Spending over time, peak ${formatMoney(data[peak]?.value ?? 0)} on ${data[peak]?.fullLabel ?? data[peak]?.label ?? ''}`}
     >
       <ResponsiveContainer width="100%" height="100%">
         <AreaChart data={data} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
@@ -339,7 +339,7 @@ export function CategoryDonut({
                   className="rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg"
                   style={{ background: t.tooltipBg, color: t.tooltipText }}
                 >
-                  {s.name} <span className="ml-1 tabular-nums">{formatINR(s.value)}</span>{' '}
+                  {s.name} <span className="ml-1 tabular-nums">{formatMoney(s.value)}</span>{' '}
                   <span className="opacity-75">· {s.percent}%</span>
                 </div>
               );
@@ -349,7 +349,7 @@ export function CategoryDonut({
       </ResponsiveContainer>
       <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-xs text-muted-foreground">Total</span>
-        <span className="tabular text-lg font-semibold">{formatINR(total)}</span>
+        <span className="tabular text-lg font-semibold">{formatMoney(total)}</span>
       </div>
     </div>
   );
@@ -369,7 +369,7 @@ export function ShareBars({
           <div className="flex items-baseline justify-between text-sm">
             <span className="font-medium">{r.label}</span>
             <span className="tabular text-muted-foreground">
-              <span className="font-semibold text-foreground">{formatINR(r.value)}</span> ·{' '}
+              <span className="font-semibold text-foreground">{formatMoney(r.value)}</span> ·{' '}
               {r.percent}%
             </span>
           </div>

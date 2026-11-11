@@ -3,10 +3,14 @@ import { createDb } from '@paipai/db';
 import { createApp } from './app';
 import { loadEnv } from './env';
 import { logger } from './lib/logger';
+import { startRecurringScheduler } from './scheduler';
 
 const env = loadEnv();
 const { db, close } = createDb(env.DATABASE_URL);
-const { app } = createApp({ env, db });
+const { app, deps } = createApp({ env, db });
+const stopScheduler = env.DISABLE_SCHEDULER
+  ? () => undefined
+  : startRecurringScheduler(db, deps.notifier);
 
 const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
   logger.info('server.started', {
@@ -19,6 +23,7 @@ const server = serve({ fetch: app.fetch, port: env.PORT }, (info) => {
 
 async function shutdown(signal: string) {
   logger.info('server.stopping', { signal });
+  stopScheduler();
   server.close();
   await close();
   process.exit(0);

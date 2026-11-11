@@ -5,3 +5,4 @@ export * from './transaction';
 export * from './analytics';
 export * from './budget';
 export * from './recurring';
+export * from './misc';

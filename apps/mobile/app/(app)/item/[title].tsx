@@ -8,7 +8,7 @@ import {
   formatTime,
   parseDateInTz,
 } from '@paipai/shared/date';
-import { formatINR } from '@paipai/shared/money';
+import { formatMoney } from '@paipai/shared/money';
 import { AreaChart, type ChartPoint } from '@/components/charts/charts';
 import { EmptyState } from '@/components/empty-state';
 import { TransactionRow } from '@/components/transaction-row';
@@ -64,15 +64,15 @@ export default function ItemDetailScreen() {
               {d.title}
             </Text>
             <Text muted>
-              {formatINR(d.total)} across {d.count} time{d.count === 1 ? '' : 's'}
+              {formatMoney(d.total)} across {d.count} time{d.count === 1 ? '' : 's'}
               {d.firstAt ? ` since ${formatDate(d.firstAt, tz)}` : ''}
             </Text>
           </View>
           <View className="flex-row flex-wrap gap-3">
             {[
-              ['Total', formatINR(d.total)],
+              ['Total', formatMoney(d.total)],
               ['Times', String(d.count)],
-              ['Average', formatINR(d.average)],
+              ['Average', formatMoney(d.average)],
               ['Last', d.lastAt ? formatDate(d.lastAt, tz) : '—'],
             ].map(([k, v]) => (
               <Card key={k} className="w-[47%] p-4">

@@ -7,7 +7,7 @@
     "dev": "tsx watch --clear-screen=false src/index.ts",
     "build": "tsup",
     "start": "node dist/index.js",
-    "lint": "eslint src",
+    "lint": "eslint src test",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "dev:local": "tsx src/dev-local.ts"
@@ -17,17 +17,20 @@
     "@hono/node-server": "^2.1.7",
     "@paipai/db": "workspace:*",
     "@paipai/shared": "workspace:*",
+    "aws4fetch": "^1.0.20",
     "better-auth": "^1.7.20",
     "dotenv": "^18.0.10",
     "hono": "^4.13.18",
+    "pdfkit": "^0.20.2",
     "resend": "^6.38.0",
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.16",
     "@paipai/config": "workspace:*",
+    "@types/pdfkit": "^0.17.7",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
-    "vitest": "^5.1.0",
-    "@electric-sql/pglite": "^0.5.16"
+    "vitest": "^5.1.0"
   }
 }

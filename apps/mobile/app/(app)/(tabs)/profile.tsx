@@ -1,27 +1,42 @@
-import { LogOut, MonitorSmartphone, Moon, Sun, Trash2 } from 'lucide-react-native';
+import { router, type Href } from 'expo-router';
+import {
+  ChevronRight,
+  FileText,
+  LogOut,
+  MonitorSmartphone,
+  Repeat,
+  Settings,
+  Tags,
+  Trash2,
+} from 'lucide-react-native';
 import { useState } from 'react';
 import { Alert, Image, Pressable, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { palette } from '@paipai/shared/tokens';
 import { useSnackbar } from '@/components/snackbar';
-import { Card, Segmented, Skeleton, Text } from '@/components/ui';
+import { Card, Skeleton, Text } from '@/components/ui';
 import { api } from '@/lib/api';
+import { authClient } from '@/lib/auth-client';
+import { unregisterPush } from '@/lib/notifications';
+import { clearQueue } from '@/lib/offline-queue';
 import { useMe } from '@/lib/queries';
 import { queryClient, signOutAndClear } from '@/lib/query-client';
-import { authClient } from '@/lib/auth-client';
-import { useTheme, type ThemePreference } from '@/theme/theme';
+import { useTheme } from '@/theme/theme';
 
 function Row({
   icon,
   label,
   onPress,
   danger,
+  chevron,
 }: {
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
   danger?: boolean;
+  chevron?: boolean;
 }) {
+  const { colors } = useTheme();
   return (
     <Pressable
       accessibilityRole="button"
@@ -29,18 +44,27 @@ function Row({
       className="min-h-14 flex-row items-center gap-3 px-5 active:bg-surface-muted"
     >
       {icon}
-      <Text weight="medium" className={danger ? 'text-expense' : ''}>
+      <Text weight="medium" className={`flex-1 ${danger ? 'text-expense' : ''}`}>
         {label}
       </Text>
+      {chevron && <ChevronRight size={18} color={colors.textSecondary} />}
     </Pressable>
   );
 }
 
+/** Sign out locally: drop this device's push token and offline queue too. */
+async function fullSignOut(allDevices = false) {
+  await unregisterPush();
+  await clearQueue();
+  await signOutAndClear({ allDevices });
+}
+
 export default function Profile() {
   const { data: me } = useMe();
-  const { preference, setPreference, colors } = useTheme();
+  const { colors } = useTheme();
   const snack = useSnackbar();
   const [busy, setBusy] = useState(false);
+  const go = (href: Href) => router.push(href);
 
   const initials = (me?.name ?? '?')
     .split(/\s+/)
@@ -52,17 +76,13 @@ export default function Profile() {
   const logoutAll = () =>
     Alert.alert('Log out from all devices?', 'You will be signed out on every phone and browser.', [
       { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Log out everywhere',
-        style: 'destructive',
-        onPress: () => void signOutAndClear({ allDevices: true }),
-      },
+      { text: 'Log out everywhere', style: 'destructive', onPress: () => void fullSignOut(true) },
     ]);
 
   const deleteAccount = () =>
     Alert.alert(
       'Delete your account?',
-      'This permanently deletes your account and all your expenses, categories and budgets. This cannot be undone.',
+      'This permanently deletes your account and all your expenses, categories, budgets and recurring rules. This cannot be undone.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -72,6 +92,7 @@ export default function Profile() {
             setBusy(true);
             try {
               await api.deleteMe();
+              await clearQueue();
               await authClient.signOut().catch(() => undefined);
               queryClient.clear();
             } catch {
@@ -84,6 +105,8 @@ export default function Profile() {
       ],
     );
 
+  const divider = <View className="mx-5 h-px bg-border" />;
+
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-4">
@@ -91,72 +114,89 @@ export default function Profile() {
           Profile
         </Text>
 
-        <Card className="flex-row items-center gap-4">
-          {me?.image ? (
-            <Image
-              source={{ uri: me.image }}
-              style={{ width: 56, height: 56, borderRadius: 28 }}
-              accessibilityIgnoresInvertColors
-            />
-          ) : (
-            <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
-              <Text weight="bold" className="text-lg text-forest">
-                {initials}
-              </Text>
-            </View>
-          )}
-          <View className="flex-1">
-            {me ? (
-              <>
-                <Text weight="bold" className="text-lg" numberOfLines={1}>
-                  {me.name}
-                </Text>
-                <Text muted className="text-sm" numberOfLines={1}>
-                  {me.email}
-                </Text>
-                <Text muted className="text-xs">
-                  {me.currency} · {me.timezone}
-                </Text>
-              </>
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Open settings"
+          onPress={() => go('/settings')}
+        >
+          <Card className="flex-row items-center gap-4">
+            {me?.image ? (
+              <Image
+                source={{ uri: me.image }}
+                style={{ width: 56, height: 56, borderRadius: 28 }}
+                accessibilityIgnoresInvertColors
+              />
             ) : (
-              <Skeleton className="h-12 w-40" />
+              <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
+                <Text weight="bold" className="text-lg text-forest">
+                  {initials}
+                </Text>
+              </View>
             )}
-          </View>
-        </Card>
+            <View className="flex-1">
+              {me ? (
+                <>
+                  <Text weight="bold" className="text-lg" numberOfLines={1}>
+                    {me.name}
+                  </Text>
+                  <Text muted className="text-sm" numberOfLines={1}>
+                    {me.email}
+                  </Text>
+                  <Text muted className="text-xs">
+                    {me.currency} · {me.timezone}
+                  </Text>
+                </>
+              ) : (
+                <Skeleton className="h-12 w-40" />
+              )}
+            </View>
+            <ChevronRight size={18} color={colors.textSecondary} />
+          </Card>
+        </Pressable>
 
-        <Card>
-          <Text weight="semibold" className="mb-3 text-base">
-            Theme
-          </Text>
-          <Segmented<ThemePreference>
-            value={preference}
-            onChange={setPreference}
-            options={[
-              { value: 'light', label: 'Light' },
-              { value: 'dark', label: 'Dark' },
-              { value: 'system', label: 'System' },
-            ]}
+        <Card className="px-0 py-1">
+          <Row
+            icon={<Settings size={20} color={colors.text} />}
+            label="Settings"
+            onPress={() => go('/settings')}
+            chevron
           />
-          <View className="mt-3 flex-row justify-around opacity-60" accessibilityElementsHidden>
-            <Sun size={16} color={colors.text} />
-            <Moon size={16} color={colors.text} />
-            <MonitorSmartphone size={16} color={colors.text} />
-          </View>
+          {divider}
+          <Row
+            icon={<Tags size={20} color={colors.text} />}
+            label="Categories"
+            onPress={() => go('/categories')}
+            chevron
+          />
+          {divider}
+          <Row
+            icon={<Repeat size={20} color={colors.text} />}
+            label="Recurring"
+            onPress={() => go('/recurring')}
+            chevron
+          />
+          {divider}
+          <Row
+            icon={<FileText size={20} color={colors.text} />}
+            label="Monthly report & export"
+            onPress={() => go('/report')}
+            chevron
+          />
         </Card>
 
         <Card className="px-0 py-1">
           <Row
             icon={<LogOut size={20} color={colors.text} />}
             label="Log out"
-            onPress={() => void signOutAndClear()}
+            onPress={() => void fullSignOut()}
           />
-          <View className="mx-5 h-px bg-border" />
+          {divider}
           <Row
             icon={<MonitorSmartphone size={20} color={colors.text} />}
             label="Log out from all devices"
             onPress={logoutAll}
           />
-          <View className="mx-5 h-px bg-border" />
+          {divider}
           <Row
             icon={<Trash2 size={20} color={palette.expense} />}
             label={busy ? 'Deleting…' : 'Delete account'}

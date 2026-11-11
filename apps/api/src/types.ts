@@ -1,11 +1,15 @@
 import type { Database } from '@paipai/db';
 import type { Auth, AuthSession, AuthUser } from './auth';
 import type { Env } from './env';
+import type { Notifier } from './lib/notifier';
+import type { StorageProvider } from './lib/storage';
 
 export interface AppDeps {
   env: Env;
   db: Database;
   auth: Auth;
+  notifier: Notifier;
+  storage: StorageProvider | null;
 }
 
 export interface AppEnv {

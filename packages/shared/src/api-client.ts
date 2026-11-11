@@ -5,6 +5,16 @@
  */
 import type {
   AnalyticsSummary,
+  BudgetAlert,
+  BudgetView,
+  CreateBudgetInput,
+  CreateRecurringInput,
+  MonthlyReport,
+  PresignUploadInput,
+  PresignUploadResult,
+  RecurringView,
+  UpdateBudgetInput,
+  UpdateRecurringInput,
   Category,
   CategoryBreakdownRow,
   CreateCategoryInput,
@@ -88,6 +98,9 @@ export interface ItemDetail {
   transactions: Transaction[];
 }
 
+/** Saved transaction, plus any budget alerts it triggered. */
+export type SavedTransaction = Transaction & { budgetAlerts?: BudgetAlert[] };
+
 export interface ApiClientOptions {
   baseUrl: string;
   /** 'include' on web so httpOnly cookies are sent cross-origin. */
@@ -166,9 +179,9 @@ export function createApiClient(opts: ApiClientOptions) {
       }),
     transaction: (id: string) => request<Transaction>(`/api/transactions/${id}`),
     createTransaction: (body: CreateTransactionInput) =>
-      request<Transaction>('/api/transactions', { body }),
+      request<SavedTransaction>('/api/transactions', { body }),
     updateTransaction: (id: string, body: UpdateTransactionInput) =>
-      request<Transaction>(`/api/transactions/${id}`, { method: 'PATCH', body }),
+      request<SavedTransaction>(`/api/transactions/${id}`, { method: 'PATCH', body }),
     deleteTransaction: (id: string) =>
       request<{ deleted: true }>(`/api/transactions/${id}`, { method: 'DELETE' }),
     restoreTransaction: (id: string) =>
@@ -208,6 +221,39 @@ export function createApiClient(opts: ApiClientOptions) {
       request<{ items: PaymentMethodRow[] }>('/api/analytics/payment-methods', {
         query: { ...p },
       }).then((r) => r.items),
+    budgets: () => request<{ items: BudgetView[] }>('/api/budgets').then((r) => r.items),
+    createBudget: (body: CreateBudgetInput) => request<BudgetView>('/api/budgets', { body }),
+    updateBudget: (id: string, body: UpdateBudgetInput) =>
+      request<BudgetView>(`/api/budgets/${id}`, { method: 'PATCH', body }),
+    deleteBudget: (id: string) =>
+      request<{ deleted: true }>(`/api/budgets/${id}`, { method: 'DELETE' }),
+
+    recurring: () => request<{ items: RecurringView[] }>('/api/recurring').then((r) => r.items),
+    createRecurring: (body: CreateRecurringInput) =>
+      request<RecurringView>('/api/recurring', { body }),
+    updateRecurring: (id: string, body: UpdateRecurringInput) =>
+      request<RecurringView>(`/api/recurring/${id}`, { method: 'PATCH', body }),
+    deleteRecurring: (id: string) =>
+      request<{ deleted: true }>(`/api/recurring/${id}`, { method: 'DELETE' }),
+
+    monthlyReport: (month: string) =>
+      request<MonthlyReport>('/api/reports/monthly', { query: { month } }),
+    /** URL of a CSV/PDF export (download it with the session attached). */
+    exportUrl: (format: 'csv' | 'pdf', from: string, to: string) =>
+      `${base}/api/export${toQueryString({ format, from, to })}`,
+
+    uploadsConfig: () => request<{ enabled: boolean }>('/api/uploads/config'),
+    presignUpload: (body: PresignUploadInput) =>
+      request<PresignUploadResult>('/api/uploads/presign', { body }),
+
+    registerPushToken: (token: string, platform: 'ios' | 'android') =>
+      request<{ ok: true }>('/api/push-tokens', { body: { token, platform } }),
+    removePushToken: (token: string) =>
+      request<{ ok: true }>('/api/push-tokens', {
+        method: 'DELETE',
+        body: { token, platform: 'android' },
+      }),
+
     patterns: (p: RangeParams) =>
       request<{ dayOfWeek: PatternRow[]; hourOfDay: PatternRow[] }>('/api/analytics/patterns', {
         query: { ...p },
