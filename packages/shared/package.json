@@ -12,7 +12,8 @@
     "./money": "./src/money.ts",
     "./date": "./src/date.ts",
     "./categories": "./src/categories.ts",
-    "./schemas": "./src/schemas/index.ts"
+    "./schemas": "./src/schemas/index.ts",
+    "./api-client": "./src/api-client.ts"
   },
   "scripts": {
     "lint": "eslint src",

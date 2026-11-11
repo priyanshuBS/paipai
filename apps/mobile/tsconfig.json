@@ -1,0 +1,8 @@
+{
+  "extends": "@paipai/config/tsconfig/expo.json",
+  "compilerOptions": {
+    "paths": { "@/*": ["./src/*"] },
+    "types": []
+  },
+  "include": ["app", "src", "nativewind-env.d.ts", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}

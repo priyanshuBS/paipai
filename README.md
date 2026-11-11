@@ -6,7 +6,7 @@ Personal finance and expense tracking for India (₹ INR, Asia/Kolkata). PaiPai 
 - an **Expo mobile app**
 - one **Hono API** and one **Neon Postgres** database, shared by both
 
-> Status: **Phase 3 done**: monorepo, database, API, and the Next.js website (landing page, auth, dashboard, quick add, transactions, analytics). The mobile app comes in Phase 4.
+> Status: **Phase 4 done**: monorepo, database, API, the Next.js website and the Expo app (onboarding, auth, tabs, quick add, transactions, analytics, budgets, profile). Phase 5 adds per-category budgets, recurring transactions, export, notifications, biometrics and the offline queue.
 
 ## Repo layout
 
@@ -80,6 +80,32 @@ pnpm --filter @paipai/web dev        # Website on http://localhost:3000
 ```
 
 **Offline sandbox:** `pnpm --filter @paipai/api dev:local` runs the API on in-memory Postgres (PGlite). OTP codes are printed to the terminal instead of emailed. It doesn't touch Neon or Resend, and the data resets when you stop it.
+
+## Mobile app (apps/mobile)
+
+Built with Expo SDK 58, Expo Router, NativeWind 4 (Tailwind v3), TanStack Query (with the cache persisted to AsyncStorage), Better Auth's Expo plugin (session kept in `expo-secure-store`), and `react-native-svg` charts. App name **PaiPai**, scheme `paipai`, bundle/package id `com.paipai.app`.
+
+```bash
+pnpm --filter @paipai/api dev          # terminal 1: API (must be running)
+pnpm --filter @paipai/mobile start     # terminal 2: Expo, then scan the QR code with Expo Go
+```
+
+- Your phone and computer must be on the **same Wi-Fi**. In development the app reaches the API at `http://<your-computer's-LAN-IP>:8787` automatically, using the same host as the Expo dev server. To use a different API, set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env`.
+- If Windows Firewall asks whether to let Node.js accept connections, allow it on **Private networks**.
+- **Email OTP** works on a phone over Wi-Fi. **Google sign-in on a phone** needs the API on a public HTTPS URL, because Google redirects to `BETTER_AUTH_URL`, and `localhost` on your phone isn't your computer. It will work once the API is deployed (Phase 6), or through a tunnel such as `cloudflared` or ngrok, with the tunnel URL added to the Google OAuth client.
+
+| Screen                       | What it does                                                                                                                                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Onboarding                   | 3 illustrated slides, then **Get Started**, or "Already have an account? Login"                                                                                                                  |
+| Sign up / Log in / Verify    | Name + email, then the 6-digit OTP (autofill, 60s resend timer); Continue with Google                                                                                                            |
+| Home                         | Greeting, balance card (hide/show, count-up), today/week/month, budget bar, quick actions, recent activity                                                                                       |
+| Quick Add (centre **+** tab) | ₹ amount with numeric keypad, title autocomplete (fills in the category), note, category grid, payment chips, Today/Yesterday + date-time picker, expense/income; haptic on save                 |
+| Transactions                 | Grouped by day with daily totals, search, filter & sort sheet, pull to refresh, infinite scroll, swipe left to edit/delete (with Undo)                                                           |
+| Analytics                    | Day/Week/Month/Year/Custom, "Nov 2026" month picker, % change, area chart, weekly bars, category donut, item-wise totals with item detail, payment methods, day/hour patterns, 12-month overview |
+| Budgets                      | Monthly budget progress (amber at 80%, red at 100%) and this month by category                                                                                                                   |
+| Profile                      | Account details, Light/Dark/System theme, log out, log out from all devices, delete account                                                                                                      |
+
+Checks: `pnpm --filter @paipai/mobile typecheck`, `lint`, `test`, `doctor` (expo-doctor) and `bundle:check` (Metro bundle for Android + iOS).
 
 ## Website (apps/web)
 

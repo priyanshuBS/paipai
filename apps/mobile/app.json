@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "PaiPai",
+    "slug": "paipai",
+    "scheme": "paipai",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "userInterfaceStyle": "automatic",
+    "backgroundColor": "#F7F8F5",
+    "ios": {
+      "bundleIdentifier": "com.paipai.app",
+      "supportsTablet": false,
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "package": "com.paipai.app",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#B6E36B"
+      },
+      "softwareKeyboardLayoutMode": "resize"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 160,
+          "resizeMode": "contain",
+          "backgroundColor": "#B6E36B",
+          "dark": {
+            "image": "./assets/images/splash-icon.png",
+            "backgroundColor": "#B6E36B"
+          }
+        }
+      ],
+      "expo-secure-store",
+      "expo-web-browser",
+      "@react-native-community/datetimepicker"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
