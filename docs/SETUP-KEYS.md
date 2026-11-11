@@ -32,18 +32,9 @@ Go to https://console.cloud.google.com and create (or select) a project called *
 - Authorized redirect URIs: `http://localhost:8787/api/auth/callback/google`, plus `https://YOUR-API-DOMAIN/api/auth/callback/google`.
 - Copy the **Client ID** and **Client secret** into `apps/api/.env`.
 
-**Android client** (needed for production builds)
+**Mobile needs no extra Google client.** The app opens Google sign-in in a secure browser, and the flow goes through the API (Better Auth's Expo plugin, then back to the app via the `paipai://` deep link). Google only ever sees the **Web** client and the API's redirect URI, so the same `GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET` work for both the website and the app, on Android and iOS.
 
-- Create credentials → OAuth client ID → **Android**.
-- Package name: `com.paipai.app`.
-- SHA-1: get it with `eas credentials` (Android → Keystore). For a local debug build, use `keytool -list -v -keystore ~/.android/debug.keystore -alias androiddebugkey -storepass android`.
-
-**iOS client** (needed for production builds)
-
-- Create credentials → OAuth client ID → **iOS**.
-- Bundle ID: `com.paipai.app`.
-
-> On mobile, PaiPai sends Google sign-in through the API (Better Auth's Expo plugin and the `paipai://` deep link), so the **Web** client ID and secret are the only values the server needs. The Android and iOS clients just register the app's identity with Google.
+> Android/iOS OAuth clients (package / bundle ID `com.paipai.app`) are only needed if you later switch to the _native_ Google Sign-In SDK (the in-app account picker). PaiPai doesn't use it, so you can skip them.
 
 ## 4. Resend (`RESEND_API_KEY`, `EMAIL_FROM`)
 
