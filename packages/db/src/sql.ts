@@ -52,3 +52,25 @@ export function normalizedTitle(col: AnyColumn | SQL): SQL<string> {
 export function sumPaise(col: AnyColumn | SQL): SQL<number> {
   return sql<number>`coalesce(sum(${col}), 0)::bigint`.mapWith(Number);
 }
+
+/** sum() restricted by a FILTER clause, as a JS number (0 when no rows match). */
+export function sumPaiseWhere(col: AnyColumn | SQL, condition: SQL): SQL<number> {
+  return sql<number>`coalesce(sum(${col}) FILTER (WHERE ${condition}), 0)::bigint`.mapWith(Number);
+}
+
+/** count() restricted by a FILTER clause. */
+export function countWhere(condition: SQL): SQL<number> {
+  return sql<number>`count(*) FILTER (WHERE ${condition})::int`.mapWith(Number);
+}
+
+/**
+ * Run a raw SQL query and return its rows. Works across drivers (Neon and
+ * PGlite both return `{ rows }`); the generic Database type can't express that.
+ */
+export async function queryRows<T extends Record<string, unknown>>(
+  db: { execute: (query: SQL) => Promise<unknown> },
+  query: SQL,
+): Promise<T[]> {
+  const result = (await db.execute(query)) as { rows?: T[] } | T[];
+  return Array.isArray(result) ? result : (result.rows ?? []);
+}
