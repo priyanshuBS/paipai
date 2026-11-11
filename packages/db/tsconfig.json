@@ -1,0 +1,4 @@
+{
+  "extends": "@paipai/config/tsconfig/node.json",
+  "include": ["src", "scripts", "drizzle.config.ts", "vitest.config.ts"]
+}

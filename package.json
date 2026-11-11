@@ -1,0 +1,29 @@
+{
+  "name": "paipai",
+  "private": true,
+  "description": "PaiPai — Paai-paai ka hisaab. Personal finance & expense tracking.",
+  "packageManager": "pnpm@10.34.9",
+  "engines": {
+    "node": ">=20.18"
+  },
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:generate": "pnpm --filter @paipai/db db:generate",
+    "db:migrate": "pnpm --filter @paipai/db db:migrate",
+    "db:seed": "pnpm --filter @paipai/db db:seed",
+    "db:studio": "pnpm --filter @paipai/db db:studio"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "prettier": "^3.10.0",
+    "turbo": "^2.11.10",
+    "typescript": "^6.0.3",
+    "vitest": "^5.1.0"
+  }
+}
