@@ -119,7 +119,7 @@ export function CategoryIcon({
         width: s.box,
         height: s.box,
         borderRadius: s.box * 0.3,
-        backgroundColor: tint + (dark ? '2E' : '1A'),
+        backgroundColor: tint + (dark ? '2E' : '26'),
         alignItems: 'center',
         justifyContent: 'center',
       }}

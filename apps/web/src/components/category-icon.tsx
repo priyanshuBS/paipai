@@ -122,7 +122,7 @@ export function CategoryIcon({
   const style = {
     '--cat-light': light,
     '--cat-dark': dark,
-    '--cat-light-bg': light + '1A',
+    '--cat-light-bg': light + '26',
     '--cat-dark-bg': dark + '2E',
   } as CSSProperties;
   return (

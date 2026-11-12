@@ -50,6 +50,12 @@ export interface ThemeColors {
   heroBorder: string;
   heroText: string;
   heroMuted: string;
+  /** App sidebar (web): light in light mode, the midnight hero in dark mode. */
+  sidebar: string;
+  sidebarForeground: string;
+  sidebarMuted: string;
+  sidebarBorder: string;
+  sidebarActive: string;
 }
 
 const hero = {
@@ -61,11 +67,11 @@ const hero = {
 };
 
 export const lightColors: ThemeColors = {
-  background: '#F7F6F3',
+  background: '#F6F4EF',
   surface: '#FFFFFF',
-  surfaceMuted: '#F1EFEA',
-  border: '#E8E5DE',
-  borderStrong: '#D6D2C8',
+  surfaceMuted: '#EFECE5',
+  border: '#E4DFD5',
+  borderStrong: '#D3CDC1',
   text: '#0B1020',
   textSecondary: '#6B6A72',
   primary: palette.ink,
@@ -78,8 +84,13 @@ export const lightColors: ThemeColors = {
   expense: palette.expense,
   income: palette.income,
   warning: palette.warning,
-  chartMuted: '#E8E5DE',
+  chartMuted: '#E8E4DB',
   ...hero,
+  sidebar: '#FFFFFF',
+  sidebarForeground: palette.ink,
+  sidebarMuted: '#6B6A72',
+  sidebarBorder: '#E4DFD5',
+  sidebarActive: '#FDEEE3',
 };
 
 export const darkColors: ThemeColors = {
@@ -104,6 +115,11 @@ export const darkColors: ThemeColors = {
   ...hero,
   hero: '#10162C',
   heroSurface: '#1A2242',
+  sidebar: '#10162C',
+  sidebarForeground: hero.heroText,
+  sidebarMuted: hero.heroMuted,
+  sidebarBorder: hero.heroBorder,
+  sidebarActive: '#1A2242',
 };
 
 /** Category identity colours (stored per category). Rendered through chartColorFor() so they stay legible. */

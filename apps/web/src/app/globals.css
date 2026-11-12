@@ -12,6 +12,18 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
+  }
+  /* Light mode only: a faint saffron warmth in the top corner so the paper canvas
+     doesn't read flat. Dark mode keeps its plain midnight background. */
+  html:not(.dark) body {
+    background-image: radial-gradient(
+      70rem 40rem at 100% -10%,
+      rgb(var(--pp-brand) / 0.07),
+      transparent 60%
+    );
+    background-attachment: fixed;
+  }
+  body {
     font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
   :focus-visible {

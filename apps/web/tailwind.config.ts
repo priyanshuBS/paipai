@@ -32,6 +32,11 @@ const config: Config = {
         'hero-border': v('hero-border'),
         'hero-foreground': v('hero-text'),
         'hero-muted': v('hero-muted'),
+        sidebar: v('sidebar'),
+        'sidebar-foreground': v('sidebar-foreground'),
+        'sidebar-muted': v('sidebar-muted'),
+        'sidebar-border': v('sidebar-border'),
+        'sidebar-active': v('sidebar-active'),
       },
       fontFamily: {
         sans: ['var(--font-inter)', 'ui-sans-serif', 'system-ui', 'sans-serif'],

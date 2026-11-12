@@ -18,7 +18,7 @@ function vars(colors: Record<string, string>): string {
 export function ThemeVars() {
   const css =
     `:root{${vars({ ...lightColors })}color-scheme:light;--radius-card:16px;` +
-    `--shadow-card:0 1px 2px rgb(11 16 32/.04),0 2px 8px -2px rgb(11 16 32/.05);` +
+    `--shadow-card:0 1px 2px rgb(11 16 32/.05),0 10px 28px -14px rgb(11 16 32/.14);` +
     `--shadow-pop:0 1px 2px rgb(11 16 32/.06),0 16px 40px -12px rgb(11 16 32/.22)}` +
     `.dark{${vars({ ...darkColors })}color-scheme:dark;` +
     `--shadow-card:0 1px 2px rgb(0 0 0/.3);` +

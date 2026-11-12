@@ -129,7 +129,7 @@ function UserMenu({ compact, onHero }: { compact?: boolean; onHero?: boolean }) 
         aria-label="Account menu"
         className={cn(
           'flex items-center gap-2.5 rounded-lg p-1.5 text-left',
-          onHero ? 'hover:bg-hero-surface' : 'hover:bg-surface-muted',
+          onHero ? 'hover:bg-sidebar-active' : 'hover:bg-surface-muted',
           compact ? '' : 'w-full',
         )}
       >
@@ -137,14 +137,17 @@ function UserMenu({ compact, onHero }: { compact?: boolean; onHero?: boolean }) 
         {!compact && (
           <span className="min-w-0 flex-1">
             <span
-              className={cn('block truncate text-sm font-medium', onHero && 'text-hero-foreground')}
+              className={cn(
+                'block truncate text-sm font-medium',
+                onHero && 'text-sidebar-foreground',
+              )}
             >
               {me?.name ?? '…'}
             </span>
             <span
               className={cn(
                 'block truncate text-xs',
-                onHero ? 'text-hero-muted' : 'text-muted-foreground',
+                onHero ? 'text-sidebar-muted' : 'text-muted-foreground',
               )}
             >
               {me?.email}
@@ -212,9 +215,9 @@ function Sidebar() {
   const pathname = usePathname();
   const { openAdd } = useQuickAdd();
   return (
-    <aside className="saffron-glow-soft sticky top-0 hidden h-dvh w-64 shrink-0 flex-col bg-hero px-3 py-5 text-hero-foreground lg:flex">
+    <aside className="saffron-glow-soft sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar px-3 py-5 text-sidebar-foreground lg:flex">
       <Link href="/app" className="px-2 py-1" aria-label="PaiPai home">
-        <Logo className="text-hero-foreground" />
+        <Logo className="text-sidebar-foreground" />
       </Link>
       <Button
         variant="brand"
@@ -226,7 +229,7 @@ function Sidebar() {
           N
         </kbd>
       </Button>
-      <p className="mt-8 px-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-hero-muted/70">
+      <p className="mt-8 px-2.5 text-[11px] font-medium uppercase tracking-[0.08em] text-sidebar-muted/70">
         Menu
       </p>
       <nav className="mt-2 flex flex-col gap-0.5" aria-label="App">
@@ -240,8 +243,8 @@ function Sidebar() {
               className={cn(
                 'relative flex h-10 items-center gap-3 rounded-[10px] px-3 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-hero-surface text-hero-foreground before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-brand [&>svg]:text-brand'
-                  : 'text-hero-muted hover:bg-hero-surface/60 hover:text-hero-foreground',
+                  ? 'bg-sidebar-active text-sidebar-foreground before:absolute before:inset-y-2.5 before:left-0 before:w-[3px] before:rounded-full before:bg-brand [&>svg]:text-brand'
+                  : 'text-sidebar-muted hover:bg-sidebar-active/60 hover:text-sidebar-foreground',
               )}
             >
               <n.icon className="size-4" aria-hidden /> {n.label}
@@ -249,7 +252,7 @@ function Sidebar() {
           );
         })}
       </nav>
-      <div className="mt-auto border-t border-hero-border pt-3">
+      <div className="mt-auto border-t border-sidebar-border pt-3">
         <UserMenu onHero />
       </div>
     </aside>
