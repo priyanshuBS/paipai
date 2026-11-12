@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
 import { emailSchema, nameSchema } from '@paipai/shared/schemas';
 import { Logo } from '@/components/brand';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button, FieldError, Input, Label, Text } from '@/components/ui';
 import { authClient } from '@/lib/auth-client';
 import { loadPendingSignIn, savePendingSignIn } from '@/lib/pending-sign-in';
@@ -30,7 +31,10 @@ export function AuthLayout({
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="flex-grow px-6 pb-8 pt-4"
         >
-          <Logo />
+          <View className="flex-row items-center justify-between">
+            <Logo />
+            <ThemeToggle />
+          </View>
           <View className="flex-1 justify-center py-8">
             <Text weight="display" className="text-[40px] leading-[44px]">
               {title}

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { Logo } from '@/components/brand';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Sparkline } from '@/components/charts/mini';
 
 const points = [
@@ -61,9 +62,12 @@ export function AuthShell({
       </aside>
 
       <main className="flex flex-col px-4 py-6 sm:px-8">
-        <Link href="/" className="w-fit lg:hidden" aria-label="PaiPai home">
-          <Logo />
-        </Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link href="/" className="w-fit lg:invisible" aria-label="PaiPai home">
+            <Logo />
+          </Link>
+          <ThemeToggle />
+        </div>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
           <h1 className="font-display text-[2.6rem] leading-[1.05] tracking-[-0.01em]">{title}</h1>
           <div className="mt-2 text-sm text-muted-foreground">{subtitle}</div>

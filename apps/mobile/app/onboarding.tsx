@@ -4,6 +4,7 @@ import { FlatList, Pressable, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { G, Rect, Text as SvgText } from 'react-native-svg';
 import { Logo } from '@/components/brand';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { Button, Text, cn } from '@/components/ui';
 import { markOnboarded } from '@/lib/onboarding';
 import { useTheme } from '@/theme/theme';
@@ -146,17 +147,20 @@ export default function Onboarding() {
     <SafeAreaView className="flex-1 bg-hero" edges={['top', 'bottom']}>
       <View className="flex-row items-center justify-between px-6 pt-2">
         <Logo onHero />
-        {index < SLIDES.length - 1 && (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => void finish('/signup')}
-            className="h-11 justify-center px-2"
-          >
-            <Text weight="medium" className="text-hero-muted">
-              Skip
-            </Text>
-          </Pressable>
-        )}
+        <View className="flex-row items-center gap-1">
+          <ThemeToggle onHero />
+          {index < SLIDES.length - 1 && (
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => void finish('/signup')}
+              className="h-11 justify-center pl-3 pr-1"
+            >
+              <Text weight="medium" className="text-hero-muted">
+                Skip
+              </Text>
+            </Pressable>
+          )}
+        </View>
       </View>
 
       <FlatList

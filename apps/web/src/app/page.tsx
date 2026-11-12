@@ -10,6 +10,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Logo } from '@/components/brand';
+import { ThemeToggle } from '@/components/theme-toggle';
 import { CategoryIcon } from '@/components/category-icon';
 import { Ring } from '@/components/charts/mini';
 import { ProductPreview } from '@/components/landing/product-preview';
@@ -102,6 +103,7 @@ export default function LandingPage() {
             <Logo className="text-hero-foreground" />
           </Link>
           <div className="flex items-center gap-1 sm:gap-2">
+            <ThemeToggle onHero />
             <a
               href="#features"
               className="hidden rounded-lg px-3 py-2 text-sm text-hero-muted hover:text-hero-foreground sm:inline-flex"

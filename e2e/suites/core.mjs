@@ -11,6 +11,20 @@ export async function run(s) {
     await shot('01-landing');
   });
 
+  await step('theme switch on public pages (landing → login), persists', async () => {
+    const isDark = () => page.evaluate(() => document.documentElement.classList.contains('dark'));
+    await page.getByRole('button', { name: 'Switch to dark theme' }).click();
+    if (!(await isDark())) throw new Error('landing did not switch to dark');
+    await page.waitForTimeout(300);
+    await shot('01b-landing-dark');
+    await page.goto(`${web}/login`);
+    await page.getByRole('button', { name: 'Switch to light theme' }).waitFor();
+    if (!(await isDark())) throw new Error('dark theme did not persist to login');
+    await shot('01c-login-dark');
+    await page.getByRole('button', { name: 'Switch to light theme' }).click();
+    if (await isDark()) throw new Error('login did not switch back to light');
+  });
+
   await step('signup requires a name', async () => {
     await page.goto(`${web}/signup`);
     await page.getByLabel('Email').fill(email);
