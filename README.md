@@ -89,6 +89,9 @@ docs/         keys + deployment guides
 
 The E2E runner starts the sandbox API itself (and `next start` if the website isn't already running), uses the installed Edge (Windows) or Chrome, and saves screenshots to `e2e/.output/`. Set `E2E_BROWSER_PATH` to use another Chromium browser.
 
+- `pnpm e2e screens` seeds a realistic month and screenshots every page in light and dark mode, at desktop and phone widths, for design review.
+- If your own API is already running on 8787, use side ports: build the website with `NEXT_PUBLIC_API_URL=http://localhost:8788`, then run `E2E_API_PORT=8788 E2E_WEB_URL=http://localhost:3001 pnpm e2e`.
+
 ## How it works
 
 - **Money is integer paise.** ₹30 is stored as `3000` (`bigint`, `CHECK amount > 0`). Input is parsed from strings, never through floats.
@@ -144,6 +147,7 @@ All routes are under `/api` and need a session, except `/api/auth/*`, `/health`,
 
 ## Notes for this codebase
 
+- **Design system:** neutral zinc surfaces, hairline borders, ink primary buttons and one cobalt accent, all from `packages/shared/src/tokens.ts` (used by the website, the app, the PDF statement and the sign-in email). Green means income and red means over-budget or errors; ordinary spending is shown in regular text.
 - Tailwind CSS **v3** on purpose: v4 needs a native `.node` binary, which Windows Application Control blocks on the development machine.
 - React is pinned to one version across the workspace (`pnpm.overrides`); Expo breaks with two copies. `node-linker=hoisted` is required by Expo.
 - TypeScript is pinned to `~6.0` until typescript-eslint supports newer versions.

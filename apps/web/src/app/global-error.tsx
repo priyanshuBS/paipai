@@ -16,25 +16,25 @@ export default function GlobalError({
           display: 'grid',
           placeItems: 'center',
           fontFamily: 'system-ui, sans-serif',
-          background: '#F7F8F5',
-          color: '#1E3A1A',
+          background: '#FAFAFA',
+          color: '#09090B',
           textAlign: 'center',
           padding: 16,
         }}
       >
         <main>
           <h1 style={{ fontSize: 28, margin: 0 }}>Something went wrong</h1>
-          <p style={{ color: '#5B6B57' }}>Your data is safe. Please try again.</p>
+          <p style={{ color: '#71717A' }}>Your data is safe. Please try again.</p>
           <button
             onClick={reset}
             style={{
               marginTop: 12,
               border: 0,
-              borderRadius: 999,
-              padding: '12px 24px',
-              fontWeight: 700,
-              background: '#B6E36B',
-              color: '#1E3A1A',
+              borderRadius: 8,
+              padding: '10px 18px',
+              fontWeight: 600,
+              background: '#18181B',
+              color: '#FAFAFA',
               cursor: 'pointer',
             }}
           >

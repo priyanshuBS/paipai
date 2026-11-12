@@ -2,50 +2,57 @@ import Link from 'next/link';
 import {
   ArrowRight,
   ChartColumn,
-  ChevronDown,
   CloudOff,
+  Download,
   Fingerprint,
+  Plus,
   Repeat,
   Search,
   Target,
-  Timer,
 } from 'lucide-react';
 import { Logo } from '@/components/brand';
-import { AnalyticsMock, DashboardMock } from '@/components/landing/phone-mockups';
+import { ProductPreview } from '@/components/landing/product-preview';
 import { buttonVariants } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const features = [
   {
-    icon: Timer,
-    title: 'Add in under 5 seconds',
-    body: 'Type “Au” and PaiPai suggests “Auto fare” with its usual category. Amount, done.',
+    icon: Plus,
+    title: 'Add in seconds',
+    body: 'Type “Au” and PaiPai suggests “Auto fare” with its usual category and payment method.',
   },
   {
     icon: ChartColumn,
-    title: 'Analytics that make sense',
-    body: 'Daily, weekly, monthly and yearly trends, category splits, and when you spend most.',
+    title: 'Clear analytics',
+    body: 'Trends by day, week, month and year, category splits, and when in the week you spend most.',
   },
   {
     icon: Search,
-    title: 'Item-wise hisaab',
-    body: '“How much have I spent on auto fare?” See the total, the count and the history for any item.',
+    title: 'Item-wise totals',
+    body: 'How much went on auto fare this year? See the total, the count and every entry.',
   },
   {
     icon: Target,
-    title: 'Budgets that nudge',
-    body: 'Set an overall or per-category budget. PaiPai warns you at 80% and again at 100%.',
+    title: 'Budgets that warn early',
+    body: 'Overall or per category. A heads-up at 80% and again when you cross 100%.',
   },
   {
     icon: Repeat,
     title: 'Recurring, handled',
-    body: 'Rent, gym and metro pass are added automatically on schedule.',
+    body: 'Rent, SIPs and subscriptions are added on schedule, including any you missed.',
   },
   {
     icon: CloudOff,
     title: 'Works offline',
-    body: 'Add expenses with no signal on the app. They sync as soon as you’re back online.',
+    body: 'On the app, expenses added without signal sync as soon as you are back online.',
   },
+];
+
+const india = [
+  ['Indian number format', '₹1,23,456, not ₹123,456'],
+  ['UPI, card, cash and bank', 'Track how you pay, not just what'],
+  ['Indian time by default', 'Days and months follow IST'],
+  ['Exports that open in Excel', 'CSV and a PDF statement for any range'],
 ];
 
 const faqs = [
@@ -55,15 +62,15 @@ const faqs = [
   },
   {
     q: 'Do I need to connect my bank account?',
-    a: 'No. PaiPai never asks for bank logins or reads your SMS. You add what you spend (it takes a few seconds), so your data stays yours.',
+    a: 'No. PaiPai never asks for bank logins or reads your SMS. You add what you spend, which takes a few seconds, so your data stays yours.',
   },
   {
     q: 'Does it work in rupees and Indian time?',
-    a: 'Yes. Amounts are in ₹ with Indian digit grouping (₹1,23,456), and days and months follow Asia/Kolkata time by default. You can change both in settings.',
+    a: 'Yes. Amounts are in ₹ with Indian digit grouping, and days and months follow Asia/Kolkata time by default. You can change both in settings.',
   },
   {
     q: 'Can I use it on my phone and laptop?',
-    a: 'Yes. Sign in on the website or the Android/iOS app with the same email or Google account, and your data syncs everywhere.',
+    a: 'Yes. Sign in on the website or the Android and iOS app with the same email or Google account, and your data syncs everywhere.',
   },
   {
     q: 'How do I sign in without a password?',
@@ -71,165 +78,187 @@ const faqs = [
   },
   {
     q: 'Can I export my data?',
-    a: 'Yes. Download your transactions as CSV or PDF for any date range.',
+    a: 'Yes. Download your transactions as CSV or as a PDF statement for any date range.',
   },
 ];
 
 export default function LandingPage() {
   return (
-    <div className="bg-background">
-      {/* ── Hero ── */}
-      <header className="relative overflow-hidden bg-lime text-forest">
+    <div className="bg-surface">
+      <header className="sticky top-0 z-40 border-b border-border bg-surface/90 backdrop-blur">
         <nav
-          className="mx-auto flex max-w-6xl items-center justify-between px-4 py-5 sm:px-6"
+          className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6"
           aria-label="Main"
         >
-          <Logo className="text-forest dark:text-forest" />
-          <div className="flex items-center gap-2">
-            <Link
-              href="/login"
+          <Link href="/" aria-label="PaiPai home">
+            <Logo />
+          </Link>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <a
+              href="#features"
               className={cn(
                 buttonVariants({ variant: 'ghost', size: 'sm' }),
-                'text-forest hover:bg-forest/10',
+                'hidden sm:inline-flex',
               )}
             >
+              Features
+            </a>
+            <a
+              href="#faq"
+              className={cn(
+                buttonVariants({ variant: 'ghost', size: 'sm' }),
+                'hidden sm:inline-flex',
+              )}
+            >
+              FAQ
+            </a>
+            <Link href="/login" className={buttonVariants({ variant: 'ghost', size: 'sm' })}>
               Log in
             </Link>
             <Link href="/signup" className={buttonVariants({ size: 'sm' })}>
-              Get Started
+              Get started
             </Link>
           </div>
         </nav>
-
-        <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 pb-16 pt-6 sm:px-6 md:grid-cols-[1.1fr_1fr] md:pb-24 md:pt-12">
-          <div>
-            <p className="inline-flex rounded-full bg-forest/10 px-3 py-1 text-sm font-semibold">
-              Paai-paai ka hisaab
-            </p>
-            <h1 className="mt-5 text-[2.6rem] font-extrabold leading-[1.05] tracking-tight sm:text-6xl">
-              Track Your Spending Effortlessly
-            </h1>
-            <p className="mt-5 max-w-lg text-lg text-forest/80">
-              Log your expenses in seconds and see exactly where your money goes, from auto fare to
-              rent. Built for India, in ₹.
-            </p>
-            <div className="mt-8 flex flex-wrap items-center gap-3">
-              <Link href="/signup" className={buttonVariants({ size: 'lg' })}>
-                Get Started <ArrowRight />
-              </Link>
-              <Link
-                href="/login"
-                className="text-sm font-semibold underline-offset-4 hover:underline"
-              >
-                Already have an account? Login
-              </Link>
-            </div>
-          </div>
-          <div className="relative flex justify-center md:justify-end">
-            <div
-              aria-hidden
-              className="absolute -right-10 top-10 size-72 rounded-full bg-lime-light/70 blur-2xl"
-            />
-            <DashboardMock className="relative rotate-[-3deg]" />
-          </div>
-        </div>
       </header>
 
       <main>
-        {/* ── Features ── */}
-        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6" aria-labelledby="features-title">
-          <h2
-            id="features-title"
-            className="max-w-xl text-3xl font-extrabold tracking-tight sm:text-4xl"
-          >
-            Everything you need to know where your money goes
-          </h2>
-          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {features.map((f) => (
-              <div
-                key={f.title}
-                className="rounded-[var(--radius-card)] bg-surface p-6 shadow-[var(--shadow-soft)]"
-              >
-                <span className="flex size-12 items-center justify-center rounded-full bg-accent-soft text-forest dark:text-lime">
-                  <f.icon className="size-5" aria-hidden />
-                </span>
-                <h3 className="mt-4 text-lg font-semibold">{f.title}</h3>
-                <p className="mt-1.5 text-muted-foreground">{f.body}</p>
+        {/* Hero */}
+        <section className="border-b border-border bg-background">
+          <div className="mx-auto max-w-6xl px-4 pb-16 pt-16 sm:px-6 sm:pt-24">
+            <div className="max-w-3xl">
+              <p className="text-sm font-medium text-accent">Expense tracking for India</p>
+              <h1 className="mt-4 text-4xl font-semibold leading-[1.1] tracking-tight sm:text-5xl">
+                Know where every rupee goes.
+              </h1>
+              <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted-foreground">
+                PaiPai is a simple ledger for your daily spending. Add an expense in seconds, set
+                budgets, and see clear reports on the web and on your phone.
+              </p>
+              <div className="mt-8 flex flex-wrap items-center gap-3">
+                <Link href="/signup" className={buttonVariants({ size: 'lg' })}>
+                  Get started <ArrowRight />
+                </Link>
+                <Link
+                  href="/login"
+                  className={buttonVariants({ variant: 'secondary', size: 'lg' })}
+                >
+                  Log in
+                </Link>
               </div>
-            ))}
+              <p className="mt-5 text-sm text-muted-foreground">
+                Free · No bank access needed · Web, Android and iOS
+              </p>
+            </div>
+            <ProductPreview className="mt-14" />
           </div>
         </section>
 
-        {/* ── Screens ── */}
-        <section className="bg-forest py-20 text-white" aria-labelledby="screens-title">
-          <div className="mx-auto grid max-w-6xl items-center gap-12 px-4 sm:px-6 md:grid-cols-2">
-            <div>
-              <h2 id="screens-title" className="text-3xl font-extrabold tracking-tight sm:text-4xl">
-                See your spending <span className="text-lime">at a glance</span>
+        {/* Features */}
+        <section id="features" className="scroll-mt-16" aria-labelledby="features-title">
+          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+            <div className="max-w-xl">
+              <h2 id="features-title" className="text-3xl font-semibold tracking-tight">
+                Everything a personal ledger needs
               </h2>
-              <ul className="mt-6 space-y-4 text-white/85">
-                <li>• See how this week compares to last, e.g. “↓ 4.8% from last week”.</li>
-                <li>
-                  • A clear category breakdown showing how much went on travel, food and groceries.
-                </li>
-                <li>• Patterns by day of the week and time of day.</li>
-                <li>• A yearly overview with a 12-month chart.</li>
-              </ul>
-              <div className="mt-8 flex items-center gap-3 text-sm text-white/70">
-                <Fingerprint className="size-5 text-lime" aria-hidden /> Optional fingerprint / Face
-                ID lock on the app
+              <p className="mt-3 text-muted-foreground">
+                Nothing you have to configure first. Start adding expenses and the reports fill in.
+              </p>
+            </div>
+            <dl className="mt-12 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {features.map((f) => (
+                <div key={f.title} className="border-t border-border pt-6">
+                  <dt className="flex items-center gap-2.5 font-medium">
+                    <f.icon className="size-4 text-muted-foreground" aria-hidden />
+                    {f.title}
+                  </dt>
+                  <dd className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* Built for India */}
+        <section className="border-y border-border bg-background" aria-labelledby="india-title">
+          <div className="mx-auto grid max-w-6xl gap-12 px-4 py-20 sm:px-6 md:grid-cols-2 md:items-center">
+            <div>
+              <h2 id="india-title" className="text-3xl font-semibold tracking-tight">
+                Built for how India spends
+              </h2>
+              <p className="mt-3 max-w-md text-muted-foreground">
+                Rupees, UPI and Indian time are the default, not an afterthought. Your data is
+                yours: export it whenever you like, or delete it in one step.
+              </p>
+              <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm text-muted-foreground">
+                <span className="inline-flex items-center gap-2">
+                  <Fingerprint className="size-4" aria-hidden /> Face ID / fingerprint lock
+                </span>
+                <span className="inline-flex items-center gap-2">
+                  <Download className="size-4" aria-hidden /> CSV and PDF export
+                </span>
               </div>
             </div>
-            <div className="flex justify-center gap-6">
-              <AnalyticsMock className="rotate-[2deg]" />
+            <dl className="divide-y divide-border rounded-xl border border-border bg-surface">
+              {india.map(([title, body]) => (
+                <div
+                  key={title}
+                  className="flex flex-col gap-0.5 px-5 py-4 sm:flex-row sm:justify-between sm:gap-6"
+                >
+                  <dt className="text-sm font-medium">{title}</dt>
+                  <dd className="text-sm text-muted-foreground">{body}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </section>
+
+        {/* FAQ */}
+        <section id="faq" className="scroll-mt-16" aria-labelledby="faq-title">
+          <div className="mx-auto grid max-w-6xl gap-10 px-4 py-20 sm:px-6 md:grid-cols-[1fr_1.6fr]">
+            <div>
+              <h2 id="faq-title" className="text-3xl font-semibold tracking-tight">
+                Questions
+              </h2>
+              <p className="mt-3 text-muted-foreground">The short answers.</p>
+            </div>
+            <div className="divide-y divide-border border-y border-border">
+              {faqs.map((f) => (
+                <details key={f.q} className="group py-1">
+                  <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between gap-4 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
+                    {f.q}
+                    <Plus
+                      className="size-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-45"
+                      aria-hidden
+                    />
+                  </summary>
+                  <p className="pb-4 pr-8 text-sm leading-relaxed text-muted-foreground">{f.a}</p>
+                </details>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── CTA ── */}
-        <section className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
-          <div className="flex flex-col items-start justify-between gap-6 rounded-[28px] bg-lime p-8 text-forest sm:flex-row sm:items-center sm:p-12">
+        {/* CTA */}
+        <section className="border-t border-border bg-background">
+          <div className="mx-auto flex max-w-6xl flex-col items-start justify-between gap-6 px-4 py-16 sm:flex-row sm:items-center sm:px-6">
             <div>
-              <h2 className="text-3xl font-extrabold tracking-tight">Start your hisaab today</h2>
-              <p className="mt-2 text-forest/80">
+              <h2 className="text-2xl font-semibold tracking-tight">Start your hisaab today</h2>
+              <p className="mt-1.5 text-muted-foreground">
                 Sign up with your email or Google. It takes under a minute.
               </p>
             </div>
             <Link href="/signup" className={buttonVariants({ size: 'lg' })}>
-              Get Started <ArrowRight />
+              Get started <ArrowRight />
             </Link>
-          </div>
-        </section>
-
-        {/* ── FAQ ── */}
-        <section className="mx-auto max-w-3xl px-4 pb-24 sm:px-6" aria-labelledby="faq-title">
-          <h2 id="faq-title" className="text-3xl font-extrabold tracking-tight">
-            Questions, answered
-          </h2>
-          <div className="mt-8 space-y-3">
-            {faqs.map((f) => (
-              <details
-                key={f.q}
-                className="group rounded-2xl bg-surface p-5 shadow-[var(--shadow-soft)]"
-              >
-                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 font-semibold">
-                  {f.q}
-                  <ChevronDown
-                    className="size-5 shrink-0 transition group-open:rotate-180"
-                    aria-hidden
-                  />
-                </summary>
-                <p className="mt-2 text-muted-foreground">{f.a}</p>
-              </details>
-            ))}
           </div>
         </section>
       </main>
 
       <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-10 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex max-w-6xl flex-col gap-4 px-4 py-8 text-sm text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex items-center gap-3">
-            <Logo markClassName="size-6" className="[&>span]:text-base" />
+            <Logo markClassName="size-5" className="[&>span]:text-sm" />
             <span>Paai-paai ka hisaab</span>
           </div>
           <div className="flex gap-6">
@@ -239,7 +268,7 @@ export default function LandingPage() {
             <Link href="/signup" className="hover:text-foreground">
               Sign up
             </Link>
-            <a href="#faq-title" className="hover:text-foreground">
+            <a href="#faq" className="hover:text-foreground">
               FAQ
             </a>
           </div>

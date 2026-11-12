@@ -12,14 +12,14 @@
   }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: 'cv11', 'ss01';
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
   }
   :focus-visible {
-    outline: 2px solid rgb(var(--pp-forest-mid));
+    outline: 2px solid rgb(var(--pp-accent));
     outline-offset: 2px;
   }
-  .dark :focus-visible {
-    outline-color: rgb(var(--pp-lime));
+  ::selection {
+    background: rgb(var(--pp-accent) / 0.18);
   }
   /* Tabular numerals for all amounts */
   .tabular {

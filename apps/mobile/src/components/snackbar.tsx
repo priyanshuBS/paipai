@@ -44,7 +44,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
           style={{ position: 'absolute', left: 16, right: 16, bottom: insets.bottom + 92 }}
         >
           <View
-            className={snack.tone === 'error' ? 'bg-expense' : 'bg-[#111111] dark:bg-lime'}
+            className={snack.tone === 'error' ? 'bg-expense' : 'bg-foreground'}
             style={{
               borderRadius: 18,
               paddingHorizontal: 16,
@@ -53,7 +53,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
               alignItems: 'center',
             }}
           >
-            <Text weight="medium" className="flex-1 py-3 text-sm text-white dark:text-forest">
+            <Text weight="medium" className="flex-1 py-3 text-sm text-background">
               {snack.message}
             </Text>
             {snack.actionLabel && (
@@ -65,7 +65,7 @@ export function SnackbarProvider({ children }: { children: ReactNode }) {
                 }}
                 className="h-11 justify-center pl-4"
               >
-                <Text weight="bold" className="text-sm text-lime dark:text-forest">
+                <Text weight="bold" className="text-sm text-background">
                   {snack.actionLabel}
                 </Text>
               </Pressable>

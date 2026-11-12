@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useColorScheme, vars } from 'nativewind';
 import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { View } from 'react-native';
-import { darkColors, lightColors, palette, type ThemeColors } from '@paipai/shared/tokens';
+import { darkColors, lightColors, type ThemeColors } from '@paipai/shared/tokens';
 
 export type ThemePreference = 'light' | 'dark' | 'system';
 const STORAGE_KEY = 'paipai:theme';
@@ -13,19 +13,9 @@ const channels = (hex: string) => {
   return `${(n >> 16) & 255} ${(n >> 8) & 255} ${n & 255}`;
 };
 
-const brand = {
-  lime: palette.lime,
-  limeLight: palette.limeLight,
-  forest: palette.forest,
-  forestMid: palette.forestMid,
-};
-
 /** CSS variables (RGB channels) derived from the shared design tokens. */
 function toVars(colors: ThemeColors) {
-  const entries = Object.entries({ ...brand, ...colors }).map(([k, v]) => [
-    `--pp-${kebab(k)}`,
-    channels(v),
-  ]);
+  const entries = Object.entries(colors).map(([k, v]) => [`--pp-${kebab(k)}`, channels(v)]);
   return vars(Object.fromEntries(entries));
 }
 
@@ -37,7 +27,7 @@ interface ThemeCtx {
   setPreference: (p: ThemePreference) => void;
   dark: boolean;
   /** Literal colours for SVG/icons, which can't read Tailwind classes. */
-  colors: ThemeColors & typeof brand;
+  colors: ThemeColors;
 }
 
 const Ctx = createContext<ThemeCtx | null>(null);
@@ -62,7 +52,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return {
       preference,
       dark,
-      colors: { ...brand, ...(dark ? darkColors : lightColors) },
+      colors: dark ? darkColors : lightColors,
       setPreference: (p) => {
         setPref(p);
         setColorScheme(p);

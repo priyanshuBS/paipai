@@ -104,7 +104,7 @@ export function ReceiptPicker({
           <Pressable
             accessibilityRole="button"
             onPress={() => void run('camera')}
-            className="h-11 flex-row items-center gap-2 rounded-full border border-border px-4"
+            className="h-11 flex-row items-center gap-2 rounded-xl border border-border px-3.5"
           >
             <Camera size={16} color={colors.text} />
             <Text weight="medium" className="text-sm">
@@ -114,7 +114,7 @@ export function ReceiptPicker({
           <Pressable
             accessibilityRole="button"
             onPress={() => void run('library')}
-            className="h-11 flex-row items-center gap-2 rounded-full border border-border px-4"
+            className="h-11 flex-row items-center gap-2 rounded-xl border border-border px-3.5"
           >
             <ImageIcon size={16} color={colors.text} />
             <Text weight="medium" className="text-sm">

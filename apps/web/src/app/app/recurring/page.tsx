@@ -144,7 +144,7 @@ function RecurringDialog({
                 <Label htmlFor="r-freq">Repeats</Label>
                 <Select
                   id="r-freq"
-                  className="h-12 w-full rounded-2xl"
+                  className="w-full"
                   value={frequency}
                   onChange={(e) => setFrequency(e.target.value as RecurringFrequency)}
                 >
@@ -159,7 +159,7 @@ function RecurringDialog({
                 <Label htmlFor="r-cat">Category</Label>
                 <Select
                   id="r-cat"
-                  className="h-12 w-full rounded-2xl"
+                  className="w-full"
                   value={categoryId}
                   onChange={(e) => setCategoryId(e.target.value)}
                 >
@@ -302,8 +302,8 @@ export default function RecurringPage() {
                     </div>
                     <span
                       className={cn(
-                        'tabular font-semibold',
-                        r.type === 'expense' ? 'text-expense' : 'text-income',
+                        'tabular font-medium',
+                        r.type === 'expense' ? 'text-foreground' : 'text-income',
                       )}
                     >
                       {r.type === 'expense' ? '−' : '+'}

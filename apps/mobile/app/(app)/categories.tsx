@@ -99,7 +99,7 @@ function CategoryForm({
                 onPress={() => setIcon(i)}
                 className={cn(
                   'aspect-square items-center justify-center rounded-xl border-2',
-                  icon === i ? 'border-forest dark:border-lime' : 'border-transparent',
+                  icon === i ? 'border-accent' : 'border-transparent',
                 )}
               >
                 <CategoryIcon icon={i} color={icon === i ? color : '#F0F2EC'} size="sm" />

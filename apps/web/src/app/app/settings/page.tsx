@@ -53,9 +53,9 @@ function Row({
   return (
     <Link
       href={href}
-      className="flex min-h-16 items-center gap-3 rounded-2xl px-3 hover:bg-surface-muted"
+      className="flex min-h-16 items-center gap-3 rounded-lg px-3 hover:bg-surface-muted"
     >
-      <span className="flex size-10 items-center justify-center rounded-full bg-accent-soft text-forest dark:bg-surface-muted dark:text-lime">
+      <span className="flex size-9 items-center justify-center rounded-lg border border-border bg-surface-muted text-muted-foreground">
         {icon}
       </span>
       <span className="flex-1">
@@ -209,7 +209,7 @@ export default function SettingsPage() {
                   className="size-16 rounded-full object-cover"
                 />
               ) : (
-                <span className="flex size-16 items-center justify-center rounded-full bg-lime text-xl font-bold text-forest">
+                <span className="flex size-16 items-center justify-center rounded-full border border-border bg-surface-muted text-lg font-semibold text-muted-foreground">
                   {me.name.slice(0, 1).toUpperCase()}
                 </span>
               )}
@@ -219,7 +219,7 @@ export default function SettingsPage() {
                     type="button"
                     aria-label="Change profile photo"
                     onClick={() => fileRef.current?.click()}
-                    className="absolute -bottom-1 -right-1 flex size-8 items-center justify-center rounded-full bg-forest text-white shadow"
+                    className="absolute -bottom-1 -right-1 flex size-7 items-center justify-center rounded-full border-2 border-surface bg-primary text-primary-foreground"
                     disabled={avatarBusy}
                   >
                     <Camera className="size-4" />
@@ -264,7 +264,7 @@ export default function SettingsPage() {
               <Label htmlFor="s-currency">Currency</Label>
               <Select
                 id="s-currency"
-                className="h-12 w-full rounded-2xl"
+                className="w-full"
                 value={me.currency}
                 onChange={(e) =>
                   void update
@@ -283,7 +283,7 @@ export default function SettingsPage() {
               <Label htmlFor="s-tz">Time zone</Label>
               <Select
                 id="s-tz"
-                className="h-12 w-full rounded-2xl"
+                className="w-full"
                 value={me.timezone}
                 onChange={(e) =>
                   void update

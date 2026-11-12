@@ -36,9 +36,14 @@ export function Providers({ children }: { children: ReactNode }) {
         {children}
         <Toaster
           position="bottom-center"
-          richColors
           closeButton
-          toastOptions={{ className: 'rounded-2xl' }}
+          toastOptions={{
+            classNames: {
+              toast:
+                'rounded-lg border border-border bg-surface text-foreground shadow-[var(--shadow-pop)]',
+              description: 'text-muted-foreground',
+            },
+          }}
         />
       </QueryClientProvider>
     </ThemeProvider>

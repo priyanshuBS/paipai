@@ -272,7 +272,7 @@ export default function TransactionsPage() {
         <div className="flex gap-2">
           <div className="relative flex-1">
             <Search
-              className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+              className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
               aria-hidden
             />
             <Input
@@ -281,20 +281,19 @@ export default function TransactionsPage() {
               aria-label="Search transactions"
               value={q}
               onChange={(e) => setQ(e.target.value)}
-              className="rounded-full pl-10"
+              className="pl-9"
             />
           </div>
           <Popover.Root>
             <Popover.Trigger asChild>
               <Button
                 variant="outline"
-                className="h-12"
                 aria-label={`Filters${nFilters ? `, ${nFilters} active` : ''}`}
               >
                 <SlidersHorizontal />
                 <span className="hidden sm:inline">Filters</span>
                 {nFilters > 0 && (
-                  <span className="flex size-5 items-center justify-center rounded-full bg-forest text-[11px] text-white dark:bg-lime dark:text-forest">
+                  <span className="flex size-5 items-center justify-center rounded-full bg-accent text-[11px] text-accent-foreground">
                     {nFilters}
                   </span>
                 )}
@@ -305,7 +304,7 @@ export default function TransactionsPage() {
                 align="end"
                 sideOffset={8}
                 collisionPadding={16}
-                className="z-50 max-h-[75dvh] w-[min(92vw,26rem)] overflow-y-auto rounded-[24px] bg-surface p-5 shadow-[var(--shadow-float)] ring-1 ring-border"
+                className="z-50 max-h-[75dvh] w-[min(92vw,26rem)] overflow-y-auto rounded-xl bg-surface p-5 shadow-[var(--shadow-pop)] ring-1 ring-border"
               >
                 <FiltersPanel value={filters} onChange={setFilters} />
                 <div className="mt-5 flex gap-2">
@@ -330,7 +329,6 @@ export default function TransactionsPage() {
           </label>
           <Select
             id="sort"
-            className="h-12"
             value={filters.sort}
             onChange={(e) =>
               setFilters({ ...filters, sort: e.target.value as FilterState['sort'] })
@@ -407,13 +405,13 @@ export default function TransactionsPage() {
                       {totals && (
                         <p className="tabular text-sm text-muted-foreground">
                           {totals.expense > 0 && (
-                            <span className="font-semibold text-expense">
+                            <span className="font-medium text-foreground">
                               −{formatMoney(totals.expense)}
                             </span>
                           )}
                           {totals.expense > 0 && totals.income > 0 && ' · '}
                           {totals.income > 0 && (
-                            <span className="font-semibold text-income">
+                            <span className="font-medium text-income">
                               +{formatMoney(totals.income)}
                             </span>
                           )}
@@ -446,7 +444,9 @@ export default function TransactionsPage() {
               </Card>
             )}
             {!query.hasNextPage && items.length > 10 && (
-              <p className="py-4 text-center text-sm text-muted-foreground">That's everything ✨</p>
+              <p className="py-4 text-center text-sm text-muted-foreground">
+                You've reached the end
+              </p>
             )}
           </div>
         )}

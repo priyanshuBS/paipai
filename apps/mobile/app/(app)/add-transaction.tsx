@@ -334,7 +334,7 @@ function QuickAddForm({
             />
             <FieldError>{errors.title}</FieldError>
             {titleFocused && visibleSuggestions.length > 0 && (
-              <View className="mt-1 overflow-hidden rounded-2xl border border-border bg-surface">
+              <View className="mt-1 overflow-hidden rounded-xl border border-border bg-surface">
                 {visibleSuggestions.map((s) => {
                   const cat = categories?.find((c) => c.id === s.categoryId);
                   return (
@@ -379,7 +379,7 @@ function QuickAddForm({
               {catsLoading
                 ? Array.from({ length: 8 }, (_, i) => (
                     <View key={i} className="w-1/4 p-1">
-                      <Skeleton className="h-20 w-full rounded-2xl" />
+                      <Skeleton className="h-20 w-full rounded-xl" />
                     </View>
                   ))
                 : typeCategories.map((c) => {
@@ -396,9 +396,9 @@ function QuickAddForm({
                             setCategoryId(selected ? null : c.id);
                           }}
                           className={cn(
-                            'min-h-20 items-center justify-center gap-1.5 rounded-2xl px-1 py-2',
+                            'min-h-20 items-center justify-center gap-1.5 rounded-xl px-1 py-2',
                             selected
-                              ? 'border-2 border-forest bg-accent-soft dark:border-lime dark:bg-surface-muted'
+                              ? 'border border-accent bg-accent-soft'
                               : 'border-2 border-transparent',
                           )}
                         >
@@ -450,7 +450,7 @@ function QuickAddForm({
                 accessibilityRole="button"
                 accessibilityLabel={`Pick date and time, currently ${formatDate(when, tz)} ${formatTime(when, tz)}`}
                 onPress={() => setPicker('date')}
-                className="h-11 flex-row items-center gap-2 rounded-full border border-border bg-surface px-4"
+                className="h-11 flex-row items-center gap-2 rounded-xl border border-border bg-surface px-3.5"
               >
                 <CalendarClock size={16} color={colors.text} />
                 <Text weight="medium" className="text-sm">
@@ -465,7 +465,7 @@ function QuickAddForm({
                 display={Platform.OS === 'ios' ? 'inline' : 'default'}
                 maximumDate={new Date(Date.now() + 86_400_000)}
                 onChange={onPick}
-                accentColor={palette.forestMid}
+                accentColor={palette.cobalt}
               />
             )}
             {picker && Platform.OS === 'ios' && (
@@ -509,7 +509,7 @@ function QuickAddForm({
           </View>
 
           {errors.form && (
-            <View className="rounded-2xl bg-expense/10 p-3">
+            <View className="rounded-xl bg-expense/10 p-3">
               <Text className="text-sm text-expense">{errors.form}</Text>
             </View>
           )}

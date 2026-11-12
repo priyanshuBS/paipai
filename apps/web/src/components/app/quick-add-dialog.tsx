@@ -306,12 +306,11 @@ function QuickAddForm({
         </label>
         <div
           className={cn(
-            'flex items-center gap-2 rounded-[22px] px-5 py-4 transition',
-            type === 'expense' ? 'bg-accent-soft dark:bg-surface-muted' : 'bg-income/10',
-            errors.amount && 'ring-2 ring-expense',
+            'flex items-center gap-2 rounded-xl border border-border-strong px-4 py-3 transition-colors focus-within:border-accent focus-within:ring-2 focus-within:ring-accent/20',
+            errors.amount && 'border-expense ring-2 ring-expense/20',
           )}
         >
-          <span className="text-3xl font-semibold text-muted-foreground" aria-hidden>
+          <span className="text-2xl font-medium text-muted-foreground" aria-hidden>
             ₹
           </span>
           <input
@@ -324,7 +323,7 @@ function QuickAddForm({
             onChange={(e) => setAmount(e.target.value.replace(/[^\d.,]/g, ''))}
             aria-invalid={!!errors.amount || undefined}
             aria-describedby={errors.amount ? `${amountId}-err` : undefined}
-            className="w-full min-w-0 bg-transparent text-[40px] font-semibold leading-none tabular-nums text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
+            className="w-full min-w-0 bg-transparent text-[34px] font-semibold leading-none tracking-tight tabular-nums text-foreground placeholder:text-muted-foreground/40 focus:outline-none"
           />
         </div>
         <FieldError id={`${amountId}-err`}>{errors.amount}</FieldError>
@@ -359,7 +358,7 @@ function QuickAddForm({
           <ul
             id={listId}
             role="listbox"
-            className="absolute inset-x-0 top-full z-10 mt-1 overflow-hidden rounded-2xl bg-surface p-1 shadow-[var(--shadow-float)] ring-1 ring-border"
+            className="absolute inset-x-0 top-full z-10 mt-1 overflow-hidden rounded-lg bg-surface p-1 shadow-[var(--shadow-pop)] ring-1 ring-border"
           >
             {visibleSuggestions.map((s, i) => {
               const cat = categories?.find((c) => c.id === s.categoryId);
@@ -409,7 +408,7 @@ function QuickAddForm({
         <div className="grid grid-cols-4 gap-2 sm:grid-cols-5">
           {catsLoading
             ? Array.from({ length: 10 }, (_, i) => (
-                <div key={i} className="h-[76px] animate-pulse rounded-2xl bg-surface-muted" />
+                <div key={i} className="h-[76px] animate-pulse rounded-lg bg-surface-muted" />
               ))
             : typeCategories.map((c) => {
                 const selected = c.id === categoryId;
@@ -423,10 +422,8 @@ function QuickAddForm({
                       setCategoryId(selected ? null : c.id);
                     }}
                     className={cn(
-                      'flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-2xl p-2 text-center transition',
-                      selected
-                        ? 'bg-accent-soft ring-2 ring-forest dark:bg-surface-muted dark:ring-lime'
-                        : 'hover:bg-surface-muted',
+                      'flex min-h-[76px] flex-col items-center justify-center gap-1.5 rounded-lg p-2 text-center transition',
+                      selected ? 'bg-accent-soft ring-1 ring-accent' : 'hover:bg-surface-muted',
                     )}
                   >
                     <CategoryIcon icon={c.icon} color={c.color} size="sm" />
@@ -470,7 +467,7 @@ function QuickAddForm({
             value={when}
             max={toDateTimeLocalValue(new Date(Date.now() + 86_400_000), tz)}
             onChange={(e) => setWhen(e.target.value)}
-            className="h-10 rounded-full border border-border bg-surface px-4 text-sm text-foreground focus:border-forest-mid focus:outline-none focus:ring-4 focus:ring-lime/30"
+            className="h-9 rounded-lg border border-border-strong bg-surface px-3 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20"
           />
         </div>
       </fieldset>
@@ -541,7 +538,7 @@ function QuickAddForm({
                     accept="image/jpeg,image/png,image/webp,image/heic"
                     disabled={uploading}
                     onChange={(e) => void onReceipt(e.target.files?.[0])}
-                    className="h-auto py-2 file:mr-3 file:rounded-full file:border-0 file:bg-accent-soft file:px-3 file:py-1.5 file:text-sm file:font-medium"
+                    className="h-auto py-2 file:mr-3 file:rounded-md file:border-0 file:bg-surface-muted file:px-3 file:py-1.5 file:text-sm file:font-medium"
                   />
                 )}
                 {uploading && <p className="mt-1 text-sm text-muted-foreground">Uploading…</p>}
@@ -552,7 +549,7 @@ function QuickAddForm({
       </div>
 
       {errors.form && (
-        <p role="alert" className="rounded-2xl bg-expense/10 p-3 text-sm text-expense">
+        <p role="alert" className="rounded-lg bg-expense/10 p-3 text-sm text-expense">
           {errors.form}
         </p>
       )}

@@ -63,7 +63,7 @@ export function Amount({
   return (
     <Text
       weight="semibold"
-      className={cn(type === 'expense' ? 'text-expense' : 'text-income', className)}
+      className={cn(type === 'expense' ? 'text-foreground' : 'text-income', className)}
       style={{ fontVariant: ['tabular-nums'] }}
     >
       {type === 'expense' ? '−' : '+'}

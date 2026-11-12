@@ -43,6 +43,8 @@ import {
   Wrench,
   type LucideIcon,
 } from 'lucide-react';
+import type { CSSProperties } from 'react';
+import { chartColorFor } from '@paipai/shared/tokens';
 import { cn } from '@/lib/utils';
 
 /** Static map (tree-shakeable) of every icon offered for categories. */
@@ -91,7 +93,10 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   repeat: Repeat,
 };
 
-/** Circular category avatar: pastel background, dark icon. */
+/**
+ * Category tile: neutral square, icon drawn in the category's chart colour
+ * (validated for contrast in both themes). Identity without pastel blobs.
+ */
 export function CategoryIcon({
   icon,
   color,
@@ -104,19 +109,28 @@ export function CategoryIcon({
   className?: string;
 }) {
   const Icon = (icon && CATEGORY_ICONS[icon]) || CircleHelp;
-  const dims = size === 'sm' ? 'size-9' : size === 'lg' ? 'size-14' : 'size-11';
-  const iconDims = size === 'sm' ? 'size-4' : size === 'lg' ? 'size-6' : 'size-5';
+  const dims =
+    size === 'sm'
+      ? 'size-8 rounded-md'
+      : size === 'lg'
+        ? 'size-12 rounded-xl'
+        : 'size-9 rounded-lg';
+  const iconDims = size === 'sm' ? 'size-4' : size === 'lg' ? 'size-6' : 'size-[18px]';
+  const style = {
+    '--cat-light': chartColorFor(color, 'light'),
+    '--cat-dark': chartColorFor(color, 'dark'),
+  } as CSSProperties;
   return (
     <span
       aria-hidden
       className={cn(
-        'flex shrink-0 items-center justify-center rounded-full text-forest',
+        'flex shrink-0 items-center justify-center border border-border bg-surface-muted text-[var(--cat-light)] dark:text-[var(--cat-dark)]',
         dims,
         className,
       )}
-      style={{ backgroundColor: color ?? '#E4F5C8' }}
+      style={style}
     >
-      <Icon className={iconDims} strokeWidth={2} />
+      <Icon className={iconDims} strokeWidth={1.75} />
     </span>
   );
 }

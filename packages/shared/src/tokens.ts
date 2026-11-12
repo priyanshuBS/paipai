@@ -1,19 +1,20 @@
 /**
  * PaiPai design tokens. Single source of truth for colours, radii, spacing and
  * typography, consumed by the Tailwind (web) and NativeWind (mobile) configs.
+ *
+ * Direction: neutral and quiet. Zinc surfaces with hairline borders, ink for
+ * primary actions, one cobalt accent (links, focus, selection, main chart
+ * series). Green only means income; red only means over-budget or errors.
  */
 
 export const palette = {
-  lime: '#B6E36B',
-  limeLight: '#E4F5C8',
-  forest: '#1E3A1A',
-  forestMid: '#2F5D2A',
+  ink: '#18181B',
   white: '#FFFFFF',
-  black: '#111111',
-  grey: '#6B7280',
-  expense: '#E5484D',
-  income: '#2E9E5B',
-  warning: '#F5A524',
+  cobalt: '#2E5BDA',
+  cobaltLight: '#7C9CF5',
+  expense: '#DC2626',
+  income: '#15803D',
+  warning: '#B45309',
 } as const;
 
 export interface ThemeColors {
@@ -21,53 +22,64 @@ export interface ThemeColors {
   surface: string;
   surfaceMuted: string;
   border: string;
+  /** Stronger border for inputs and hover states. */
+  borderStrong: string;
   text: string;
   textSecondary: string;
+  /** Primary action (buttons): ink in light mode, near-white in dark mode. */
   primary: string;
   primaryForeground: string;
+  /** The single accent: links, focus rings, selected states, main chart series. */
   accent: string;
   accentForeground: string;
   accentSoft: string;
+  /** Negative / danger (over budget, errors, destructive). Not used for ordinary expenses. */
   expense: string;
   income: string;
   warning: string;
+  /** Neutral fill for chart bars that aren't highlighted. */
+  chartMuted: string;
 }
 
 export const lightColors: ThemeColors = {
-  background: '#F7F8F5',
+  background: '#FAFAFA',
   surface: '#FFFFFF',
-  surfaceMuted: '#F0F2EC',
-  border: '#E6E9E1',
-  text: '#111111',
-  textSecondary: '#6B7280',
-  primary: palette.forest,
-  primaryForeground: '#FFFFFF',
-  accent: palette.lime,
-  accentForeground: palette.forest,
-  accentSoft: palette.limeLight,
+  surfaceMuted: '#F4F4F5',
+  border: '#E4E4E7',
+  borderStrong: '#D4D4D8',
+  text: '#09090B',
+  textSecondary: '#71717A',
+  primary: palette.ink,
+  primaryForeground: '#FAFAFA',
+  accent: palette.cobalt,
+  accentForeground: '#FFFFFF',
+  accentSoft: '#EEF2FC',
   expense: palette.expense,
   income: palette.income,
   warning: palette.warning,
+  chartMuted: '#E4E4E7',
 };
 
 export const darkColors: ThemeColors = {
-  background: '#0F140E',
-  surface: '#1A2118',
-  surfaceMuted: '#232B20',
-  border: '#2A3327',
-  text: '#F3F4F0',
-  textSecondary: '#A3A9A0',
-  primary: palette.lime,
-  primaryForeground: palette.forest,
-  accent: palette.lime,
-  accentForeground: palette.forest,
-  accentSoft: '#2A3A1F',
-  expense: '#F2555A',
-  income: '#3FBF73',
-  warning: palette.warning,
+  background: '#09090B',
+  surface: '#111113',
+  surfaceMuted: '#1C1C1F',
+  border: '#27272A',
+  borderStrong: '#3F3F46',
+  text: '#FAFAFA',
+  textSecondary: '#A1A1AA',
+  primary: '#FAFAFA',
+  primaryForeground: '#09090B',
+  accent: palette.cobaltLight,
+  accentForeground: '#09090B',
+  accentSoft: '#172038',
+  expense: '#F87171',
+  income: '#4ADE80',
+  warning: '#FBBF24',
+  chartMuted: '#27272A',
 };
 
-/** Soft pastel colours used for categories (dot indicators + icon backgrounds). */
+/** Category identity colours (stored per category). Rendered through chartColorFor() so they stay legible. */
 export const categoryColors = [
   '#7CC4FA', // sky
   '#FFB38A', // peach
@@ -86,10 +98,10 @@ export const categoryColors = [
 ] as const;
 
 export const radii = {
-  sm: 10,
-  md: 14,
-  lg: 20,
-  xl: 24,
+  sm: 6,
+  md: 8,
+  lg: 12,
+  xl: 16,
   pill: 9999,
 } as const;
 
@@ -104,10 +116,10 @@ export const spacing = {
 
 export const typography = {
   fontFamily: 'Inter',
-  balance: { size: 40, weight: '600' },
-  h1: { size: 28, weight: '700' },
-  h2: { size: 22, weight: '700' },
-  h3: { size: 18, weight: '600' },
+  balance: { size: 34, weight: '600' },
+  h1: { size: 24, weight: '600' },
+  h2: { size: 18, weight: '600' },
+  h3: { size: 16, weight: '600' },
   body: { size: 15, weight: '400' },
   caption: { size: 12, weight: '400' },
 } as const;

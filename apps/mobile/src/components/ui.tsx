@@ -48,9 +48,9 @@ type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'outline' | 'ghost' | 'd
 
 const BTN: Record<ButtonVariant, { box: string; text: string }> = {
   primary: { box: 'bg-primary', text: 'text-primary-foreground' },
-  secondary: { box: 'bg-accent', text: 'text-accent-foreground' },
-  soft: { box: 'bg-accent-soft', text: 'text-accent-foreground dark:text-foreground' },
-  outline: { box: 'border border-border bg-surface', text: 'text-foreground' },
+  secondary: { box: 'border border-border-strong bg-surface', text: 'text-foreground' },
+  soft: { box: 'bg-accent-soft', text: 'text-accent' },
+  outline: { box: 'border border-border-strong bg-surface', text: 'text-foreground' },
   ghost: { box: 'bg-transparent', text: 'text-foreground' },
   destructive: { box: 'bg-expense', text: 'text-white' },
 };
@@ -64,7 +64,7 @@ export interface ButtonProps extends Omit<PressableProps, 'children'> {
   className?: string;
 }
 
-/** Pill-shaped button (min 44pt tap target). */
+/** Button (min 44pt tap target). */
 export function Button({
   title,
   variant = 'primary',
@@ -83,8 +83,8 @@ export function Button({
       accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
       disabled={disabled || loading}
       className={cn(
-        'flex-row items-center justify-center gap-2 rounded-full px-5 active:opacity-80',
-        size === 'lg' ? 'h-14' : 'h-12',
+        'flex-row items-center justify-center gap-2 rounded-xl px-5 active:opacity-80',
+        size === 'lg' ? 'h-[52px]' : 'h-12',
         v.box,
         (disabled || loading) && 'opacity-50',
         className,
@@ -99,14 +99,14 @@ export function Button({
       ) : (
         icon
       )}
-      <Text weight="semibold" className={cn(size === 'lg' ? 'text-base' : 'text-[15px]', v.text)}>
+      <Text weight="semibold" className={cn('text-[15px]', v.text)}>
         {title}
       </Text>
     </Pressable>
   );
 }
 
-/** Lime pill with a small dark circular icon on the left. */
+/** Bordered quick-action button with a leading icon. */
 export function IconPill({
   title,
   icon,
@@ -120,10 +120,10 @@ export function IconPill({
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
-      className="h-12 flex-row items-center gap-2 rounded-full bg-accent pl-1.5 pr-4 active:opacity-80"
+      className="h-11 flex-row items-center gap-2 rounded-xl border border-border bg-surface px-3.5 active:opacity-70"
     >
-      <View className="h-9 w-9 items-center justify-center rounded-full bg-forest">{icon}</View>
-      <Text weight="semibold" className="text-sm text-accent-foreground">
+      {icon}
+      <Text weight="medium" className="text-sm">
         {title}
       </Text>
     </Pressable>
@@ -133,14 +133,7 @@ export function IconPill({
 export function Card({ className, ...props }: ViewProps & { className?: string }) {
   return (
     <View
-      className={cn('rounded-card bg-surface p-5', className)}
-      style={{
-        shadowColor: '#111',
-        shadowOpacity: 0.06,
-        shadowRadius: 16,
-        shadowOffset: { width: 0, height: 6 },
-        elevation: 2,
-      }}
+      className={cn('rounded-card border border-border bg-surface p-4', className)}
       {...props}
     />
   );
@@ -156,8 +149,8 @@ export const Input = forwardRef<
       ref={ref}
       placeholderTextColor={colors.textSecondary}
       className={cn(
-        'h-12 rounded-2xl border bg-surface px-4 font-inter text-[15px] text-foreground',
-        invalid ? 'border-expense' : 'border-border',
+        'h-12 rounded-xl border bg-surface px-3.5 font-inter text-[15px] text-foreground',
+        invalid ? 'border-expense' : 'border-border-strong',
         className,
       )}
       {...props}
@@ -200,16 +193,14 @@ export function Chip({
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       className={cn(
-        'h-11 min-w-11 flex-row items-center justify-center gap-1.5 rounded-full border px-4',
-        selected
-          ? 'border-forest bg-forest dark:border-lime dark:bg-lime'
-          : 'border-border bg-surface',
+        'h-10 min-w-11 flex-row items-center justify-center gap-1.5 rounded-lg border px-3.5',
+        selected ? 'border-accent bg-accent-soft' : 'border-border bg-surface',
       )}
     >
       {left}
       <Text
         weight="medium"
-        className={cn('text-sm', selected ? 'text-white dark:text-forest' : 'text-foreground')}
+        className={cn('text-sm', selected ? 'text-accent' : 'text-muted-foreground')}
       >
         {label}
       </Text>
@@ -231,7 +222,7 @@ export function Segmented<T extends string>({
   return (
     <View
       accessibilityRole="radiogroup"
-      className={cn('flex-row rounded-full bg-surface-muted p-1', className)}
+      className={cn('flex-row rounded-xl bg-surface-muted p-1', className)}
     >
       {options.map((o) => {
         const active = o.value === value;
@@ -242,11 +233,11 @@ export function Segmented<T extends string>({
             accessibilityState={{ checked: active }}
             onPress={() => onChange(o.value)}
             className={cn(
-              'h-10 flex-1 items-center justify-center rounded-full px-3',
-              active && 'bg-surface',
+              'h-9 flex-1 items-center justify-center rounded-lg px-3',
+              active && 'border border-border bg-surface',
             )}
           >
-            <Text weight="semibold" className={cn('text-sm', !active && 'text-muted-foreground')}>
+            <Text weight="medium" className={cn('text-sm', !active && 'text-muted-foreground')}>
               {o.label}
             </Text>
           </Pressable>
@@ -258,7 +249,7 @@ export function Segmented<T extends string>({
 
 export function Skeleton({ className }: { className?: string }) {
   return (
-    <View accessibilityElementsHidden className={cn('rounded-xl bg-surface-muted', className)} />
+    <View accessibilityElementsHidden className={cn('rounded-md bg-surface-muted', className)} />
   );
 }
 
@@ -266,7 +257,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
   return (
     <View
       accessibilityRole="alert"
-      className="items-center gap-3 rounded-2xl bg-expense/5 px-4 py-8"
+      className="items-center gap-3 rounded-xl border border-dashed border-border px-4 py-8"
     >
       <Text className="text-center text-sm">
         {message ?? 'Something went wrong while loading this.'}

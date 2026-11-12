@@ -169,8 +169,8 @@ function BudgetCard({
         {b.categoryId ? (
           <CategoryIcon icon={b.categoryIcon} color={b.categoryColor} />
         ) : (
-          <View className="h-11 w-11 items-center justify-center rounded-full bg-forest">
-            <Target size={20} color={palette.lime} />
+          <View className="h-10 w-10 items-center justify-center rounded-[11px] border border-border bg-surface-muted">
+            <Target size={18} color={colors.textSecondary} />
           </View>
         )}
         <View className="flex-1">
@@ -217,7 +217,7 @@ function BudgetCard({
               ? 'bg-expense'
               : b.status === 'warning'
                 ? 'bg-warning'
-                : 'bg-forest-mid dark:bg-lime',
+                : 'bg-accent',
           )}
           style={{ width: `${pct}%` }}
         />
@@ -269,7 +269,7 @@ export default function Budgets() {
         refreshControl={
           <RefreshControl
             refreshing={refreshing}
-            tintColor={palette.forestMid}
+            tintColor={palette.cobalt}
             onRefresh={() => {
               setRefreshing(true);
               void q.refetch().finally(() => setRefreshing(false));
@@ -278,7 +278,7 @@ export default function Budgets() {
         }
       >
         <View className="flex-row items-center justify-between px-1">
-          <Text weight="extrabold" className="text-[28px]" accessibilityRole="header">
+          <Text weight="semibold" className="text-2xl tracking-tight" accessibilityRole="header">
             Budgets
           </Text>
           <Button
@@ -344,7 +344,7 @@ export default function Budgets() {
           onPress={() => router.push('/report')}
           className="items-center py-3"
         >
-          <Text weight="semibold" className="text-forest-mid dark:text-lime">
+          <Text weight="semibold" className="text-accent">
             View monthly report →
           </Text>
         </Pressable>

@@ -5,27 +5,29 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-full font-semibold transition-all active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        /** Deep forest green pill, white text */
-        primary:
-          'bg-primary text-primary-foreground shadow-[var(--shadow-soft)] hover:brightness-110',
-        /** Lime pill, dark green text */
-        secondary: 'bg-accent text-accent-foreground hover:brightness-95',
-        soft: 'bg-accent-soft text-accent-foreground hover:brightness-95 dark:text-foreground',
-        outline: 'border border-border bg-surface text-foreground hover:bg-surface-muted',
+        /** Ink button (white in dark mode): the one main action on a screen. */
+        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        /** Bordered neutral button for secondary actions. */
+        secondary:
+          'border border-border bg-surface text-foreground hover:border-border-strong hover:bg-surface-muted',
+        /** Accent-tinted button for a highlighted secondary action. */
+        soft: 'bg-accent-soft text-accent hover:bg-accent/15',
+        outline:
+          'border border-border bg-surface text-foreground hover:border-border-strong hover:bg-surface-muted',
         ghost: 'text-foreground hover:bg-surface-muted',
-        destructive: 'bg-expense text-white hover:brightness-110',
-        link: 'text-forest-mid underline-offset-4 hover:underline dark:text-lime',
+        destructive: 'bg-expense text-white hover:bg-expense/90',
+        link: 'h-auto px-0 text-accent underline-offset-4 hover:underline',
       },
       size: {
-        sm: 'h-9 px-4 text-sm',
-        md: 'h-11 px-5 text-sm',
-        lg: 'h-13 px-7 text-base',
-        icon: 'size-11',
-        'icon-sm': 'size-9',
+        sm: 'h-8 px-3 text-sm',
+        md: 'h-10 px-4 text-sm',
+        lg: 'h-11 px-5 text-[15px]',
+        icon: 'size-10',
+        'icon-sm': 'size-8',
       },
     },
     defaultVariants: { variant: 'primary', size: 'md' },
@@ -63,7 +65,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 Button.displayName = 'Button';
 
-/** Secondary pill with a small circular icon on the left. */
+/** Secondary button with a leading icon (quick actions). */
 export function IconPill({
   icon,
   children,
@@ -71,8 +73,8 @@ export function IconPill({
   ...props
 }: ButtonProps & { icon: React.ReactNode }) {
   return (
-    <Button variant="secondary" className={cn('pl-1.5', className)} {...props}>
-      <span className="flex size-8 items-center justify-center rounded-full bg-forest text-lime">
+    <Button variant="secondary" className={cn('text-foreground', className)} {...props}>
+      <span className="text-muted-foreground" aria-hidden>
         {icon}
       </span>
       {children}

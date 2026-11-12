@@ -110,7 +110,7 @@ export default function Profile() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-4">
-        <Text weight="extrabold" className="px-1 text-[28px]" accessibilityRole="header">
+        <Text weight="semibold" className="px-1 text-2xl tracking-tight" accessibilityRole="header">
           Profile
         </Text>
 
@@ -127,8 +127,8 @@ export default function Profile() {
                 accessibilityIgnoresInvertColors
               />
             ) : (
-              <View className="h-14 w-14 items-center justify-center rounded-full bg-lime">
-                <Text weight="bold" className="text-lg text-forest">
+              <View className="h-14 w-14 items-center justify-center rounded-full border border-border bg-surface-muted">
+                <Text weight="semibold" className="text-base text-muted-foreground">
                   {initials}
                 </Text>
               </View>

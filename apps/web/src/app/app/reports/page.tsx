@@ -159,7 +159,7 @@ export default function ReportsPage() {
               className="grid grid-cols-2 gap-3 lg:col-span-3 lg:grid-cols-4"
             >
               {[
-                { label: 'Spent', value: formatMoney(r.summary.totalExpense), cls: 'text-expense' },
+                { label: 'Spent', value: formatMoney(r.summary.totalExpense), cls: '' },
                 { label: 'Income', value: formatMoney(r.summary.totalIncome), cls: 'text-income' },
                 { label: 'Net', value: formatMoney(r.summary.net), cls: '' },
                 { label: 'Average per day', value: formatMoney(r.averagePerDay), cls: '' },
@@ -266,7 +266,7 @@ export default function ReportsPage() {
                           aria-hidden
                         >
                           <span
-                            className="block h-full rounded-full bg-forest-mid dark:bg-lime"
+                            className="block h-full rounded-full bg-accent"
                             style={{ width: `${Math.max(c.percent, 2)}%` }}
                           />
                         </span>
@@ -311,7 +311,7 @@ export default function ReportsPage() {
                               ? 'bg-expense'
                               : b.status === 'warning'
                                 ? 'bg-warning'
-                                : 'bg-forest-mid dark:bg-lime',
+                                : 'bg-accent',
                           )}
                           style={{ width: `${Math.min(b.percent, 100)}%` }}
                         />

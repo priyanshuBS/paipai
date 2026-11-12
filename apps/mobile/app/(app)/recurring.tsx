@@ -143,7 +143,7 @@ function RecurringForm({
           <Pressable
             accessibilityRole="button"
             onPress={() => setPicker(true)}
-            className="h-12 justify-center rounded-2xl border border-border px-4"
+            className="h-12 justify-center rounded-xl border border-border px-4"
           >
             <Text>{formatDate(startAt, tz)}</Text>
           </Pressable>
@@ -266,7 +266,7 @@ export default function RecurringScreen() {
                       weight="semibold"
                       className={cn(
                         'text-sm',
-                        r.type === 'expense' ? 'text-expense' : 'text-income',
+                        r.type === 'expense' ? 'text-foreground' : 'text-income',
                       )}
                     >
                       {r.type === 'expense' ? '−' : '+'}

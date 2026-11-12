@@ -12,7 +12,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 import { formatMoney } from '@paipai/shared/money';
-import { chartColorFor, chartPalette, palette } from '@paipai/shared/tokens';
+import { chartColorFor, chartPalette } from '@paipai/shared/tokens';
 import { useTheme } from '@/theme/theme';
 import { Text } from '../ui';
 import { arcPath, monotonePath, niceMax } from './geometry';
@@ -33,12 +33,13 @@ function useChartColors() {
     surface: colors.surface,
     grid: colors.border,
     axis: colors.textSecondary,
-    line: dark ? palette.lime : palette.forestMid,
-    fill: palette.lime,
-    bar: dark ? palette.forestMid : palette.lime,
-    barActive: dark ? palette.lime : palette.forest,
-    tipBg: dark ? palette.lime : '#111111',
-    tipText: dark ? palette.forest : '#FFFFFF',
+    /** Single-series colour: the accent; non-highlighted bars recede to neutral. */
+    line: colors.accent,
+    fill: colors.accent,
+    bar: colors.chartMuted,
+    barActive: colors.accent,
+    tipBg: colors.text,
+    tipText: colors.background,
     neutral: chartPalette.neutral[dark ? 'dark' : 'light'],
   };
 }
@@ -69,7 +70,7 @@ function TooltipPill({ point, x, width }: { point: ChartPoint; x: number; width:
       <View
         style={{
           backgroundColor: c.tipBg,
-          borderRadius: 999,
+          borderRadius: 6,
           paddingHorizontal: 10,
           paddingVertical: 5,
         }}
@@ -82,7 +83,7 @@ function TooltipPill({ point, x, width }: { point: ChartPoint; x: number; width:
   );
 }
 
-/** Smooth area chart: lime gradient fading to transparent, tap to inspect a point. */
+/** Smooth area chart: accent line over a faint wash, tap to inspect a point. */
 export function AreaChart({ data, height = 190 }: { data: ChartPoint[]; height?: number }) {
   const c = useChartColors();
   const [width, onLayout] = useWidth();
@@ -126,7 +127,7 @@ export function AreaChart({ data, height = 190 }: { data: ChartPoint[]; height?:
           <Svg width={width} height={height}>
             <Defs>
               <LinearGradient id="ppArea" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={c.fill} stopOpacity={c.dark ? 0.35 : 0.65} />
+                <Stop offset="0" stopColor={c.fill} stopOpacity={c.dark ? 0.22 : 0.14} />
                 <Stop offset="1" stopColor={c.fill} stopOpacity={0} />
               </LinearGradient>
             </Defs>
@@ -239,7 +240,7 @@ export function BarChart({
                   y={padTop + plotH - h}
                   width={barW}
                   height={h}
-                  rx={Math.min(4, barW / 2)}
+                  rx={Math.min(3, barW / 2)}
                   fill={isActive && d.value > 0 ? c.barActive : c.bar}
                 />
                 {(i % labelEvery === 0 || isActive) && (
@@ -334,7 +335,7 @@ export function ShareBars({
   const c = useChartColors();
   return (
     <View className="gap-3">
-      {rows.map((r, i) => (
+      {rows.map((r) => (
         <View
           key={r.key}
           accessible
@@ -351,13 +352,13 @@ export function ShareBars({
               · {r.percent}%
             </Text>
           </View>
-          <View className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-surface-muted">
+          <View className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-surface-muted">
             <View
               style={{
                 width: `${Math.max(r.percent, 2)}%`,
                 height: '100%',
                 borderRadius: 999,
-                backgroundColor: i === 0 ? c.barActive : c.line,
+                backgroundColor: c.line,
               }}
             />
           </View>

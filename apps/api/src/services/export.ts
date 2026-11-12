@@ -6,7 +6,7 @@ import { and, asc, categories, eq, gte, isNull, lt, transactions, type Database 
 import { dayKey, formatDate, formatTime, rangeFromDateStrings } from '@paipai/shared/date';
 import { formatMoney, paiseToRupeesString } from '@paipai/shared/money';
 import { PAYMENT_METHOD_LABELS } from '@paipai/shared/schemas';
-import { palette } from '@paipai/shared/tokens';
+import { lightColors, palette } from '@paipai/shared/tokens';
 import { AppError } from '../lib/errors';
 import type { UserCtx } from '../types';
 
@@ -152,28 +152,34 @@ export function buildPdf(
   const left = 40;
   const right = W - 40;
 
-  // Header band
-  doc.rect(0, 0, W, 96).fill(palette.lime);
-  const sq = (x: number, y: number, r: number, o = 1) =>
-    doc.roundedRect(x, y, 12, 12, r).fillOpacity(o).fill(palette.forest).fillOpacity(1);
-  sq(left, 30, 3.5);
-  sq(left + 14, 30, 3.5);
-  sq(left, 44, 3.5);
-  sq(left + 14, 44, 6, 0.28);
+  // Header: mark + name on white, hairline rule below.
+  const INK = palette.ink;
+  const MUTED = lightColors.textSecondary;
+  const RULE = lightColors.border;
+  doc.roundedRect(left, 32, 26, 26, 6.5).fill(INK);
+  doc.roundedRect(left + 6.5, 39.5, 13, 3.25, 1.6).fill('#FAFAFA');
   doc
-    .fillColor(palette.forest)
-    .font('Inter-ExtraBold')
-    .fontSize(20)
-    .text('PaiPai', left + 36, 32);
+    .roundedRect(left + 6.5, 47, 7.6, 3.25, 1.6)
+    .fillOpacity(0.6)
+    .fill('#FAFAFA')
+    .fillOpacity(1);
   doc
+    .fillColor(INK)
+    .font('Inter-SemiBold')
+    .fontSize(16)
+    .text('PaiPai', left + 36, 33);
+  doc
+    .fillColor(MUTED)
     .font('Inter')
-    .fontSize(10)
-    .text('Paai-paai ka hisaab', left + 36, 56);
+    .fontSize(9)
+    .text('Paai-paai ka hisaab', left + 36, 51);
   doc
+    .fillColor(INK)
     .font('Inter-SemiBold')
     .fontSize(12)
     .text('Statement', 0, 34, { align: 'right', width: right });
   doc
+    .fillColor(MUTED)
     .font('Inter')
     .fontSize(10)
     .text(
@@ -185,28 +191,29 @@ export function buildPdf(
         width: right,
       },
     );
+  doc.moveTo(left, 82).lineTo(right, 82).lineWidth(0.75).strokeColor(RULE).stroke();
 
   // Summary
   const expense = rows.filter((r) => r.type === 'expense').reduce((s, r) => s + r.amount, 0);
   const income = rows.filter((r) => r.type === 'income').reduce((s, r) => s + r.amount, 0);
   let y = 120;
-  doc.fillColor('#111111').font('Inter-SemiBold').fontSize(11).text(ctx.name, left, y);
+  doc.fillColor(INK).font('Inter-SemiBold').fontSize(11).text(ctx.name, left, y);
   doc
-    .fillColor('#6B7280')
+    .fillColor(MUTED)
     .font('Inter')
     .fontSize(9)
     .text(`${rows.length} transactions · times in ${ctx.timezone}`, left, y + 15);
   y += 42;
   const boxW = (right - left - 20) / 3;
   [
-    ['Spent', fmt(expense), palette.expense],
+    ['Spent', fmt(expense), INK],
     ['Income', fmt(income), palette.income],
-    ['Net', fmt(income - expense), palette.forest],
+    ['Net', fmt(income - expense), INK],
   ].forEach(([label, value, color], i) => {
     const x = left + i * (boxW + 10);
-    doc.roundedRect(x, y, boxW, 54, 12).fill('#F7F8F5');
+    doc.roundedRect(x, y, boxW, 54, 8).lineWidth(0.75).fillAndStroke('#FFFFFF', RULE);
     doc
-      .fillColor('#6B7280')
+      .fillColor(MUTED)
       .font('Inter')
       .fontSize(9)
       .text(label as string, x + 12, y + 10);
@@ -227,24 +234,16 @@ export function buildPdf(
         (byCat.get(r.category ?? 'Uncategorised') ?? 0) + r.amount,
       );
   if (byCat.size) {
-    doc
-      .fillColor('#111111')
-      .font('Inter-SemiBold')
-      .fontSize(12)
-      .text('Spending by category', left, y);
+    doc.fillColor(INK).font('Inter-SemiBold').fontSize(12).text('Spending by category', left, y);
     y += 20;
     for (const [name, total] of [...byCat.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)) {
       const pct = expense ? total / expense : 0;
-      doc.fillColor('#111111').font('Inter').fontSize(9.5).text(name, left, y, { width: 150 });
-      doc
-        .roundedRect(left + 155, y + 2, (right - left - 260) * pct + 2, 8, 4)
-        .fill(palette.forestMid);
-      doc
-        .fillColor('#111111')
-        .text(`${fmt(total)}  ·  ${Math.round(pct * 1000) / 10}%`, right - 100, y, {
-          width: 100,
-          align: 'right',
-        });
+      doc.fillColor(INK).font('Inter').fontSize(9.5).text(name, left, y, { width: 150 });
+      doc.roundedRect(left + 155, y + 3, (right - left - 260) * pct + 2, 6, 3).fill(palette.cobalt);
+      doc.fillColor(INK).text(`${fmt(total)}  ·  ${Math.round(pct * 1000) / 10}%`, right - 100, y, {
+        width: 100,
+        align: 'right',
+      });
       y += 16;
     }
     y += 14;
@@ -259,8 +258,8 @@ export function buildPdf(
     { label: 'Amount', x: left + 410, w: right - left - 410 },
   ] as const;
   const headerRow = () => {
-    doc.rect(left, y - 4, right - left, 18).fill(palette.limeLight);
-    doc.fillColor(palette.forest).font('Inter-SemiBold').fontSize(9);
+    doc.rect(left, y - 4, right - left, 18).fill(lightColors.surfaceMuted);
+    doc.fillColor(MUTED).font('Inter-SemiBold').fontSize(9);
     for (const c of cols)
       doc.text(c.label, c.x + 4, y, {
         width: c.w - 8,
@@ -279,23 +278,23 @@ export function buildPdf(
       headerRow();
       doc.font('Inter').fontSize(9);
     }
-    if (i % 2 === 1) doc.rect(left, y - 2, right - left, h).fill('#FAFBF8');
-    doc.fillColor('#111111');
+    if (i % 2 === 1) doc.rect(left, y - 2, right - left, h).fill('#FAFAFA');
+    doc.fillColor(INK);
     doc.text(formatDate(r.occurredAt, ctx.timezone), cols[0].x + 4, y, { width: cols[0].w - 8 });
     doc.text(title, cols[1].x + 4, y, { width: cols[1].w - 8 });
     doc
-      .fillColor('#6B7280')
+      .fillColor(MUTED)
       .text(r.category ?? 'Uncategorised', cols[2].x + 4, y, { width: cols[2].w - 8 });
     doc.text(PAYMENT_METHOD_LABELS[r.paymentMethod], cols[3].x + 4, y, { width: cols[3].w - 8 });
     doc
-      .fillColor(r.type === 'expense' ? palette.expense : palette.income)
+      .fillColor(r.type === 'expense' ? INK : palette.income)
       .text(`${r.type === 'expense' ? '−' : '+'}${fmt(r.amount)}`, cols[4].x + 4, y, {
         width: cols[4].w - 8,
         align: 'right',
       });
     y += h;
   });
-  if (rows.length === 0) doc.fillColor('#6B7280').text('No transactions in this period.', left, y);
+  if (rows.length === 0) doc.fillColor(MUTED).text('No transactions in this period.', left, y);
 
   // Footer with page numbers
   const range = doc.bufferedPageRange();

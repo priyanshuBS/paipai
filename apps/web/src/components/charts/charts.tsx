@@ -19,13 +19,7 @@ import {
 } from 'recharts';
 import { Table2, ChartColumn } from 'lucide-react';
 import { formatMoney } from '@paipai/shared/money';
-import {
-  chartColorFor,
-  chartPalette,
-  darkColors,
-  lightColors,
-  palette,
-} from '@paipai/shared/tokens';
+import { chartColorFor, chartPalette, darkColors, lightColors } from '@paipai/shared/tokens';
 import { Card } from '@/components/ui/primitives';
 import { cn } from '@/lib/utils';
 
@@ -54,31 +48,33 @@ export function useChartTheme() {
     grid: c.border,
     axis: c.textSecondary,
     text: c.text,
-    line: dark ? palette.lime : palette.forestMid,
-    fill: palette.lime,
-    bar: dark ? palette.forestMid : palette.lime,
-    barActive: dark ? palette.lime : palette.forest,
-    tooltipBg: dark ? palette.lime : '#111111',
-    tooltipText: dark ? palette.forest : '#FFFFFF',
+    /** Single-series colour: the accent. Other bars recede to a neutral. */
+    line: c.accent,
+    fill: c.accent,
+    bar: c.chartMuted,
+    barActive: c.accent,
     neutral: chartPalette.neutral[dark ? 'dark' : 'light'],
   };
 }
 
 const compactINR = (v: number) => formatMoney(v, { compact: true });
 
+const tooltipClass =
+  'rounded-md border border-border bg-surface px-2.5 py-1.5 text-xs shadow-[var(--shadow-pop)]';
+
 function TooltipPill({ active, payload }: Partial<TooltipContentProps<number, string>>) {
-  const t = useChartTheme();
   const p = payload?.[0];
   if (!active || !p) return null;
   const point = p.payload as ChartPoint;
   return (
-    <div
-      className="rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg"
-      style={{ background: t.tooltipBg, color: t.tooltipText }}
-    >
-      <span className="opacity-75">{point.fullLabel ?? point.label}</span>
-      <span className="ml-2 tabular-nums">{formatMoney(Number(p.value))}</span>
-      {point.count !== undefined && <span className="ml-1 opacity-75">· {point.count}×</span>}
+    <div className={tooltipClass}>
+      <p className="text-muted-foreground">{point.fullLabel ?? point.label}</p>
+      <p className="tabular mt-0.5 font-medium text-foreground">
+        {formatMoney(Number(p.value))}
+        {point.count !== undefined && (
+          <span className="ml-1 font-normal text-muted-foreground">· {point.count}×</span>
+        )}
+      </p>
     </div>
   );
 }
@@ -104,7 +100,7 @@ export function ChartCard({
     <Card className={cn('min-w-0', className)}>
       <div className="mb-4 flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <h2 className="font-semibold">{title}</h2>
+          <h2 className="text-sm font-semibold">{title}</h2>
           {subtitle && <div className="mt-0.5 text-sm text-muted-foreground">{subtitle}</div>}
         </div>
         <div className="flex items-center gap-1">
@@ -115,7 +111,7 @@ export function ChartCard({
               onClick={() => setAsTable((v) => !v)}
               aria-pressed={asTable}
               aria-label={asTable ? `Show ${title} as chart` : `Show ${title} as table`}
-              className="flex size-11 items-center justify-center rounded-full text-muted-foreground hover:bg-surface-muted"
+              className="-mr-1.5 -mt-1 flex size-8 items-center justify-center rounded-md text-muted-foreground hover:bg-surface-muted hover:text-foreground"
             >
               {asTable ? <ChartColumn className="size-4" /> : <Table2 className="size-4" />}
             </button>
@@ -154,7 +150,7 @@ export function ChartCard({
   );
 }
 
-/** Smooth area chart with a lime gradient fading to transparent. */
+/** Area chart: 2px accent line over a faint accent wash. */
 export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; height?: number }) {
   const t = useChartTheme();
   const gid = useId().replace(/:/g, '');
@@ -169,11 +165,11 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
         <AreaChart data={data} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={`fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={t.fill} stopOpacity={t.dark ? 0.35 : 0.65} />
+              <stop offset="0%" stopColor={t.fill} stopOpacity={t.dark ? 0.22 : 0.14} />
               <stop offset="100%" stopColor={t.fill} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid vertical={false} stroke={t.grid} strokeDasharray="3 6" />
+          <CartesianGrid vertical={false} stroke={t.grid} />
           <XAxis
             dataKey="label"
             tickLine={false}
@@ -191,7 +187,7 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
           />
           <Tooltip
             content={<TooltipPill />}
-            cursor={{ stroke: t.line, strokeWidth: 1, strokeDasharray: '4 4' }}
+            cursor={{ stroke: t.axis, strokeWidth: 1, strokeDasharray: '3 3' }}
           />
           <Area
             type="monotone"
@@ -199,15 +195,15 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
             stroke={t.line}
             strokeWidth={2}
             fill={`url(#fill-${gid})`}
-            activeDot={{ r: 6, fill: t.barActive, stroke: t.surface, strokeWidth: 2 }}
+            activeDot={{ r: 4, fill: t.line, stroke: t.surface, strokeWidth: 2 }}
             dot={(props: { cx?: number; cy?: number; index?: number }) =>
               props.index === peak && data.length > 1 ? (
                 <circle
                   key="peak"
                   cx={props.cx}
                   cy={props.cy}
-                  r={5}
-                  fill={t.barActive}
+                  r={4}
+                  fill={t.line}
                   stroke={t.surface}
                   strokeWidth={2}
                 />
@@ -223,7 +219,7 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
   );
 }
 
-/** Vertical bars; the highlighted bar (selected/peak/today) is dark green. */
+/** Vertical bars; the highlighted bar (selected/peak/today) takes the accent, the rest stay neutral. */
 export function SpendBarChart({
   data,
   highlightKey,
@@ -249,7 +245,7 @@ export function SpendBarChart({
           barCategoryGap="22%"
           onMouseLeave={() => setHover(null)}
         >
-          {showYAxis && <CartesianGrid vertical={false} stroke={t.grid} strokeDasharray="3 6" />}
+          {showYAxis && <CartesianGrid vertical={false} stroke={t.grid} />}
           <XAxis
             dataKey="label"
             tickLine={false}
@@ -266,10 +262,10 @@ export function SpendBarChart({
               width={56}
             />
           )}
-          <Tooltip content={<TooltipPill />} cursor={{ fill: t.grid, opacity: 0.4, radius: 8 }} />
+          <Tooltip content={<TooltipPill />} cursor={{ fill: t.grid, opacity: 0.35, radius: 4 }} />
           <Bar
             dataKey="value"
-            radius={[4, 4, 4, 4]}
+            radius={[4, 4, 0, 0]}
             minPointSize={3}
             onMouseEnter={(_, i) => setHover(i)}
             isAnimationActive
@@ -312,10 +308,10 @@ export function CategoryDonut({
             data={slices}
             dataKey="value"
             nameKey="name"
-            innerRadius="64%"
-            outerRadius="92%"
+            innerRadius="70%"
+            outerRadius="94%"
             paddingAngle={slices.length > 1 ? 2 : 0}
-            cornerRadius={4}
+            cornerRadius={2}
             stroke={t.surface}
             strokeWidth={2}
             startAngle={90}
@@ -335,12 +331,12 @@ export function CategoryDonut({
               if (!active || !p) return null;
               const s = p.payload as DonutSlice;
               return (
-                <div
-                  className="rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg"
-                  style={{ background: t.tooltipBg, color: t.tooltipText }}
-                >
-                  {s.name} <span className="ml-1 tabular-nums">{formatMoney(s.value)}</span>{' '}
-                  <span className="opacity-75">· {s.percent}%</span>
+                <div className={tooltipClass}>
+                  <p className="text-muted-foreground">{s.name}</p>
+                  <p className="tabular mt-0.5 font-medium text-foreground">
+                    {formatMoney(s.value)}{' '}
+                    <span className="font-normal text-muted-foreground">· {s.percent}%</span>
+                  </p>
                 </div>
               );
             }}
@@ -364,21 +360,21 @@ export function ShareBars({
   const t = useChartTheme();
   return (
     <ul className="space-y-3">
-      {rows.map((r, i) => (
+      {rows.map((r) => (
         <li key={r.key}>
           <div className="flex items-baseline justify-between text-sm">
-            <span className="font-medium">{r.label}</span>
+            <span>{r.label}</span>
             <span className="tabular text-muted-foreground">
-              <span className="font-semibold text-foreground">{formatMoney(r.value)}</span> ·{' '}
+              <span className="font-medium text-foreground">{formatMoney(r.value)}</span> ·{' '}
               {r.percent}%
             </span>
           </div>
-          <div className="mt-1.5 h-2.5 rounded-full bg-surface-muted" aria-hidden>
+          <div className="mt-1.5 h-1.5 rounded-full bg-surface-muted" aria-hidden>
             <div
               className="h-full rounded-full"
               style={{
                 width: `${Math.max(r.percent, 2)}%`,
-                background: i === 0 ? t.barActive : t.line,
+                background: t.line,
               }}
             />
           </div>

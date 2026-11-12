@@ -40,11 +40,7 @@ function BudgetCard({
 }) {
   const pct = Math.min(b.percent, 100);
   const bar =
-    b.status === 'over'
-      ? 'bg-expense'
-      : b.status === 'warning'
-        ? 'bg-warning'
-        : 'bg-forest-mid dark:bg-lime';
+    b.status === 'over' ? 'bg-expense' : b.status === 'warning' ? 'bg-warning' : 'bg-accent';
   const name = b.categoryName ?? 'Overall spending';
   return (
     <Card className="flex flex-col gap-4">
@@ -52,7 +48,7 @@ function BudgetCard({
         {b.categoryId ? (
           <CategoryIcon icon={b.categoryIcon} color={b.categoryColor} />
         ) : (
-          <span className="flex size-11 items-center justify-center rounded-full bg-forest text-lime">
+          <span className="flex size-9 items-center justify-center rounded-lg border border-border bg-surface-muted text-muted-foreground">
             <Target className="size-5" aria-hidden />
           </span>
         )}
@@ -81,7 +77,7 @@ function BudgetCard({
           <span className="text-muted-foreground">of {formatMoney(b.amount)}</span>
         </div>
         <div
-          className="mt-2 h-3 overflow-hidden rounded-full bg-accent-soft dark:bg-surface-muted"
+          className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-muted"
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={100}
@@ -176,7 +172,7 @@ function BudgetDialog({
                   <Label htmlFor="b-cat">Applies to</Label>
                   <Select
                     id="b-cat"
-                    className="h-12 w-full rounded-2xl"
+                    className="w-full"
                     value={categoryId}
                     onChange={(e) => setCategoryId(e.target.value)}
                   >
@@ -195,7 +191,7 @@ function BudgetDialog({
                   <Label htmlFor="b-period">Period</Label>
                   <Select
                     id="b-period"
-                    className="h-12 w-full rounded-2xl"
+                    className="w-full"
                     value={period}
                     onChange={(e) => setPeriod(e.target.value as BudgetPeriod)}
                   >
@@ -272,7 +268,7 @@ export default function BudgetsPage() {
         {alerts.length > 0 && (
           <div
             role="status"
-            className="flex gap-3 rounded-[var(--radius-card)] border border-warning/40 bg-warning/10 p-4"
+            className="flex gap-3 rounded-card border border-border border-l-2 border-l-warning bg-surface p-4"
           >
             <AlertTriangle className="mt-0.5 size-5 shrink-0 text-warning" aria-hidden />
             <ul className="space-y-1 text-sm">

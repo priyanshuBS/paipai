@@ -83,7 +83,7 @@ export default function ItemDetailPage({ params }: { params: Promise<{ title: st
         </div>
       ) : (
         <>
-          <h1 className="mt-2 text-3xl font-extrabold tracking-tight">{d.title}</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight">{d.title}</h1>
           <p className="mt-1 text-muted-foreground">
             {formatMoney(d.total)} across {d.count} time{d.count === 1 ? '' : 's'}
             {d.firstAt && ` since ${formatDate(d.firstAt, tz)}`}

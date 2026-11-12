@@ -12,10 +12,7 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn(
-        'rounded-[var(--radius-card)] bg-surface p-5 shadow-[var(--shadow-soft)]',
-        className,
-      )}
+      className={cn('rounded-card border border-border bg-surface p-5', className)}
       {...props}
     />
   ),
@@ -34,7 +31,7 @@ export function CardHeader({
   return (
     <div className="mb-4 flex items-start justify-between gap-3">
       <div>
-        <h2 className="text-base font-semibold">{title}</h2>
+        <h2 className="text-sm font-semibold text-foreground">{title}</h2>
         {subtitle && <p className="mt-0.5 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {action}
@@ -47,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={cn(
-        'h-12 w-full rounded-2xl border border-border bg-surface px-4 text-[15px] text-foreground placeholder:text-muted-foreground/70 transition focus:border-forest-mid focus:outline-none focus:ring-4 focus:ring-lime/30 disabled:opacity-60 aria-[invalid=true]:border-expense',
+        'h-10 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-60 aria-[invalid=true]:border-expense',
         className,
       )}
       {...props}
@@ -61,7 +58,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
     <select
       ref={ref}
       className={cn(
-        'h-11 rounded-full border border-border bg-surface pl-4 pr-9 text-sm font-medium text-foreground focus:border-forest-mid focus:outline-none focus:ring-4 focus:ring-lime/30',
+        'h-10 rounded-lg border border-border-strong bg-surface pl-3 pr-9 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20',
         className,
       )}
       {...props}
@@ -89,7 +86,7 @@ export function FieldError({ children, id }: { children?: ReactNode; id?: string
 }
 
 export function Skeleton({ className }: { className?: string }) {
-  return <div aria-hidden className={cn('animate-pulse rounded-xl bg-surface-muted', className)} />;
+  return <div aria-hidden className={cn('animate-pulse rounded-md bg-surface-muted', className)} />;
 }
 
 /** Toggleable pill chip (payment methods, filters). */
@@ -104,10 +101,10 @@ export function Chip({
       type="button"
       aria-pressed={selected}
       className={cn(
-        'inline-flex h-10 min-w-11 items-center justify-center gap-1.5 rounded-full border px-4 text-sm font-medium transition',
+        'inline-flex h-8 min-w-10 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium transition-colors',
         selected
-          ? 'border-forest bg-forest text-white dark:border-lime dark:bg-lime dark:text-forest'
-          : 'border-border bg-surface text-foreground hover:bg-surface-muted',
+          ? 'border-accent bg-accent-soft text-accent'
+          : 'border-border bg-surface text-muted-foreground hover:border-border-strong hover:text-foreground',
         className,
       )}
       {...props}
@@ -135,7 +132,7 @@ export function Segmented<T extends string>({
     <div
       role="radiogroup"
       aria-label={label}
-      className={cn('inline-flex rounded-full bg-surface-muted p-1', className)}
+      className={cn('inline-flex rounded-lg bg-surface-muted p-0.5', className)}
     >
       {options.map((o) => (
         <button
@@ -145,9 +142,9 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'h-9 min-w-11 rounded-full px-4 text-sm font-semibold transition',
+            'h-8 min-w-10 rounded-md px-3 text-sm font-medium transition-colors',
             value === o.value
-              ? 'bg-surface text-foreground shadow-[var(--shadow-soft)]'
+              ? 'bg-surface text-foreground shadow-sm ring-1 ring-border'
               : 'text-muted-foreground hover:text-foreground',
           )}
         >
@@ -162,7 +159,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
   return (
     <div
       role="alert"
-      className="flex flex-col items-center gap-3 rounded-2xl bg-expense/5 px-4 py-8 text-center"
+      className="flex flex-col items-center gap-3 rounded-lg border border-dashed border-border px-4 py-8 text-center"
     >
       <p className="text-sm text-foreground">
         {message ?? 'Something went wrong while loading this.'}
@@ -171,7 +168,7 @@ export function ErrorState({ message, onRetry }: { message?: string; onRetry?: (
         <button
           type="button"
           onClick={onRetry}
-          className="h-10 rounded-full bg-surface px-4 text-sm font-semibold shadow-[var(--shadow-soft)]"
+          className="h-8 rounded-md border border-border bg-surface px-3 text-sm font-medium hover:bg-surface-muted"
         >
           Try again
         </button>

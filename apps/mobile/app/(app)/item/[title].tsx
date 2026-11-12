@@ -60,7 +60,7 @@ export default function ItemDetailScreen() {
       ) : (
         <>
           <View>
-            <Text weight="extrabold" className="text-[28px]">
+            <Text weight="semibold" className="text-2xl tracking-tight">
               {d.title}
             </Text>
             <Text muted>

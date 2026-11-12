@@ -7,6 +7,8 @@
 // Starts the sandbox API (PGlite + OTPs in the log; never touches Neon or Resend)
 // and, unless one is already running on E2E_WEB_URL, `next start` for the website.
 // Browser: E2E_BROWSER_PATH, or the installed Edge (Windows) / Chrome (elsewhere).
+// Ports: E2E_API_PORT (default 8787) and E2E_WEB_URL (default http://localhost:3000).
+// The website build must point at the same API port (NEXT_PUBLIC_API_URL).
 // Screenshots, downloads and logs go to e2e/.output/.
 import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
@@ -16,14 +18,18 @@ import { chromium } from 'playwright-core';
 import { createSuite } from './lib.mjs';
 import * as core from './suites/core.mjs';
 import * as money from './suites/money.mjs';
+import * as screens from './suites/screens.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const outDir = path.join(here, '.output');
-const API = 'http://localhost:8787';
+const API_PORT = process.env.E2E_API_PORT ?? '8787';
+const API = `http://localhost:${API_PORT}`;
 const WEB = (process.env.E2E_WEB_URL ?? 'http://localhost:3000').replace(/\/$/, '');
-const suites = [core, money].filter(
-  (s) => process.argv.length <= 2 || process.argv.includes(s.name),
+const requested = process.argv.slice(2);
+// Opt-in suites (screens) run only when named: pnpm e2e screens
+const suites = [core, money, screens].filter((s) =>
+  requested.length ? requested.includes(s.name) : !s.optIn,
 );
 
 fs.rmSync(outDir, { recursive: true, force: true });
@@ -81,11 +87,13 @@ function launchOptions() {
 let exitCode = 0;
 try {
   if (await isUp(`${API}/health`)) {
-    throw new Error('Port 8787 is in use. Stop your dev API first: E2E runs its own sandbox API.');
+    throw new Error(
+      `Port ${API_PORT} is in use. Stop your dev API, or run with E2E_API_PORT=8788 (build the website with NEXT_PUBLIC_API_URL=http://localhost:8788).`,
+    );
   }
   start('api', ['--filter', '@paipai/api', 'dev:local'], {
     NODE_ENV: 'development',
-    PORT: '8787',
+    PORT: API_PORT,
     DATABASE_URL: 'pglite://memory',
     BETTER_AUTH_SECRET: 'e2e-only-secret-e2e-only-secret-e2e-only',
     BETTER_AUTH_URL: API,
@@ -99,7 +107,15 @@ try {
     if (!fs.existsSync(path.join(root, 'apps/web/.next/BUILD_ID'))) {
       throw new Error('No website build found. Run: pnpm --filter @paipai/web build');
     }
-    start('web', ['--filter', '@paipai/web', 'start'], { NEXT_PUBLIC_API_URL: API });
+    start('web', [
+      '--filter',
+      '@paipai/web',
+      'exec',
+      'next',
+      'start',
+      '-p',
+      new URL(WEB).port || '3000',
+    ]);
   }
   await Promise.all([waitUntilUp(`${API}/health`, 'api'), waitUntilUp(WEB, 'web')]);
 

@@ -44,7 +44,8 @@ import {
   type LucideIcon,
 } from 'lucide-react-native';
 import { View } from 'react-native';
-import { palette } from '@paipai/shared/tokens';
+import { chartColorFor } from '@paipai/shared/tokens';
+import { useTheme } from '@/theme/theme';
 
 export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   bus: Bus,
@@ -91,9 +92,12 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
   repeat: Repeat,
 };
 
-const SIZES = { sm: { box: 36, icon: 16 }, md: { box: 44, icon: 20 }, lg: { box: 56, icon: 24 } };
+const SIZES = { sm: { box: 34, icon: 16 }, md: { box: 40, icon: 18 }, lg: { box: 52, icon: 24 } };
 
-/** Circular category avatar: pastel background, dark-green icon. */
+/**
+ * Category tile: neutral rounded square, icon drawn in the category's chart
+ * colour (validated for contrast in light and dark). Identity without pastel blobs.
+ */
 export function CategoryIcon({
   icon,
   color,
@@ -103,6 +107,7 @@ export function CategoryIcon({
   color?: string | null;
   size?: keyof typeof SIZES;
 }) {
+  const { colors, dark } = useTheme();
   const Icon = (icon && CATEGORY_ICONS[icon]) || CircleHelp;
   const s = SIZES[size];
   return (
@@ -112,13 +117,19 @@ export function CategoryIcon({
       style={{
         width: s.box,
         height: s.box,
-        borderRadius: s.box / 2,
-        backgroundColor: color ?? palette.limeLight,
+        borderRadius: s.box * 0.28,
+        backgroundColor: colors.surfaceMuted,
+        borderWidth: 1,
+        borderColor: colors.border,
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Icon size={s.icon} color={palette.forest} strokeWidth={2} />
+      <Icon
+        size={s.icon}
+        color={chartColorFor(color, dark ? 'dark' : 'light')}
+        strokeWidth={1.75}
+      />
     </View>
   );
 }

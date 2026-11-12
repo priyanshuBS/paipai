@@ -3,7 +3,6 @@ import { Link, router } from 'expo-router';
 import {
   ArrowDownLeft,
   ArrowRight,
-  ArrowUpRight,
   ChartColumn,
   Eye,
   EyeOff,
@@ -20,7 +19,6 @@ import {
   formatTime,
 } from '@paipai/shared/date';
 import { formatMoney } from '@paipai/shared/money';
-import { palette } from '@paipai/shared/tokens';
 import { EmptyState } from '@/components/empty-state';
 import { CountUp } from '@/components/money';
 import { TransactionRow, TransactionRowSkeleton } from '@/components/transaction-row';
@@ -28,6 +26,7 @@ import { Button, Card, ErrorState, IconPill, Skeleton, Text, cn } from '@/compon
 import { flushQueue, usePendingTransactions } from '@/lib/offline-queue';
 import { shouldShowWelcome } from '@/lib/onboarding';
 import { useCategoryMap, useMe, useRecentTransactions, useSummary } from '@/lib/queries';
+import { useTheme } from '@/theme/theme';
 
 const HIDE_KEY = 'paipai:hide-balance';
 
@@ -35,20 +34,49 @@ function firstName(name?: string) {
   return (name ?? '').trim().split(/\s+/)[0] || 'there';
 }
 
+function greetingFor(tz: string) {
+  const hour = Number(
+    new Intl.DateTimeFormat('en-IN', { hour: 'numeric', hour12: false, timeZone: tz }).format(
+      new Date(),
+    ),
+  );
+  return hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+}
+
+function ProgressBar({ pct, tone }: { pct: number; tone: 'ok' | 'warn' | 'over' }) {
+  return (
+    <View
+      className="h-1.5 overflow-hidden rounded-full bg-surface-muted"
+      accessibilityRole="progressbar"
+      accessibilityValue={{ min: 0, max: 100, now: Math.min(pct, 100) }}
+      accessibilityLabel={`Budget used ${pct}%`}
+    >
+      <View
+        className={cn(
+          'h-full rounded-full',
+          tone === 'over' ? 'bg-expense' : tone === 'warn' ? 'bg-warning' : 'bg-accent',
+        )}
+        style={{ width: `${Math.min(pct, 100)}%` }}
+      />
+    </View>
+  );
+}
+
 function BudgetCard({ spent, budget }: { spent: number; budget: number | null }) {
+  const { colors } = useTheme();
   if (!budget) {
     return (
-      <Card className="flex-row items-center gap-4">
-        <View className="h-11 w-11 items-center justify-center rounded-full bg-accent-soft">
-          <Target size={20} color={palette.forest} />
-        </View>
+      <Card className="flex-row items-center gap-3">
+        <Target size={18} color={colors.textSecondary} />
         <View className="flex-1">
-          <Text weight="semibold">Set a monthly budget</Text>
+          <Text weight="medium" className="text-[15px]">
+            Set a monthly budget
+          </Text>
           <Text muted className="text-sm">
-            We&apos;ll warn you before you overspend.
+            Get a heads-up before you overspend.
           </Text>
         </View>
-        <Button title="Set" variant="soft" onPress={() => router.push('/welcome')} />
+        <Button title="Set" variant="secondary" onPress={() => router.push('/welcome')} />
       </Card>
     );
   }
@@ -57,31 +85,18 @@ function BudgetCard({ spent, budget }: { spent: number; budget: number | null })
   return (
     <Card>
       <View className="flex-row items-baseline justify-between">
-        <Text weight="semibold">Monthly budget</Text>
+        <Text weight="semibold" className="text-[15px]">
+          Monthly budget
+        </Text>
         <Text muted className="text-sm">
-          <Text weight="semibold" className="text-sm">
+          <Text weight="medium" className="text-sm">
             {formatMoney(spent)}
           </Text>{' '}
           of {formatMoney(budget)}
         </Text>
       </View>
-      <View
-        className="mt-3 h-3 overflow-hidden rounded-full bg-accent-soft dark:bg-surface-muted"
-        accessibilityRole="progressbar"
-        accessibilityValue={{ min: 0, max: 100, now: Math.min(pct, 100) }}
-        accessibilityLabel={`Budget used ${pct}%`}
-      >
-        <View
-          className={cn(
-            'h-full rounded-full',
-            state === 'over'
-              ? 'bg-expense'
-              : state === 'warn'
-                ? 'bg-warning'
-                : 'bg-forest-mid dark:bg-lime',
-          )}
-          style={{ width: `${Math.min(pct, 100)}%` }}
-        />
+      <View className="mt-3">
+        <ProgressBar pct={pct} tone={state} />
       </View>
       <Text
         className={cn(
@@ -105,6 +120,7 @@ function BudgetCard({ spent, budget }: { spent: number; budget: number | null })
 
 export default function Home() {
   const me = useMe();
+  const { colors } = useTheme();
   const tz = me.data?.timezone ?? DEFAULT_TIMEZONE;
   const summary = useSummary({ period: 'month', type: 'expense' });
   const recent = useRecentTransactions(6);
@@ -146,37 +162,43 @@ export default function Home() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
-            tintColor={palette.forestMid}
+            tintColor={colors.accent}
           />
         }
       >
         <View className="px-5 pb-4 pt-4">
           {me.data ? (
             <>
-              <Text muted>Welcome back!</Text>
-              <Text weight="extrabold" className="text-[28px]">
-                Hi, {firstName(me.data.name)}
+              <Text weight="semibold" className="text-[22px] tracking-tight">
+                {greetingFor(tz)}, {firstName(me.data.name)}
+              </Text>
+              <Text muted className="mt-0.5 text-sm">
+                Here&apos;s your month so far
               </Text>
             </>
           ) : (
-            <Skeleton className="h-12 w-40" />
+            <Skeleton className="h-12 w-48" />
           )}
         </View>
 
-        {/* Balance card */}
-        <View className="mx-5 overflow-hidden rounded-card bg-forest p-5">
-          <View className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-lime/15" />
+        {/* This month */}
+        <Card className="mx-5">
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm text-white/70">
+            <Text muted className="text-sm">
               Spent in {formatMonthLabel(new Date(), tz)}
             </Text>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={hidden ? 'Show amounts' : 'Hide amounts'}
               onPress={toggleHidden}
-              className="h-11 w-11 items-center justify-center rounded-full"
+              hitSlop={8}
+              className="-mr-2 h-9 w-9 items-center justify-center rounded-lg"
             >
-              {hidden ? <EyeOff size={20} color="#fff" /> : <Eye size={20} color="#fff" />}
+              {hidden ? (
+                <EyeOff size={18} color={colors.textSecondary} />
+              ) : (
+                <Eye size={18} color={colors.textSecondary} />
+              )}
             </Pressable>
           </View>
           {s ? (
@@ -184,55 +206,58 @@ export default function Home() {
               value={s.totalExpense}
               hidden={hidden}
               weight="semibold"
-              className="text-[40px] leading-[48px] text-white"
+              className="text-[34px] leading-[42px] tracking-tight"
             />
           ) : (
-            <Skeleton className="h-12 w-44 bg-white/10" />
+            <Skeleton className="mt-1 h-10 w-40" />
           )}
-          <View className="mt-4 flex-row gap-3">
-            <View className="flex-1 rounded-2xl bg-white/10 p-3">
-              <View className="flex-row items-center gap-1">
-                <ArrowDownLeft size={14} color="rgba(255,255,255,0.7)" />
-                <Text className="text-xs text-white/70">Income</Text>
-              </View>
-              <Text weight="semibold" className="mt-1 text-white">
-                {s ? (hidden ? '•••••' : formatMoney(s.totalIncome)) : '—'}
+          <View className="mt-4 flex-row border-t border-border pt-3.5">
+            <View className="flex-1">
+              <Text muted className="text-xs">
+                Income
+              </Text>
+              <Text weight="medium" className="mt-0.5 text-[15px] text-income">
+                {s ? (hidden ? '••••' : formatMoney(s.totalIncome)) : '—'}
               </Text>
             </View>
-            <View className="flex-1 rounded-2xl bg-lime p-3">
-              <View className="flex-row items-center gap-1">
-                <ArrowUpRight size={14} color={palette.forest} />
-                <Text className="text-xs text-forest/70">Net balance</Text>
-              </View>
-              <Text weight="semibold" className="mt-1 text-forest">
-                {s ? (hidden ? '•••••' : formatMoney(s.net)) : '—'}
+            <View className="flex-1">
+              <Text muted className="text-xs">
+                Net balance
+              </Text>
+              <Text weight="medium" className="mt-0.5 text-[15px]">
+                {s ? (hidden ? '••••' : formatMoney(s.net)) : '—'}
               </Text>
             </View>
           </View>
-        </View>
+        </Card>
 
         {pending.length > 0 && (
           <Pressable
             accessibilityRole="button"
             accessibilityHint="Tries to sync now"
             onPress={() => void flushQueue().then(() => onRefresh())}
-            className="mx-5 mt-3 flex-row items-center gap-2 rounded-2xl bg-warning/15 px-4 py-3"
+            className="mx-5 mt-3 flex-row items-center gap-2 rounded-xl border border-border border-l-2 border-l-warning bg-surface px-4 py-3"
           >
-            <Text weight="semibold" className="flex-1 text-sm">
+            <Text weight="medium" className="flex-1 text-sm">
               {pending.length} {pending.length === 1 ? 'entry is' : 'entries are'} waiting to sync
             </Text>
-            <Text className="text-sm text-forest-mid dark:text-lime">Sync now</Text>
+            <Text weight="medium" className="text-sm text-accent">
+              Sync now
+            </Text>
           </Pressable>
         )}
 
         {/* Today / week / month */}
-        <View className="mx-5 mt-3 flex-row gap-3">
+        <Card className="mx-5 mt-3 flex-row p-0">
           {[
             { label: 'Today', value: s?.today },
             { label: 'This week', value: s?.thisWeek },
             { label: 'This month', value: s?.thisMonth },
-          ].map((x) => (
-            <Card key={x.label} className="flex-1 p-3.5">
+          ].map((x, i) => (
+            <View
+              key={x.label}
+              className={cn('flex-1 px-3.5 py-3', i > 0 && 'border-l border-border')}
+            >
               <Text muted className="text-xs">
                 {x.label}
               </Text>
@@ -240,57 +265,57 @@ export default function Home() {
                 <Skeleton className="mt-1 h-5 w-14" />
               ) : (
                 <Text
-                  weight="semibold"
-                  className="mt-1 text-base"
+                  weight="medium"
+                  className="mt-0.5 text-[15px]"
                   numberOfLines={1}
                   adjustsFontSizeToFit
                 >
                   {hidden ? '•••' : formatMoney(x.value)}
                 </Text>
               )}
-            </Card>
+            </View>
           ))}
-        </View>
+        </Card>
 
         {/* Quick actions */}
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerClassName="gap-2 px-5 py-5"
+          contentContainerClassName="gap-2 px-5 py-4"
         >
           <IconPill
-            title="Add Expense"
-            icon={<Plus size={18} color={palette.lime} />}
+            title="Add expense"
+            icon={<Plus size={16} color={colors.textSecondary} />}
             onPress={() => router.push('/add-transaction')}
           />
           <IconPill
-            title="Add Income"
-            icon={<ArrowDownLeft size={18} color={palette.lime} />}
+            title="Add income"
+            icon={<ArrowDownLeft size={16} color={colors.textSecondary} />}
             onPress={() =>
               router.push({ pathname: '/add-transaction', params: { type: 'income' } })
             }
           />
           <IconPill
             title="Analytics"
-            icon={<ChartColumn size={18} color={palette.lime} />}
+            icon={<ChartColumn size={16} color={colors.textSecondary} />}
             onPress={() => router.push('/analytics')}
           />
         </ScrollView>
 
-        <View className="mx-5 gap-4">
+        <View className="mx-5 gap-3">
           <BudgetCard spent={s?.thisMonth ?? 0} budget={me.data?.monthlyBudget ?? null} />
 
-          <Card className="px-0 pb-2 pt-4">
-            <View className="flex-row items-center justify-between px-5 pb-2">
-              <Text weight="semibold" className="text-base">
-                Recent Activity
+          <Card className="px-0 pb-1 pt-3">
+            <View className="flex-row items-center justify-between px-4 pb-1">
+              <Text weight="semibold" className="text-[15px]">
+                Recent activity
               </Text>
               <Link href="/transactions" asChild>
-                <Pressable accessibilityRole="link" className="h-11 flex-row items-center gap-1">
-                  <Text weight="semibold" className="text-sm text-forest-mid dark:text-lime">
-                    See Details
+                <Pressable accessibilityRole="link" className="h-10 flex-row items-center gap-1">
+                  <Text weight="medium" className="text-sm text-accent">
+                    View all
                   </Text>
-                  <ArrowRight size={16} color={palette.forestMid} />
+                  <ArrowRight size={14} color={colors.accent} />
                 </Pressable>
               </Link>
             </View>
@@ -312,8 +337,8 @@ export default function Home() {
               ))
             ) : (
               <EmptyState
-                title="No expenses yet — add your first one!"
-                description="Tap the + button below. It takes about 5 seconds."
+                title="No expenses yet"
+                description="Tap + below to add your first one. It takes about five seconds."
                 action={
                   <Button title="Add expense" onPress={() => router.push('/add-transaction')} />
                 }

@@ -48,7 +48,7 @@ export function CountUp({
   );
 }
 
-/** Amount coloured by type: red for expense, green for income. */
+/** Signed amount: expenses in regular ink with a minus, income in green with a plus. */
 export function Amount({
   amount,
   type,
@@ -61,8 +61,8 @@ export function Amount({
   return (
     <span
       className={cn(
-        'tabular font-semibold',
-        type === 'expense' ? 'text-expense' : 'text-income',
+        'tabular font-medium',
+        type === 'expense' ? 'text-foreground' : 'text-income',
         className,
       )}
     >

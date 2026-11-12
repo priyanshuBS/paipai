@@ -100,7 +100,7 @@ export default function Verify() {
           onPress={() => router.replace({ pathname: '/signup', params: { email } })}
           className="mt-2 h-11 justify-center"
         >
-          <Text weight="bold" className="text-forest-mid dark:text-lime">
+          <Text weight="bold" className="text-accent">
             Create an account instead
           </Text>
         </Pressable>
@@ -132,7 +132,7 @@ export default function Verify() {
         >
           <Text
             weight="semibold"
-            className={cooldown > 0 ? 'text-muted-foreground' : 'text-forest-mid dark:text-lime'}
+            className={cooldown > 0 ? 'text-muted-foreground' : 'text-accent'}
           >
             {cooldown > 0 ? `Resend in ${cooldown}s` : sending ? 'Sending…' : 'Resend code'}
           </Text>

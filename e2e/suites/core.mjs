@@ -7,7 +7,7 @@ export async function run(s) {
 
   await step('landing renders', async () => {
     await page.goto(web);
-    await page.getByRole('heading', { name: 'Track Your Spending Effortlessly' }).waitFor();
+    await page.getByRole('heading', { name: 'Know where every rupee goes.' }).waitFor();
     await shot('01-landing');
   });
 
@@ -40,7 +40,9 @@ export async function run(s) {
     await page.getByLabel('Monthly budget').fill('500');
     await page.getByRole('button', { name: 'Set budget' }).click();
     await page.waitForURL(`${web}/app`);
-    await page.getByRole('heading', { name: 'Hi, Priya' }).waitFor();
+    await page
+      .getByRole('heading', { name: /^Good (morning|afternoon|evening), Priya$/ })
+      .waitFor();
     await page.getByText('No expenses yet — add your first one!').waitFor();
   });
 

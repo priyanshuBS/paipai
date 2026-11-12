@@ -7,7 +7,6 @@ import { emailSchema, nameSchema } from '@paipai/shared/schemas';
 import { Logo } from '@/components/brand';
 import { Button, FieldError, Input, Label, Text } from '@/components/ui';
 import { authClient } from '@/lib/auth-client';
-import { useTheme } from '@/theme/theme';
 
 export function AuthLayout({
   title,
@@ -20,7 +19,6 @@ export function AuthLayout({
   children: ReactNode;
   footer?: ReactNode;
 }) {
-  const { dark } = useTheme();
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <KeyboardAvoidingView
@@ -31,9 +29,9 @@ export function AuthLayout({
           keyboardShouldPersistTaps="handled"
           contentContainerClassName="flex-grow px-6 pb-8 pt-4"
         >
-          <Logo color={dark ? '#B6E36B' : '#1E3A1A'} />
+          <Logo />
           <View className="flex-1 justify-center py-8">
-            <Text weight="extrabold" className="text-[30px] leading-9">
+            <Text weight="semibold" className="text-[26px] leading-8 tracking-tight">
               {title}
             </Text>
             <View className="mt-2">
@@ -164,7 +162,7 @@ export function AuthDetailsForm({
         <FieldError>{errors.email}</FieldError>
       </View>
       {errors.form && (
-        <View className="mt-4 rounded-2xl bg-expense/10 p-3">
+        <View className="mt-4 rounded-xl bg-expense/10 p-3">
           <Text className="text-sm text-expense">{errors.form}</Text>
         </View>
       )}
@@ -184,7 +182,7 @@ export function AuthFooterLink({ mode }: { mode: 'login' | 'signup' }) {
     <Link href="/login" replace className="py-3">
       <Text muted>
         Already have an account?{' '}
-        <Text weight="bold" className="text-forest-mid dark:text-lime">
+        <Text weight="bold" className="text-accent">
           Login
         </Text>
       </Text>
@@ -193,7 +191,7 @@ export function AuthFooterLink({ mode }: { mode: 'login' | 'signup' }) {
     <Link href="/signup" replace className="py-3">
       <Text muted>
         New to PaiPai?{' '}
-        <Text weight="bold" className="text-forest-mid dark:text-lime">
+        <Text weight="bold" className="text-accent">
           Create an account
         </Text>
       </Text>

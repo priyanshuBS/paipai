@@ -2,49 +2,80 @@ import { router } from 'expo-router';
 import { useRef, useState } from 'react';
 import { FlatList, Pressable, View, useWindowDimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg';
-import { palette } from '@paipai/shared/tokens';
+import Svg, { G, Rect, Text as SvgText } from 'react-native-svg';
 import { Logo } from '@/components/brand';
-import { Button, Text } from '@/components/ui';
+import { Button, Text, cn } from '@/components/ui';
 import { markOnboarded } from '@/lib/onboarding';
+import { useTheme } from '@/theme/theme';
 
-const F = palette.forest;
-const L = palette.limeLight;
+/** Illustrations are small fragments of the real UI, drawn in theme colours. */
+function useArt() {
+  const { colors } = useTheme();
+  return {
+    card: colors.surface,
+    line: colors.border,
+    muted: colors.surfaceMuted,
+    text: colors.text,
+    sub: colors.textSecondary,
+    accent: colors.accent,
+    bar: colors.chartMuted,
+  };
+}
 
 function AddIllustration() {
+  const c = useArt();
   return (
-    <Svg width={240} height={220} viewBox="0 0 240 220">
-      <Circle cx={120} cy={110} r={96} fill={L} opacity={0.6} />
-      <Rect x={62} y={38} width={116} height={150} rx={22} fill="#fff" />
-      <Rect x={78} y={58} width={84} height={34} rx={12} fill={L} />
-      <SvgText x={92} y={82} fontSize={20} fontWeight="700" fill={F}>
+    <Svg width={260} height={200} viewBox="0 0 260 200">
+      <Rect x={30} y={20} width={200} height={160} rx={14} fill={c.card} stroke={c.line} />
+      <Rect
+        x={48}
+        y={40}
+        width={164}
+        height={44}
+        rx={10}
+        fill={c.card}
+        stroke={c.accent}
+        strokeWidth={1.5}
+      />
+      <SvgText x={62} y={70} fontSize={22} fontWeight="600" fill={c.text}>
         ₹ 30
       </SvgText>
-      <Rect x={78} y={102} width={84} height={12} rx={6} fill="#E6E9E1" />
-      <Rect x={78} y={122} width={56} height={12} rx={6} fill="#E6E9E1" />
-      <Rect x={78} y={148} width={84} height={26} rx={13} fill={F} />
-      <Circle cx={182} cy={52} r={20} fill={F} />
-      <Path d="M182 42v20M172 52h20" stroke={palette.lime} strokeWidth={4} strokeLinecap="round" />
+      <Rect x={48} y={96} width={164} height={28} rx={8} fill={c.card} stroke={c.line} />
+      <SvgText x={60} y={115} fontSize={12} fill={c.text}>
+        Auto fare
+      </SvgText>
+      <Rect x={48} y={136} width={52} height={24} rx={6} fill={c.muted} stroke={c.line} />
+      <Rect x={106} y={136} width={52} height={24} rx={6} fill={c.muted} stroke={c.accent} />
+      <Rect x={164} y={136} width={48} height={24} rx={6} fill={c.muted} stroke={c.line} />
+      <SvgText x={132} y={152} fontSize={10} fill={c.accent} textAnchor="middle">
+        UPI
+      </SvgText>
     </Svg>
   );
 }
 
 function ChartIllustration() {
+  const c = useArt();
   const bars = [40, 70, 35, 95, 60, 80, 50];
   return (
-    <Svg width={240} height={220} viewBox="0 0 240 220">
-      <Circle cx={120} cy={110} r={96} fill={L} opacity={0.6} />
-      <Rect x={40} y={50} width={160} height={124} rx={22} fill="#fff" />
+    <Svg width={260} height={200} viewBox="0 0 260 200">
+      <Rect x={30} y={20} width={200} height={160} rx={14} fill={c.card} stroke={c.line} />
+      <SvgText x={48} y={48} fontSize={11} fill={c.sub}>
+        This week
+      </SvgText>
+      <SvgText x={48} y={70} fontSize={20} fontWeight="600" fill={c.text}>
+        ₹3,240
+      </SvgText>
       <G>
         {bars.map((h, i) => (
           <Rect
             key={i}
-            x={58 + i * 19}
-            y={158 - h}
-            width={12}
-            height={h}
-            rx={4}
-            fill={i === 3 ? F : palette.lime}
+            x={50 + i * 24}
+            y={162 - h * 0.75}
+            width={14}
+            height={h * 0.75}
+            rx={3}
+            fill={i === 3 ? c.accent : c.bar}
           />
         ))}
       </G>
@@ -53,19 +84,24 @@ function ChartIllustration() {
 }
 
 function BudgetIllustration() {
+  const c = useArt();
   return (
-    <Svg width={240} height={220} viewBox="0 0 240 220">
-      <Circle cx={120} cy={110} r={96} fill={L} opacity={0.6} />
-      <Circle cx={120} cy={110} r={58} fill="none" stroke="#fff" strokeWidth={18} />
-      <Path
-        d="M120 52 A58 58 0 1 1 64 126"
-        fill="none"
-        stroke={F}
-        strokeWidth={18}
-        strokeLinecap="round"
-      />
-      <SvgText x={120} y={118} fontSize={24} fontWeight="800" fill={F} textAnchor="middle">
+    <Svg width={260} height={200} viewBox="0 0 260 200">
+      <Rect x={30} y={36} width={200} height={128} rx={14} fill={c.card} stroke={c.line} />
+      <SvgText x={48} y={66} fontSize={12} fontWeight="600" fill={c.text}>
+        Monthly budget
+      </SvgText>
+      <SvgText x={212} y={66} fontSize={11} fill={c.sub} textAnchor="end">
         72%
+      </SvgText>
+      <Rect x={48} y={82} width={164} height={6} rx={3} fill={c.muted} />
+      <Rect x={48} y={82} width={118} height={6} rx={3} fill={c.accent} />
+      <SvgText x={48} y={112} fontSize={11} fill={c.sub}>
+        ₹4,200 left · 9 days to go
+      </SvgText>
+      <Rect x={48} y={128} width={164} height={1} fill={c.line} />
+      <SvgText x={48} y={150} fontSize={11} fill={c.sub}>
+        Alerts at 80% and 100%
       </SvgText>
     </Svg>
   );
@@ -81,13 +117,13 @@ const SLIDES = [
   {
     key: 'insights',
     title: 'See where every rupee goes',
-    body: 'Daily, weekly and monthly trends, category splits, and item-wise totals like “Auto fare: ₹1,240”.',
+    body: 'Trends by day, week and month, category splits, and item-wise totals like “Auto fare: ₹1,240”.',
     Art: ChartIllustration,
   },
   {
     key: 'budget',
     title: 'Stay on budget',
-    body: 'Set a monthly budget and PaiPai nudges you before you overspend. Paai-paai ka hisaab.',
+    body: 'Set a monthly budget and get a heads-up before you overspend.',
     Art: BudgetIllustration,
   },
 ];
@@ -107,7 +143,7 @@ export default function Onboarding() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-lime" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
       <View className="flex-row items-center justify-between px-6 pt-2">
         <Logo />
         {index < SLIDES.length - 1 && (
@@ -116,7 +152,7 @@ export default function Onboarding() {
             onPress={() => void finish('/signup')}
             className="h-11 justify-center px-2"
           >
-            <Text weight="semibold" className="text-forest">
+            <Text weight="medium" muted>
               Skip
             </Text>
           </Pressable>
@@ -135,25 +171,31 @@ export default function Onboarding() {
         renderItem={({ item }) => (
           <View style={{ width }} className="flex-1 items-center justify-center px-8">
             <item.Art />
-            <Text weight="extrabold" className="mt-8 text-center text-[30px] leading-9 text-forest">
+            <Text
+              weight="semibold"
+              className="mt-8 text-center text-[26px] leading-8 tracking-tight"
+            >
               {item.title}
             </Text>
-            <Text className="mt-3 text-center text-base leading-6 text-forest/80">{item.body}</Text>
+            <Text muted className="mt-3 text-center text-[15px] leading-6">
+              {item.body}
+            </Text>
           </View>
         )}
       />
 
       <View className="items-center gap-4 px-6 pb-4">
         <View
-          className="flex-row gap-2"
+          className="flex-row gap-1.5"
           accessibilityLabel={`Slide ${index + 1} of ${SLIDES.length}`}
         >
           {SLIDES.map((s, i) => (
             <View
               key={s.key}
-              className={
-                i === index ? 'h-2 w-6 rounded-full bg-forest' : 'h-2 w-2 rounded-full bg-forest/30'
-              }
+              className={cn(
+                'h-1.5 rounded-full',
+                i === index ? 'w-5 bg-foreground' : 'w-1.5 bg-border-strong',
+              )}
             />
           ))}
         </View>
@@ -166,7 +208,7 @@ export default function Onboarding() {
           />
         ) : (
           <Button
-            title="Get Started"
+            title="Get started"
             size="lg"
             className="w-full"
             onPress={() => void finish('/signup')}
@@ -177,11 +219,8 @@ export default function Onboarding() {
           onPress={() => void finish('/login')}
           className="h-11 justify-center"
         >
-          <Text className="text-forest">
-            Already have an account?{' '}
-            <Text weight="bold" className="text-forest">
-              Login
-            </Text>
+          <Text muted>
+            Already have an account? <Text weight="semibold">Log in</Text>
           </Text>
         </Pressable>
       </View>

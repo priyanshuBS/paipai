@@ -30,13 +30,13 @@ export function OtpInput({
             <View
               key={i}
               className={cn(
-                'h-14 flex-1 items-center justify-center rounded-2xl border bg-surface',
+                'h-14 flex-1 items-center justify-center rounded-xl border bg-surface',
                 invalid
                   ? 'border-expense'
                   : d
-                    ? 'border-forest-mid bg-accent-soft dark:bg-surface-muted'
+                    ? 'border-border-strong'
                     : focused
-                      ? 'border-forest-mid'
+                      ? 'border-accent'
                       : 'border-border',
               )}
             >

@@ -171,12 +171,12 @@ export function AuthFlow({ mode }: { mode: Mode }) {
           />
           <FieldError>{errors.otp}</FieldError>
           {errors.form && (
-            <div role="alert" className="rounded-2xl bg-warning/10 p-4 text-sm">
+            <div role="alert" className="rounded-lg bg-warning/10 p-4 text-sm">
               {errors.form}{' '}
               {needsSignup && (
                 <Link
                   href={`/signup?email=${encodeURIComponent(email)}`}
-                  className="font-semibold text-forest-mid underline dark:text-lime"
+                  className="font-medium text-accent underline"
                 >
                   Create an account
                 </Link>
@@ -207,7 +207,7 @@ export function AuthFlow({ mode }: { mode: Mode }) {
               type="button"
               disabled={cooldown > 0 || sending}
               onClick={() => void sendCode().then((ok) => ok && setOtp(''))}
-              className="min-h-11 font-semibold text-forest-mid disabled:text-muted-foreground dark:text-lime"
+              className="min-h-11 font-medium text-accent disabled:text-muted-foreground"
               aria-live="polite"
             >
               {cooldown > 0 ? `Resend in ${cooldown}s` : sending ? 'Sending…' : 'Resend code'}
@@ -230,20 +230,14 @@ export function AuthFlow({ mode }: { mode: Mode }) {
         isSignup ? (
           <>
             Already have an account?{' '}
-            <Link
-              href="/login"
-              className="font-semibold text-forest-mid hover:underline dark:text-lime"
-            >
+            <Link href="/login" className="font-medium text-accent hover:underline">
               Login
             </Link>
           </>
         ) : (
           <>
             New to PaiPai?{' '}
-            <Link
-              href="/signup"
-              className="font-semibold text-forest-mid hover:underline dark:text-lime"
-            >
+            <Link href="/signup" className="font-medium text-accent hover:underline">
               Create an account
             </Link>
           </>
@@ -298,7 +292,7 @@ export function AuthFlow({ mode }: { mode: Mode }) {
           <FieldError id="email-error">{errors.email}</FieldError>
         </div>
         {errors.form && (
-          <p role="alert" className="rounded-2xl bg-expense/10 p-3 text-sm text-expense">
+          <p role="alert" className="rounded-lg bg-expense/10 p-3 text-sm text-expense">
             {errors.form}
           </p>
         )}

@@ -296,7 +296,7 @@ export default function AnalyticsPage() {
               value={custom.from}
               max={custom.to}
               onChange={(e) => e.target.value && setCustom((c) => ({ ...c, from: e.target.value }))}
-              className="h-11 w-auto rounded-full"
+              className="w-auto"
             />
             <span className="text-muted-foreground">–</span>
             <Input
@@ -305,16 +305,16 @@ export default function AnalyticsPage() {
               value={custom.to}
               min={custom.from}
               onChange={(e) => e.target.value && setCustom((c) => ({ ...c, to: e.target.value }))}
-              className="h-11 w-auto rounded-full"
+              className="w-auto"
             />
           </div>
         ) : (
-          <div className="flex items-center gap-1 rounded-full bg-surface p-1 shadow-[var(--shadow-soft)]">
+          <div className="flex items-center gap-0.5 rounded-lg border border-border-strong bg-surface p-0.5">
             <button
               type="button"
               aria-label={`Previous ${period}`}
               onClick={() => setAnchor((a) => shiftDateString(a, period, -1, tz))}
-              className="flex size-9 items-center justify-center rounded-full hover:bg-surface-muted"
+              className="flex size-8 items-center justify-center rounded-md hover:bg-surface-muted"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -326,7 +326,7 @@ export default function AnalyticsPage() {
               aria-label={`Next ${period}`}
               disabled={rangeStrings(period, anchor, tz).to >= today}
               onClick={() => setAnchor((a) => shiftDateString(a, period, 1, tz))}
-              className="flex size-9 items-center justify-center rounded-full hover:bg-surface-muted disabled:opacity-30"
+              className="flex size-8 items-center justify-center rounded-md hover:bg-surface-muted disabled:opacity-30"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -349,7 +349,7 @@ export default function AnalyticsPage() {
                 {change !== null ? (
                   <span
                     className={cn(
-                      'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-sm font-semibold',
+                      'inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs font-medium',
                       goodChange ? 'bg-income/10 text-income' : 'bg-expense/10 text-expense',
                     )}
                   >
@@ -417,20 +417,19 @@ export default function AnalyticsPage() {
           ) : (
             <div className="grid items-center gap-6 sm:grid-cols-[220px_1fr]">
               <CategoryDonut slices={slices} total={catTotal} />
-              <ul className="space-y-1">
+              <ul className="divide-y divide-border text-sm">
                 {catRows.map((c, i) => (
                   <li
                     key={c.categoryId ?? 'none'}
-                    className="flex min-h-11 items-center gap-3 rounded-xl px-2"
+                    className="flex min-h-11 items-center gap-3 px-1"
                   >
                     <span
                       className="size-2.5 shrink-0 rounded-full"
                       style={{ background: i < 5 ? chartColorFor(c.color, ct.mode) : ct.neutral }}
                       aria-hidden
                     />
-                    <CategoryIcon icon={c.icon} color={c.color} size="sm" />
-                    <span className="min-w-0 flex-1 truncate font-medium">{c.name}</span>
-                    <span className="tabular font-semibold">{formatMoney(c.total)}</span>
+                    <span className="min-w-0 flex-1 truncate">{c.name}</span>
+                    <span className="tabular font-medium">{formatMoney(c.total)}</span>
                     <span className="tabular w-12 text-right text-sm text-muted-foreground">
                       {c.percent}%
                     </span>
@@ -464,14 +463,14 @@ export default function AnalyticsPage() {
         <Card className="lg:col-span-3">
           <div className="grid gap-6 md:grid-cols-2">
             <div>
-              <h2 className="mb-3 font-semibold">Top 5 categories</h2>
-              <ol className="space-y-2">
+              <h2 className="mb-3 text-sm font-semibold">Top 5 categories</h2>
+              <ol className="space-y-2.5 text-sm">
                 {top5.map((c, i) => (
                   <li key={c.categoryId ?? 'none'} className="flex items-center gap-3">
-                    <span className="w-5 text-sm font-semibold text-muted-foreground">{i + 1}</span>
+                    <span className="w-5 text-xs text-muted-foreground">{i + 1}</span>
                     <CategoryIcon icon={c.icon} color={c.color} size="sm" />
                     <span className="flex-1 truncate">{c.name}</span>
-                    <span className="tabular font-semibold">{formatMoney(c.total)}</span>
+                    <span className="tabular font-medium">{formatMoney(c.total)}</span>
                   </li>
                 ))}
                 {top5.length === 0 && (
@@ -480,20 +479,18 @@ export default function AnalyticsPage() {
               </ol>
             </div>
             <div>
-              <h2 className="mb-3 font-semibold">Top 5 items</h2>
-              <ol className="space-y-2">
+              <h2 className="mb-3 text-sm font-semibold">Top 5 items</h2>
+              <ol className="space-y-2.5 text-sm">
                 {(items.data ?? []).slice(0, 5).map((it, i) => (
                   <li key={it.key}>
                     <Link
                       href={`/app/analytics/items/${encodeURIComponent(it.title)}`}
                       className="flex min-h-9 items-center gap-3 rounded-lg hover:bg-surface-muted"
                     >
-                      <span className="w-5 text-sm font-semibold text-muted-foreground">
-                        {i + 1}
-                      </span>
+                      <span className="w-5 text-xs text-muted-foreground">{i + 1}</span>
                       <span className="flex-1 truncate">{it.title}</span>
                       <span className="text-sm text-muted-foreground">{it.count}×</span>
-                      <span className="tabular font-semibold">{formatMoney(it.total)}</span>
+                      <span className="tabular font-medium">{formatMoney(it.total)}</span>
                     </Link>
                   </li>
                 ))}
@@ -509,7 +506,7 @@ export default function AnalyticsPage() {
         <Card className="lg:col-span-3">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="font-semibold">
+              <h2 className="text-sm font-semibold">
                 Item-wise {type === 'expense' ? 'spending' : 'income'}
               </h2>
               <p className="text-sm text-muted-foreground">
@@ -518,7 +515,7 @@ export default function AnalyticsPage() {
             </div>
             <div className="relative w-full sm:w-64">
               <Search
-                className="pointer-events-none absolute left-4 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
+                className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground"
                 aria-hidden
               />
               <Input
@@ -526,7 +523,7 @@ export default function AnalyticsPage() {
                 placeholder="Search items"
                 value={itemQuery}
                 onChange={(e) => setItemQuery(e.target.value)}
-                className="h-11 rounded-full pl-10"
+                className="pl-9"
               />
             </div>
           </div>
@@ -539,21 +536,21 @@ export default function AnalyticsPage() {
               No items in this period
             </p>
           ) : (
-            <ul className="divide-y divide-border">
+            <ul className="divide-y divide-border text-sm">
               {filteredItems.map((it) => (
                 <li key={it.key}>
                   <Link
                     href={`/app/analytics/items/${encodeURIComponent(it.title)}`}
-                    className="flex min-h-14 items-center gap-3 rounded-xl px-2 py-2 hover:bg-surface-muted"
+                    className="flex min-h-14 items-center gap-3 rounded-md px-2 py-2 hover:bg-surface-muted"
                   >
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate font-semibold">{it.title}</span>
+                      <span className="block truncate font-medium">{it.title}</span>
                       <span className="block text-sm text-muted-foreground">
                         {formatMoney(it.total)} across {it.count} time{it.count === 1 ? '' : 's'} ·
                         avg {formatMoney(it.average)} · last {formatDate(it.lastAt, tz)}
                       </span>
                     </span>
-                    <span className="tabular font-semibold">{formatMoney(it.total)}</span>
+                    <span className="tabular font-medium">{formatMoney(it.total)}</span>
                     <ChevronRight className="size-4 text-muted-foreground" aria-hidden />
                   </Link>
                 </li>

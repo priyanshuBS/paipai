@@ -143,19 +143,19 @@ export default function TransactionsScreen() {
             placeholder="Search title or note"
             accessibilityLabel="Search transactions"
             returnKeyType="search"
-            className="rounded-full pl-10"
+            className="pl-10"
           />
         </View>
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={`Filters${nFilters ? `, ${nFilters} active` : ''}`}
           onPress={() => setSheet(true)}
-          className="h-12 w-12 items-center justify-center rounded-full border border-border bg-surface"
+          className="h-12 w-12 items-center justify-center rounded-xl border border-border-strong bg-surface"
         >
           <SlidersHorizontal size={18} color={colors.text} />
           {nFilters > 0 && (
-            <View className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-forest dark:bg-lime">
-              <Text weight="bold" className="text-[10px] text-white dark:text-forest">
+            <View className="absolute -right-1 -top-1 h-5 w-5 items-center justify-center rounded-full bg-accent">
+              <Text weight="bold" className="text-[10px] text-accent-foreground">
                 {nFilters}
               </Text>
             </View>
@@ -183,7 +183,7 @@ export default function TransactionsScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => void onRefresh()}
-              tintColor={palette.forestMid}
+              tintColor={palette.cobalt}
             />
           }
           onEndReachedThreshold={0.5}
@@ -200,7 +200,7 @@ export default function TransactionsScreen() {
                 {totals && byDate && (
                   <Text className="text-sm">
                     {totals.expense > 0 && (
-                      <Text weight="semibold" className="text-sm text-expense">
+                      <Text weight="medium" className="text-sm">
                         −{formatMoney(totals.expense)}
                       </Text>
                     )}
@@ -252,10 +252,10 @@ export default function TransactionsScreen() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <ActivityIndicator className="py-6" color={palette.forestMid} />
+              <ActivityIndicator className="py-6" color={palette.cobalt} />
             ) : !query.hasNextPage && items.length > 10 ? (
               <Text muted className="py-6 text-center text-sm">
-                That&apos;s everything ✨
+                You&apos;ve reached the end
               </Text>
             ) : undefined
           }

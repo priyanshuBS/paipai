@@ -69,9 +69,9 @@ export function OtpInput({
             if (ch && i < length - 1) refs.current[i + 1]?.focus();
           }}
           className={cn(
-            'h-14 w-full min-w-0 rounded-2xl border bg-surface text-center text-2xl font-bold tabular-nums text-foreground transition focus:border-forest-mid focus:outline-none focus:ring-4 focus:ring-lime/30',
+            'h-14 w-full min-w-0 rounded-lg border bg-surface text-center text-xl font-semibold tabular-nums text-foreground transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20',
             invalid ? 'border-expense' : 'border-border',
-            d && !invalid && 'border-forest-mid bg-accent-soft dark:bg-surface-muted',
+            d && !invalid && 'border-border-strong',
           )}
         />
       ))}

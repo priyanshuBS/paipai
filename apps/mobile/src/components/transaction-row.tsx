@@ -63,10 +63,10 @@ export function TransactionRow({
     >
       <CategoryIcon icon={category?.icon} color={category?.color} />
       <View className="flex-1">
-        <Text weight="semibold" numberOfLines={1}>
+        <Text weight="medium" className="text-[15px]" numberOfLines={1}>
           {t.title}
         </Text>
-        <Text muted className="text-sm" numberOfLines={1}>
+        <Text muted className="text-[13px]" numberOfLines={1}>
           {subtitle}
         </Text>
       </View>
@@ -96,7 +96,7 @@ export function TransactionRow({
               ref.current?.close();
               openEdit(t);
             }}
-            className="w-20 items-center justify-center bg-forest-mid"
+            className="w-20 items-center justify-center bg-[#52525B]"
           >
             <Pencil size={20} color="#fff" />
             <Text weight="medium" className="mt-1 text-xs text-white">
@@ -128,7 +128,7 @@ export function TransactionRow({
 export function TransactionRowSkeleton() {
   return (
     <View className="flex-row items-center gap-3 px-3 py-3">
-      <Skeleton className="h-11 w-11 rounded-full" />
+      <Skeleton className="h-10 w-10 rounded-[11px]" />
       <View className="flex-1 gap-2">
         <Skeleton className="h-3.5 w-1/3" />
         <Skeleton className="h-3 w-1/2" />

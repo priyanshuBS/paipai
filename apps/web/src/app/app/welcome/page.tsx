@@ -31,9 +31,9 @@ export default function WelcomePage() {
 
   return (
     <div className="mx-auto flex min-h-[80dvh] max-w-md flex-col justify-center px-4 py-10">
-      <LogoMark className="size-12 text-forest dark:text-lime" />
-      <h1 className="mt-6 text-3xl font-extrabold tracking-tight">
-        Welcome{me ? `, ${firstName(me.name)}` : ''}! 🎉
+      <LogoMark className="size-12 text-foreground" />
+      <h1 className="mt-6 text-2xl font-semibold tracking-tight">
+        Welcome{me ? `, ${firstName(me.name)}` : ''}
       </h1>
       <p className="mt-2 text-muted-foreground">
         Want a monthly budget? PaiPai will show your progress and warn you at 80%. This step is

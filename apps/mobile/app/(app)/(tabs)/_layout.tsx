@@ -4,7 +4,6 @@ import { Tabs, router } from 'expo-router';
 import { ChartColumn, House, Plus, Target, User, type LucideIcon } from 'lucide-react-native';
 import { Pressable, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { palette } from '@paipai/shared/tokens';
 import { Text } from '@/components/ui';
 import { useTheme } from '@/theme/theme';
 
@@ -15,11 +14,11 @@ const ICONS: Record<string, { icon: LucideIcon; label: string }> = {
   profile: { icon: User, label: 'Profile' },
 };
 
-/** 5 tabs: Home, Analytics, Add (centre, lime), Budgets, Profile. Active = dark green + dot. */
+/** 5 tabs: Home, Analytics, Add (centre, ink), Budgets, Profile. Active = ink, inactive = muted. */
 function TabBar({ state, navigateToTab }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
-  const { colors, dark } = useTheme();
-  const active = dark ? palette.lime : palette.forest;
+  const { colors } = useTheme();
+  const active = colors.text;
 
   return (
     <View
@@ -47,21 +46,15 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
                 router.push('/add-transaction');
               }}
               style={{
-                marginTop: -26,
-                width: 60,
-                height: 60,
-                borderRadius: 30,
-                backgroundColor: palette.lime,
+                width: 48,
+                height: 44,
+                borderRadius: 12,
+                backgroundColor: colors.primary,
                 alignItems: 'center',
                 justifyContent: 'center',
-                shadowColor: palette.forest,
-                shadowOpacity: 0.35,
-                shadowRadius: 12,
-                shadowOffset: { width: 0, height: 6 },
-                elevation: 6,
               }}
             >
-              <Plus size={28} color={palette.forest} strokeWidth={2.5} />
+              <Plus size={22} color={colors.primaryForeground} strokeWidth={2.25} />
             </Pressable>
           );
         }
@@ -86,12 +79,12 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
             }}
           >
             <Icon
-              size={22}
+              size={21}
               color={focused ? active : colors.textSecondary}
-              strokeWidth={focused ? 2.4 : 2}
+              strokeWidth={focused ? 2 : 1.75}
             />
             <Text
-              weight={focused ? 'semibold' : 'medium'}
+              weight="medium"
               className="text-[11px]"
               style={{ color: focused ? active : colors.textSecondary }}
             >
@@ -99,10 +92,10 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
             </Text>
             <View
               style={{
-                width: 4,
-                height: 4,
-                borderRadius: 2,
-                backgroundColor: focused ? active : 'transparent',
+                width: 16,
+                height: 2,
+                borderRadius: 1,
+                backgroundColor: focused ? colors.accent : 'transparent',
               }}
             />
           </Pressable>

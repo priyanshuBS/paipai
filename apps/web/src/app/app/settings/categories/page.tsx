@@ -106,7 +106,7 @@ function CategoryDialog({
                     onClick={() => setIcon(i)}
                     className={cn(
                       'flex aspect-square items-center justify-center rounded-xl',
-                      icon === i ? 'ring-2 ring-forest dark:ring-lime' : 'hover:bg-surface-muted',
+                      icon === i ? 'ring-2 ring-accent' : 'hover:bg-surface-muted',
                     )}
                   >
                     <CategoryIcon icon={i} color={icon === i ? color : '#F0F2EC'} size="sm" />
@@ -127,7 +127,7 @@ function CategoryDialog({
                     className={cn(
                       'size-9 rounded-full',
                       color.toLowerCase() === c.toLowerCase() &&
-                        'ring-2 ring-forest ring-offset-2 ring-offset-surface dark:ring-lime',
+                        'ring-2 ring-accent ring-offset-2 ring-offset-surface',
                     )}
                     style={{ background: c }}
                   />
@@ -231,7 +231,7 @@ export default function CategoriesPage() {
               ) : (
                 <ul>
                   {custom.map((c, i) => (
-                    <li key={c.id} className="flex items-center gap-2 rounded-2xl px-2 py-2">
+                    <li key={c.id} className="flex items-center gap-2 rounded-lg px-2 py-2">
                       <CategoryIcon icon={c.icon} color={c.color} />
                       <span className="flex-1 truncate font-medium">{c.name}</span>
                       <Button
@@ -280,7 +280,7 @@ export default function CategoriesPage() {
                   {archived.map((c) => (
                     <li
                       key={c.id}
-                      className="flex items-center gap-2 rounded-2xl px-2 py-2 opacity-70"
+                      className="flex items-center gap-2 rounded-lg px-2 py-2 opacity-70"
                     >
                       <CategoryIcon icon={c.icon} color={c.color} />
                       <span className="flex-1 truncate">{c.name}</span>

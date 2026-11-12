@@ -3,7 +3,6 @@ import { Bell, Camera, Check, Fingerprint } from 'lucide-react-native';
 import { useEffect, useState } from 'react';
 import { Image, Modal, Platform, Pressable, ScrollView, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { palette } from '@paipai/shared/tokens';
 import { CURRENCIES, TIMEZONES } from '@paipai/shared/settings';
 import type { ThemePreference } from '@paipai/shared/schemas';
 import { useSnackbar } from '@/components/snackbar';
@@ -88,7 +87,7 @@ export default function SettingsScreen() {
   const update = useUpdateMe();
   const uploads = useUploadsEnabled();
   const lock = useAppLock();
-  const { setPreference } = useTheme();
+  const { setPreference, colors } = useTheme();
   const snack = useSnackbar();
   const [name, setName] = useState<string | null>(null);
   const [picker, setPicker] = useState<null | 'currency' | 'timezone'>(null);
@@ -164,14 +163,14 @@ export default function SettingsScreen() {
                   style={{ width: 64, height: 64, borderRadius: 32 }}
                 />
               ) : (
-                <View className="h-16 w-16 items-center justify-center rounded-full bg-lime">
-                  <Text weight="bold" className="text-xl text-forest">
+                <View className="h-16 w-16 items-center justify-center rounded-full border border-border bg-surface-muted">
+                  <Text weight="semibold" className="text-lg text-muted-foreground">
                     {me.name.slice(0, 1).toUpperCase()}
                   </Text>
                 </View>
               )}
               {uploads && (
-                <View className="absolute -bottom-1 -right-1 h-7 w-7 items-center justify-center rounded-full bg-forest">
+                <View className="absolute -bottom-1 -right-1 h-7 w-7 items-center justify-center rounded-full border-2 border-surface bg-primary">
                   <Camera size={14} color="#fff" />
                 </View>
               )}
@@ -237,7 +236,7 @@ export default function SettingsScreen() {
 
         <Card>
           <View className="flex-row items-center gap-3">
-            <Bell size={20} color={palette.forestMid} />
+            <Bell size={18} color={colors.textSecondary} />
             <View className="flex-1">
               <Text weight="semibold">Daily reminder</Text>
               <Text muted className="text-sm">
@@ -248,14 +247,14 @@ export default function SettingsScreen() {
               accessibilityLabel="Daily reminder"
               value={reminder?.enabled ?? false}
               onValueChange={(v) => void applyReminder(v, reminder?.time ?? '21:00')}
-              trackColor={{ true: palette.forestMid }}
+              trackColor={{ true: colors.accent }}
             />
           </View>
           {reminder?.enabled && (
             <Pressable
               accessibilityRole="button"
               onPress={() => setTimePicker(true)}
-              className="mt-3 h-11 flex-row items-center justify-between rounded-2xl bg-surface-muted px-4"
+              className="mt-3 h-11 flex-row items-center justify-between rounded-xl bg-surface-muted px-4"
             >
               <Text>Remind me at</Text>
               <Text weight="semibold">{reminder.time}</Text>
@@ -279,7 +278,7 @@ export default function SettingsScreen() {
 
         <Card>
           <View className="flex-row items-center gap-3">
-            <Fingerprint size={20} color={palette.forestMid} />
+            <Fingerprint size={18} color={colors.textSecondary} />
             <View className="flex-1">
               <Text weight="semibold">App lock</Text>
               <Text muted className="text-sm">
@@ -297,7 +296,7 @@ export default function SettingsScreen() {
                   .setEnabled(v)
                   .then((ok) => ok && snack(v ? 'App lock on' : 'App lock off'))
               }
-              trackColor={{ true: palette.forestMid }}
+              trackColor={{ true: colors.accent }}
             />
           </View>
         </Card>

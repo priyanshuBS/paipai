@@ -85,7 +85,7 @@ function Avatar({
   ) : (
     <span
       className={cn(
-        'flex size-10 items-center justify-center rounded-full bg-lime text-sm font-bold text-forest',
+        'flex size-10 items-center justify-center rounded-full border border-border bg-surface-muted text-xs font-semibold text-muted-foreground',
         className,
       )}
     >
@@ -121,21 +121,21 @@ function UserMenu({ compact }: { compact?: boolean }) {
   }
 
   const item =
-    'flex min-h-11 cursor-pointer items-center gap-3 rounded-xl px-3 text-sm outline-none data-[highlighted]:bg-surface-muted';
+    'flex h-9 cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-sm outline-none data-[highlighted]:bg-surface-muted [&>svg]:text-muted-foreground';
 
   return (
     <DropdownMenu.Root>
       <DropdownMenu.Trigger
         aria-label="Account menu"
         className={cn(
-          'flex items-center gap-3 rounded-2xl p-2 text-left hover:bg-surface-muted',
+          'flex items-center gap-2.5 rounded-lg p-1.5 text-left hover:bg-surface-muted',
           compact ? '' : 'w-full',
         )}
       >
-        <Avatar name={me?.name} image={me?.image} className={compact ? 'size-9' : ''} />
+        <Avatar name={me?.name} image={me?.image} className={compact ? 'size-8' : 'size-8'} />
         {!compact && (
           <span className="min-w-0 flex-1">
-            <span className="block truncate text-sm font-semibold">{me?.name ?? '…'}</span>
+            <span className="block truncate text-sm font-medium">{me?.name ?? '…'}</span>
             <span className="block truncate text-xs text-muted-foreground">{me?.email}</span>
           </span>
         )}
@@ -144,9 +144,9 @@ function UserMenu({ compact }: { compact?: boolean }) {
         <DropdownMenu.Content
           align="end"
           sideOffset={8}
-          className="z-50 w-64 rounded-2xl bg-surface p-2 shadow-[var(--shadow-float)] ring-1 ring-border"
+          className="z-50 w-60 rounded-lg border border-border bg-surface p-1 shadow-[var(--shadow-pop)]"
         >
-          <DropdownMenu.Label className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+          <DropdownMenu.Label className="px-2.5 py-1.5 text-xs font-medium text-muted-foreground">
             Theme
           </DropdownMenu.Label>
           <DropdownMenu.RadioGroup value={theme ?? 'system'} onValueChange={changeTheme}>
@@ -158,10 +158,10 @@ function UserMenu({ compact }: { compact?: boolean }) {
               <DropdownMenu.RadioItem
                 key={v}
                 value={v}
-                className={cn(item, 'data-[state=checked]:font-semibold')}
+                className={cn(item, 'data-[state=checked]:font-medium')}
               >
                 <I className="size-4" aria-hidden /> {l}
-                <DropdownMenu.ItemIndicator className="ml-auto size-2 rounded-full bg-forest-mid dark:bg-lime" />
+                <DropdownMenu.ItemIndicator className="ml-auto size-1.5 rounded-full bg-accent" />
               </DropdownMenu.RadioItem>
             ))}
           </DropdownMenu.RadioGroup>
@@ -172,7 +172,7 @@ function UserMenu({ compact }: { compact?: boolean }) {
               <DropdownMenu.Item
                 key={n.href}
                 asChild
-                className={cn(item, pathname.startsWith(n.href) && 'font-semibold')}
+                className={cn(item, pathname.startsWith(n.href) && 'font-medium')}
               >
                 <Link href={n.href}>
                   <n.icon className="size-4" aria-hidden /> {n.label}
@@ -200,15 +200,17 @@ function Sidebar() {
   const pathname = usePathname();
   const { openAdd } = useQuickAdd();
   return (
-    <aside className="sticky top-0 hidden h-dvh w-64 shrink-0 flex-col border-r border-border bg-surface px-4 py-6 lg:flex">
-      <Link href="/app" className="px-3" aria-label="PaiPai home">
+    <aside className="sticky top-0 hidden h-dvh w-60 shrink-0 flex-col border-r border-border bg-background px-3 py-4 lg:flex">
+      <Link href="/app" className="px-2 py-1" aria-label="PaiPai home">
         <Logo />
       </Link>
-      <Button className="mt-8 w-full" size="lg" onClick={() => openAdd('expense')}>
+      <Button className="mt-5 w-full justify-start" onClick={() => openAdd('expense')}>
         <Plus /> Add expense
-        <kbd className="ml-auto rounded-md bg-white/15 px-1.5 text-xs font-medium">N</kbd>
+        <kbd className="ml-auto rounded border border-primary-foreground/20 px-1.5 font-sans text-[11px] font-medium text-primary-foreground/70">
+          N
+        </kbd>
       </Button>
-      <nav className="mt-6 flex flex-col gap-1" aria-label="App">
+      <nav className="mt-5 flex flex-col gap-0.5" aria-label="App">
         {nav.map((n) => {
           const active = isActive(pathname, n.href);
           return (
@@ -217,18 +219,18 @@ function Sidebar() {
               href={n.href}
               aria-current={active ? 'page' : undefined}
               className={cn(
-                'flex min-h-11 items-center gap-3 rounded-2xl px-3 text-sm font-semibold transition',
+                'flex h-9 items-center gap-2.5 rounded-md px-2.5 text-sm font-medium transition-colors',
                 active
-                  ? 'bg-accent-soft text-forest dark:bg-surface-muted dark:text-lime'
+                  ? 'bg-surface text-foreground shadow-sm ring-1 ring-border [&>svg]:text-foreground'
                   : 'text-muted-foreground hover:bg-surface-muted hover:text-foreground',
               )}
             >
-              <n.icon className="size-5" aria-hidden /> {n.label}
+              <n.icon className="size-4" aria-hidden /> {n.label}
             </Link>
           );
         })}
       </nav>
-      <div className="mt-auto">
+      <div className="mt-auto border-t border-border pt-3">
         <UserMenu />
       </div>
     </aside>
@@ -253,9 +255,7 @@ function BottomNav() {
                 aria-current={isActive(pathname, n.href) ? 'page' : undefined}
                 className={cn(
                   'flex min-h-14 min-w-14 flex-col items-center justify-center gap-1 text-[11px] font-medium',
-                  isActive(pathname, n.href)
-                    ? 'text-forest dark:text-lime'
-                    : 'text-muted-foreground',
+                  isActive(pathname, n.href) ? 'text-foreground' : 'text-muted-foreground',
                 )}
               >
                 <n.icon className="size-5" aria-hidden />
@@ -263,7 +263,7 @@ function BottomNav() {
                 <span
                   className={cn(
                     'size-1 rounded-full',
-                    isActive(pathname, n.href) ? 'bg-forest dark:bg-lime' : 'bg-transparent',
+                    isActive(pathname, n.href) ? 'bg-accent' : 'bg-transparent',
                   )}
                 />
               </Link>
@@ -274,9 +274,9 @@ function BottomNav() {
                 type="button"
                 onClick={() => openAdd('expense')}
                 aria-label="Add expense"
-                className="-mt-6 flex size-14 items-center justify-center rounded-full bg-lime text-forest shadow-[var(--shadow-float)] active:scale-95"
+                className="flex size-11 items-center justify-center rounded-xl bg-primary text-primary-foreground active:opacity-90"
               >
-                <Plus className="size-6" strokeWidth={2.5} aria-hidden />
+                <Plus className="size-5" strokeWidth={2} aria-hidden />
               </button>
             </li>
           ),
@@ -299,7 +299,9 @@ export function AppShell({ children }: { children: ReactNode }) {
         <Sidebar />
         {/* Remount on currency change so every amount re-formats. */}
         <Fragment key={currency}>
-          <div className="min-w-0 flex-1 pb-28 lg:pb-10">{children}</div>
+          <div className="min-w-0 flex-1 pb-28 lg:pb-12">
+            <div className="mx-auto w-full max-w-6xl">{children}</div>
+          </div>
         </Fragment>
       </div>
       <BottomNav />
@@ -317,10 +319,10 @@ export function PageHeader({
   action?: ReactNode;
 }) {
   return (
-    <header className="flex flex-wrap items-end justify-between gap-4 px-4 pb-2 pt-6 sm:px-8 sm:pt-10">
+    <header className="flex flex-wrap items-end justify-between gap-4 px-4 pb-2 pt-6 sm:px-8 sm:pt-8">
       <div>
-        <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">{title}</h1>
-        {subtitle && <p className="mt-1 text-muted-foreground">{subtitle}</p>}
+        <h1 className="text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+        {subtitle && <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>}
       </div>
       {action}
     </header>

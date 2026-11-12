@@ -267,12 +267,12 @@ export default function AnalyticsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
-            tintColor={palette.forestMid}
+            tintColor={palette.cobalt}
           />
         }
       >
         <View className="flex-row items-center justify-between px-5 pt-4">
-          <Text weight="extrabold" className="text-[28px]" accessibilityRole="header">
+          <Text weight="semibold" className="text-2xl tracking-tight" accessibilityRole="header">
             Analytics
           </Text>
           <Segmented
@@ -310,7 +310,7 @@ export default function AnalyticsScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={`${k === 'from' ? 'Start' : 'End'} date, ${custom[k]}`}
                   onPress={() => setCustomPicker(k)}
-                  className="h-11 flex-1 items-center justify-center rounded-full bg-surface"
+                  className="h-11 flex-1 items-center justify-center rounded-xl border border-border bg-surface"
                 >
                   <Text weight="semibold" className="text-sm">
                     {formatDate(parseDateInTz(custom[k], tz), tz)}
@@ -324,7 +324,7 @@ export default function AnalyticsScreen() {
                 accessibilityRole="button"
                 accessibilityLabel={`Previous ${period}`}
                 onPress={() => setAnchor((a) => shiftDateString(a, period, -1, tz))}
-                className="h-11 w-11 items-center justify-center rounded-full bg-surface"
+                className="h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface"
               >
                 <ChevronLeft size={18} color={colors.text} />
               </Pressable>
@@ -335,7 +335,7 @@ export default function AnalyticsScreen() {
                 }
                 disabled={period !== 'month'}
                 onPress={() => setMonthPicker(true)}
-                className="h-11 min-w-40 flex-row items-center justify-center gap-1 rounded-full bg-surface px-4"
+                className="h-11 min-w-40 flex-row items-center justify-center gap-1 rounded-xl border border-border bg-surface px-4"
               >
                 <Text weight="semibold" className="text-sm">
                   {anchorLabel}
@@ -348,7 +348,7 @@ export default function AnalyticsScreen() {
                 disabled={range.to >= today}
                 onPress={() => setAnchor((a) => shiftDateString(a, period, 1, tz))}
                 className={cn(
-                  'h-11 w-11 items-center justify-center rounded-full bg-surface',
+                  'h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface',
                   range.to >= today && 'opacity-30',
                 )}
               >
@@ -368,7 +368,7 @@ export default function AnalyticsScreen() {
               {change !== null ? (
                 <View
                   className={cn(
-                    'mt-1 self-start rounded-full px-2.5 py-1',
+                    'mt-1 self-start rounded-md px-2 py-0.5',
                     good ? 'bg-income/10' : 'bg-expense/10',
                   )}
                 >

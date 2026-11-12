@@ -59,7 +59,7 @@ export default function ReportScreen() {
           accessibilityRole="button"
           accessibilityLabel="Previous month"
           onPress={() => setMonth(shiftDateString(monthStart, 'month', -1, tz).slice(0, 7))}
-          className="h-11 w-11 items-center justify-center rounded-full bg-surface"
+          className="h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface"
         >
           <ChevronLeft size={18} color={colors.text} />
         </Pressable>
@@ -72,7 +72,7 @@ export default function ReportScreen() {
           disabled={isCurrent}
           onPress={() => setMonth(shiftDateString(monthStart, 'month', 1, tz).slice(0, 7))}
           className={cn(
-            'h-11 w-11 items-center justify-center rounded-full bg-surface',
+            'h-11 w-11 items-center justify-center rounded-xl border border-border bg-surface',
             isCurrent && 'opacity-30',
           )}
         >
@@ -91,7 +91,7 @@ export default function ReportScreen() {
         <>
           <View className="flex-row flex-wrap gap-3">
             {[
-              { label: 'Spent', value: formatMoney(r.summary.totalExpense), cls: 'text-expense' },
+              { label: 'Spent', value: formatMoney(r.summary.totalExpense), cls: '' },
               { label: 'Income', value: formatMoney(r.summary.totalIncome), cls: 'text-income' },
               { label: 'Net', value: formatMoney(r.summary.net), cls: '' },
               { label: 'Per day', value: formatMoney(r.averagePerDay), cls: '' },
