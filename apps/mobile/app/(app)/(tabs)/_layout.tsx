@@ -111,9 +111,13 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
   );
 }
 
+// Module-level so the navigator sees the same identity on every render.
+const TAB_OPTIONS = { headerShown: false };
+const renderTabBar = (props: BottomTabBarProps) => <TabBar {...props} />;
+
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ headerShown: false }} tabBar={(props) => <TabBar {...props} />}>
+    <Tabs screenOptions={TAB_OPTIONS} tabBar={renderTabBar}>
       <Tabs.Screen name="index" />
       <Tabs.Screen name="analytics" />
       <Tabs.Screen name="add" />

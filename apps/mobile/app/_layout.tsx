@@ -13,7 +13,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SnackbarProvider } from '@/components/snackbar';
@@ -34,6 +34,12 @@ function RootNavigator() {
   // first check: unmounting the navigator later would throw the user back to /login
   // (e.g. while they switch to their email app to copy the code).
   const [booted, setBooted] = useState(false);
+  // Stable identity: Expo Router re-reports options whenever this object changes,
+  // and an inline object here caused "Maximum update depth exceeded".
+  const screenOptions = useMemo(
+    () => ({ headerShown: false, contentStyle: { backgroundColor: colors.background } }),
+    [colors.background],
+  );
 
   useEffect(() => {
     if (!isPending && !booted) {
@@ -47,9 +53,7 @@ function RootNavigator() {
   return (
     <>
       <StatusBar style={dark ? 'light' : 'dark'} />
-      <Stack
-        screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }}
-      >
+      <Stack screenOptions={screenOptions}>
         <Stack.Screen name="index" />
         <Stack.Protected guard={signedIn}>
           <Stack.Screen name="(app)" />

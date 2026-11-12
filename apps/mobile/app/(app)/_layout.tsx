@@ -2,7 +2,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { onlineManager, useQueryClient } from '@tanstack/react-query';
 import * as Notifications from 'expo-notifications';
 import { Stack, router } from 'expo-router';
-import { useEffect, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { AppState } from 'react-native';
 import { setDisplayCurrency } from '@paipai/shared/money';
 import { useSnackbar } from '@/components/snackbar';
@@ -84,33 +84,45 @@ function SessionEffects() {
   return null;
 }
 
+// Static per-screen options live outside render so their identity never changes.
+const withHeader = (title: string) => ({ headerShown: true, title });
+const SCREEN = {
+  transactions: withHeader('Transactions'),
+  item: withHeader(''),
+  recurring: withHeader('Recurring'),
+  categories: withHeader('Categories'),
+  report: withHeader('Monthly report'),
+  settings: withHeader('Settings'),
+  add: { presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' } as const,
+  welcome: { presentation: 'modal', gestureEnabled: false } as const,
+};
+
 export default function AppLayout() {
   const { colors } = useTheme();
+  const screenOptions = useMemo(
+    () => ({
+      headerShown: false,
+      contentStyle: { backgroundColor: colors.background },
+      headerStyle: { backgroundColor: colors.background },
+      headerTintColor: colors.text,
+      headerTitleStyle: { fontFamily: 'Inter_700Bold' },
+      headerShadowVisible: false,
+    }),
+    [colors.background, colors.text],
+  );
   return (
     <AppLockProvider>
       <SessionEffects />
-      <Stack
-        screenOptions={{
-          headerShown: false,
-          contentStyle: { backgroundColor: colors.background },
-          headerStyle: { backgroundColor: colors.background },
-          headerTintColor: colors.text,
-          headerTitleStyle: { fontFamily: 'Inter_700Bold' },
-          headerShadowVisible: false,
-        }}
-      >
+      <Stack screenOptions={screenOptions}>
         <Stack.Screen name="(tabs)" />
-        <Stack.Screen name="transactions" options={{ headerShown: true, title: 'Transactions' }} />
-        <Stack.Screen name="item/[title]" options={{ headerShown: true, title: '' }} />
-        <Stack.Screen name="recurring" options={{ headerShown: true, title: 'Recurring' }} />
-        <Stack.Screen name="categories" options={{ headerShown: true, title: 'Categories' }} />
-        <Stack.Screen name="report" options={{ headerShown: true, title: 'Monthly report' }} />
-        <Stack.Screen name="settings" options={{ headerShown: true, title: 'Settings' }} />
-        <Stack.Screen
-          name="add-transaction"
-          options={{ presentation: 'modal', headerShown: false, animation: 'slide_from_bottom' }}
-        />
-        <Stack.Screen name="welcome" options={{ presentation: 'modal', gestureEnabled: false }} />
+        <Stack.Screen name="transactions" options={SCREEN.transactions} />
+        <Stack.Screen name="item/[title]" options={SCREEN.item} />
+        <Stack.Screen name="recurring" options={SCREEN.recurring} />
+        <Stack.Screen name="categories" options={SCREEN.categories} />
+        <Stack.Screen name="report" options={SCREEN.report} />
+        <Stack.Screen name="settings" options={SCREEN.settings} />
+        <Stack.Screen name="add-transaction" options={SCREEN.add} />
+        <Stack.Screen name="welcome" options={SCREEN.welcome} />
       </Stack>
     </AppLockProvider>
   );

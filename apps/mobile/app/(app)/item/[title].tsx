@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
 import { ScrollView, View } from 'react-native';
 import {
   DEFAULT_TIMEZONE,
@@ -22,6 +23,8 @@ export default function ItemDetailScreen() {
   const tz = me?.timezone ?? DEFAULT_TIMEZONE;
   const categories = useCategoryMap();
   const q = useItemDetail(title);
+  const headerTitle = q.data?.title ?? title;
+  const headerOptions = useMemo(() => ({ title: headerTitle }), [headerTitle]);
   const d = q.data;
 
   const series: ChartPoint[] = (d?.series ?? []).map((p) => {
@@ -44,7 +47,7 @@ export default function ItemDetailScreen() {
 
   return (
     <ScrollView contentContainerClassName="gap-4 px-4 pb-10">
-      <Stack.Screen options={{ title: d?.title ?? title }} />
+      <Stack.Screen options={headerOptions} />
       {q.isError ? (
         q.error instanceof ApiError && q.error.status === 404 ? (
           <EmptyState title={`No entries for “${title}”`} />
