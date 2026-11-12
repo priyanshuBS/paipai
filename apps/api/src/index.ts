@@ -24,6 +24,21 @@ const server = serve({ fetch: app.fetch, port: env.PORT, hostname: '0.0.0.0' }, 
   });
 });
 
+// A second copy of the API (e.g. an old terminal) already holds the port:
+// say so plainly instead of crashing with a stack trace.
+server.on('error', (err: NodeJS.ErrnoException) => {
+  if (err.code !== 'EADDRINUSE') throw err;
+  logger.error('server.port_in_use', {
+    port: env.PORT,
+    hint:
+      process.platform === 'win32'
+        ? `Another process is using port ${env.PORT}. Stop the other API terminal, or run: Get-NetTCPConnection -LocalPort ${env.PORT} -State Listen | % { Stop-Process -Id $_.OwningProcess }`
+        : `Another process is using port ${env.PORT}. Stop the other API terminal, or run: lsof -ti :${env.PORT} | xargs kill`,
+  });
+  stopScheduler();
+  void close().finally(() => process.exit(1));
+});
+
 let stopping = false;
 async function shutdown(signal: string, code = 0) {
   if (stopping) return;
