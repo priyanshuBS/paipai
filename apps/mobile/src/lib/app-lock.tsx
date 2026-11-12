@@ -109,24 +109,25 @@ export function AppLockProvider({ children }: { children: ReactNode }) {
           style={{
             position: 'absolute',
             inset: 0,
-            backgroundColor: colors.background,
+            backgroundColor: colors.hero,
             alignItems: 'center',
             justifyContent: 'center',
             padding: 32,
           }}
         >
           <LogoMark size={48} />
-          <Text weight="semibold" className="mt-6 text-[22px] tracking-tight">
+          <Text weight="display" className="mt-6 text-[36px] leading-[40px] text-hero-foreground">
             PaiPai is locked
           </Text>
-          <Text muted className="mt-2 text-center">
+          <Text className="mt-2 text-center text-hero-muted">
             Unlock with your fingerprint, face or device passcode.
           </Text>
           <Button
             title="Unlock"
+            variant="brand"
             size="lg"
             className="mt-8 w-full"
-            icon={<Fingerprint size={18} color={colors.primaryForeground} />}
+            icon={<Fingerprint size={18} color={colors.brandForeground} />}
             onPress={() => void unlock()}
           />
         </View>

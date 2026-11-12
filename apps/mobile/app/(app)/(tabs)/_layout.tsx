@@ -46,15 +46,21 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
                 router.push('/add-transaction');
               }}
               style={{
-                width: 48,
-                height: 44,
-                borderRadius: 12,
-                backgroundColor: colors.primary,
+                width: 52,
+                height: 52,
+                borderRadius: 18,
+                marginTop: -14,
+                backgroundColor: colors.brand,
+                shadowColor: colors.brand,
+                shadowOpacity: 0.45,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 6 },
+                elevation: 6,
                 alignItems: 'center',
                 justifyContent: 'center',
               }}
             >
-              <Plus size={22} color={colors.primaryForeground} strokeWidth={2.25} />
+              <Plus size={24} color={colors.brandForeground} strokeWidth={2.5} />
             </Pressable>
           );
         }
@@ -95,7 +101,7 @@ function TabBar({ state, navigateToTab }: BottomTabBarProps) {
                 width: 16,
                 height: 2,
                 borderRadius: 1,
-                backgroundColor: focused ? colors.accent : 'transparent',
+                backgroundColor: focused ? colors.brand : 'transparent',
               }}
             />
           </Pressable>

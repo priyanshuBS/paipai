@@ -95,8 +95,8 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
 const SIZES = { sm: { box: 34, icon: 16 }, md: { box: 40, icon: 18 }, lg: { box: 52, icon: 24 } };
 
 /**
- * Category tile: neutral rounded square, icon drawn in the category's chart
- * colour (validated for contrast in light and dark). Identity without pastel blobs.
+ * Category tile: a soft tint of the category's chart colour behind the icon in
+ * full colour (validated palette, legible in light and dark).
  */
 export function CategoryIcon({
   icon,
@@ -107,9 +107,10 @@ export function CategoryIcon({
   color?: string | null;
   size?: keyof typeof SIZES;
 }) {
-  const { colors, dark } = useTheme();
+  const { dark } = useTheme();
   const Icon = (icon && CATEGORY_ICONS[icon]) || CircleHelp;
   const s = SIZES[size];
+  const tint = chartColorFor(color, dark ? 'dark' : 'light');
   return (
     <View
       accessibilityElementsHidden
@@ -117,19 +118,13 @@ export function CategoryIcon({
       style={{
         width: s.box,
         height: s.box,
-        borderRadius: s.box * 0.28,
-        backgroundColor: colors.surfaceMuted,
-        borderWidth: 1,
-        borderColor: colors.border,
+        borderRadius: s.box * 0.3,
+        backgroundColor: tint + (dark ? '2E' : '1A'),
         alignItems: 'center',
         justifyContent: 'center',
       }}
     >
-      <Icon
-        size={s.icon}
-        color={chartColorFor(color, dark ? 'dark' : 'light')}
-        strokeWidth={1.75}
-      />
+      <Icon size={s.icon} color={tint} strokeWidth={2} />
     </View>
   );
 }

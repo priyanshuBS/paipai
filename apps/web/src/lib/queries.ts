@@ -195,6 +195,8 @@ export function useBudgetMutations() {
     Promise.all([
       qc.invalidateQueries({ queryKey: ['budgets'] }),
       qc.invalidateQueries({ queryKey: ['report'] }),
+      // The overall monthly budget is mirrored on the account (users.monthly_budget).
+      qc.invalidateQueries({ queryKey: qk.me }),
     ]);
   return {
     create: useMutation({ mutationFn: api.createBudget, onSuccess: done }),

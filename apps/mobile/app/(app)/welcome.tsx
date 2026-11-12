@@ -27,7 +27,7 @@ export default function Welcome() {
           contentContainerClassName="flex-grow justify-center px-6 py-8"
         >
           <LogoMark size={40} />
-          <Text weight="semibold" className="mt-6 text-[26px] leading-8 tracking-tight">
+          <Text weight="display" className="mt-6 text-[38px] leading-[42px]">
             Welcome{first ? `, ${first}` : ''}
           </Text>
           <Text muted className="mb-8 mt-2 text-base">

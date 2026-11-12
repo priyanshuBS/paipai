@@ -7,7 +7,7 @@ export async function run(s) {
 
   await step('landing renders', async () => {
     await page.goto(web);
-    await page.getByRole('heading', { name: 'Know where every rupee goes.' }).waitFor();
+    await page.getByRole('heading', { level: 1, name: /Every rupee,\s*accounted for\./ }).waitFor();
     await shot('01-landing');
   });
 

@@ -34,10 +34,10 @@ function useChartColors() {
     grid: colors.border,
     axis: colors.textSecondary,
     /** Single-series colour: the accent; non-highlighted bars recede to neutral. */
-    line: colors.accent,
-    fill: colors.accent,
+    line: colors.brand,
+    fill: colors.brand,
     bar: colors.chartMuted,
-    barActive: colors.accent,
+    barActive: colors.brand,
     tipBg: colors.text,
     tipText: colors.background,
     neutral: chartPalette.neutral[dark ? 'dark' : 'light'],
@@ -127,7 +127,7 @@ export function AreaChart({ data, height = 190 }: { data: ChartPoint[]; height?:
           <Svg width={width} height={height}>
             <Defs>
               <LinearGradient id="ppArea" x1="0" y1="0" x2="0" y2="1">
-                <Stop offset="0" stopColor={c.fill} stopOpacity={c.dark ? 0.22 : 0.14} />
+                <Stop offset="0" stopColor={c.fill} stopOpacity={c.dark ? 0.3 : 0.22} />
                 <Stop offset="1" stopColor={c.fill} stopOpacity={0} />
               </LinearGradient>
             </Defs>

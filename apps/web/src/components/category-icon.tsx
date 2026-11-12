@@ -94,8 +94,9 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
 };
 
 /**
- * Category tile: neutral square, icon drawn in the category's chart colour
- * (validated for contrast in both themes). Identity without pastel blobs.
+ * Category tile: a soft tint of the category's chart colour behind the icon in
+ * full colour. Colours are the validated chart palette, so they stay legible
+ * in light and dark mode.
  */
 export function CategoryIcon({
   icon,
@@ -111,26 +112,30 @@ export function CategoryIcon({
   const Icon = (icon && CATEGORY_ICONS[icon]) || CircleHelp;
   const dims =
     size === 'sm'
-      ? 'size-8 rounded-md'
+      ? 'size-8 rounded-[9px]'
       : size === 'lg'
-        ? 'size-12 rounded-xl'
-        : 'size-9 rounded-lg';
+        ? 'size-12 rounded-2xl'
+        : 'size-10 rounded-xl';
   const iconDims = size === 'sm' ? 'size-4' : size === 'lg' ? 'size-6' : 'size-[18px]';
+  const light = chartColorFor(color, 'light');
+  const dark = chartColorFor(color, 'dark');
   const style = {
-    '--cat-light': chartColorFor(color, 'light'),
-    '--cat-dark': chartColorFor(color, 'dark'),
+    '--cat-light': light,
+    '--cat-dark': dark,
+    '--cat-light-bg': light + '1A',
+    '--cat-dark-bg': dark + '2E',
   } as CSSProperties;
   return (
     <span
       aria-hidden
       className={cn(
-        'flex shrink-0 items-center justify-center border border-border bg-surface-muted text-[var(--cat-light)] dark:text-[var(--cat-dark)]',
+        'flex shrink-0 items-center justify-center bg-[var(--cat-light-bg)] text-[var(--cat-light)] dark:bg-[var(--cat-dark-bg)] dark:text-[var(--cat-dark)]',
         dims,
         className,
       )}
       style={style}
     >
-      <Icon className={iconDims} strokeWidth={1.75} />
+      <Icon className={iconDims} strokeWidth={2} />
     </span>
   );
 }

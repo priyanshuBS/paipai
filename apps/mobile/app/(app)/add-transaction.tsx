@@ -465,7 +465,7 @@ function QuickAddForm({
                 display={Platform.OS === 'ios' ? 'inline' : 'default'}
                 maximumDate={new Date(Date.now() + 86_400_000)}
                 onChange={onPick}
-                accentColor={palette.cobalt}
+                accentColor={palette.saffron}
               />
             )}
             {picker && Platform.OS === 'ios' && (

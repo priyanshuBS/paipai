@@ -156,12 +156,13 @@ export function buildPdf(
   const INK = palette.ink;
   const MUTED = lightColors.textSecondary;
   const RULE = lightColors.border;
-  doc.roundedRect(left, 32, 26, 26, 6.5).fill(INK);
-  doc.roundedRect(left + 6.5, 39.5, 13, 3.25, 1.6).fill('#FAFAFA');
+  // Mark: saffron tile with two midnight ledger bars.
+  doc.roundedRect(left, 32, 26, 26, 7.5).fill(palette.saffron);
+  doc.roundedRect(left + 6.5, 39.5, 13, 3.25, 1.6).fill(INK);
   doc
     .roundedRect(left + 6.5, 47, 7.6, 3.25, 1.6)
-    .fillOpacity(0.6)
-    .fill('#FAFAFA')
+    .fillOpacity(0.55)
+    .fill(INK)
     .fillOpacity(1);
   doc
     .fillColor(INK)
@@ -239,7 +240,9 @@ export function buildPdf(
     for (const [name, total] of [...byCat.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8)) {
       const pct = expense ? total / expense : 0;
       doc.fillColor(INK).font('Inter').fontSize(9.5).text(name, left, y, { width: 150 });
-      doc.roundedRect(left + 155, y + 3, (right - left - 260) * pct + 2, 6, 3).fill(palette.cobalt);
+      doc
+        .roundedRect(left + 155, y + 3, (right - left - 260) * pct + 2, 6, 3)
+        .fill(palette.saffron);
       doc.fillColor(INK).text(`${fmt(total)}  ·  ${Math.round(pct * 1000) / 10}%`, right - 100, y, {
         width: 100,
         align: 'right',

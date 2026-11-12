@@ -110,7 +110,11 @@ export default function Profile() {
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top']}>
       <ScrollView contentContainerClassName="gap-4 px-4 pb-10 pt-4">
-        <Text weight="semibold" className="px-1 text-2xl tracking-tight" accessibilityRole="header">
+        <Text
+          weight="display"
+          className="px-1 text-[34px] leading-[40px]"
+          accessibilityRole="header"
+        >
           Profile
         </Text>
 

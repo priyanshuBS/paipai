@@ -7,7 +7,7 @@
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "userInterfaceStyle": "automatic",
-    "backgroundColor": "#FAFAFA",
+    "backgroundColor": "#F7F6F3",
     "ios": {
       "bundleIdentifier": "com.paipai.app",
       "supportsTablet": false,
@@ -20,7 +20,7 @@
       "package": "com.paipai.app",
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#18181B"
+        "backgroundColor": "#F26B1D"
       },
       "softwareKeyboardLayoutMode": "resize"
     },
@@ -33,10 +33,10 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 96,
           "resizeMode": "contain",
-          "backgroundColor": "#FAFAFA",
+          "backgroundColor": "#0B1020",
           "dark": {
             "image": "./assets/images/splash-icon-dark.png",
-            "backgroundColor": "#09090B"
+            "backgroundColor": "#0B1020"
           }
         }
       ],
@@ -48,7 +48,7 @@
         "expo-notifications",
         {
           "icon": "./assets/images/notification-icon.png",
-          "color": "#2E5BDA"
+          "color": "#F26B1D"
         }
       ],
       [

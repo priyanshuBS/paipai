@@ -18,13 +18,17 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-type Weight = 'regular' | 'medium' | 'semibold' | 'bold' | 'extrabold';
+type Weight =
+  'regular' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'display' | 'display-italic';
 const WEIGHT: Record<Weight, string> = {
   regular: 'font-inter',
   medium: 'font-inter-medium',
   semibold: 'font-inter-semibold',
   bold: 'font-inter-bold',
   extrabold: 'font-inter-extrabold',
+  /** Editorial serif (Instrument Serif) for titles only, never for amounts. */
+  display: 'font-display',
+  'display-italic': 'font-display-italic',
 };
 
 export interface TextProps extends RNTextProps {
@@ -44,10 +48,13 @@ export function Text({ weight = 'regular', muted, className, ...props }: TextPro
   );
 }
 
-type ButtonVariant = 'primary' | 'secondary' | 'soft' | 'outline' | 'ghost' | 'destructive';
+type ButtonVariant =
+  'primary' | 'brand' | 'hero' | 'secondary' | 'soft' | 'outline' | 'ghost' | 'destructive';
 
 const BTN: Record<ButtonVariant, { box: string; text: string }> = {
   primary: { box: 'bg-primary', text: 'text-primary-foreground' },
+  brand: { box: 'bg-brand', text: 'text-brand-foreground' },
+  hero: { box: 'border border-hero-border bg-hero-surface', text: 'text-hero-foreground' },
   secondary: { box: 'border border-border-strong bg-surface', text: 'text-foreground' },
   soft: { box: 'bg-accent-soft', text: 'text-accent' },
   outline: { box: 'border border-border-strong bg-surface', text: 'text-foreground' },
@@ -83,7 +90,7 @@ export function Button({
       accessibilityState={{ disabled: !!(disabled || loading), busy: !!loading }}
       disabled={disabled || loading}
       className={cn(
-        'flex-row items-center justify-center gap-2 rounded-xl px-5 active:opacity-80',
+        'flex-row items-center justify-center gap-2 rounded-2xl px-5 active:opacity-80',
         size === 'lg' ? 'h-[52px]' : 'h-12',
         v.box,
         (disabled || loading) && 'opacity-50',
@@ -134,6 +141,13 @@ export function Card({ className, ...props }: ViewProps & { className?: string }
   return (
     <View
       className={cn('rounded-card border border-border bg-surface p-4', className)}
+      style={{
+        shadowColor: '#0B1020',
+        shadowOpacity: 0.05,
+        shadowRadius: 8,
+        shadowOffset: { width: 0, height: 2 },
+        elevation: 1,
+      }}
       {...props}
     />
   );
@@ -193,14 +207,14 @@ export function Chip({
       accessibilityState={{ selected: !!selected }}
       onPress={onPress}
       className={cn(
-        'h-10 min-w-11 flex-row items-center justify-center gap-1.5 rounded-lg border px-3.5',
-        selected ? 'border-accent bg-accent-soft' : 'border-border bg-surface',
+        'h-10 min-w-11 flex-row items-center justify-center gap-1.5 rounded-full border px-4',
+        selected ? 'border-transparent bg-primary' : 'border-border bg-surface',
       )}
     >
       {left}
       <Text
         weight="medium"
-        className={cn('text-sm', selected ? 'text-accent' : 'text-muted-foreground')}
+        className={cn('text-sm', selected ? 'text-primary-foreground' : 'text-muted-foreground')}
       >
         {label}
       </Text>

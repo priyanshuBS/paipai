@@ -49,10 +49,10 @@ export function useChartTheme() {
     axis: c.textSecondary,
     text: c.text,
     /** Single-series colour: the accent. Other bars recede to a neutral. */
-    line: c.accent,
-    fill: c.accent,
+    line: c.brand,
+    fill: c.brand,
     bar: c.chartMuted,
-    barActive: c.accent,
+    barActive: c.brand,
     neutral: chartPalette.neutral[dark ? 'dark' : 'light'],
   };
 }
@@ -165,7 +165,7 @@ export function SpendAreaChart({ data, height = 220 }: { data: ChartPoint[]; hei
         <AreaChart data={data} margin={{ top: 12, right: 8, bottom: 0, left: 0 }}>
           <defs>
             <linearGradient id={`fill-${gid}`} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={t.fill} stopOpacity={t.dark ? 0.22 : 0.14} />
+              <stop offset="0%" stopColor={t.fill} stopOpacity={t.dark ? 0.3 : 0.22} />
               <stop offset="100%" stopColor={t.fill} stopOpacity={0} />
             </linearGradient>
           </defs>

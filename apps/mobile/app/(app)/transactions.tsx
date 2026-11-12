@@ -183,7 +183,7 @@ export default function TransactionsScreen() {
             <RefreshControl
               refreshing={refreshing}
               onRefresh={() => void onRefresh()}
-              tintColor={palette.cobalt}
+              tintColor={palette.saffron}
             />
           }
           onEndReachedThreshold={0.5}
@@ -252,7 +252,7 @@ export default function TransactionsScreen() {
           }
           ListFooterComponent={
             query.isFetchingNextPage ? (
-              <ActivityIndicator className="py-6" color={palette.cobalt} />
+              <ActivityIndicator className="py-6" color={palette.saffron} />
             ) : !query.hasNextPage && items.length > 10 ? (
               <Text muted className="py-6 text-center text-sm">
                 You&apos;ve reached the end

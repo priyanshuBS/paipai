@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { Check } from 'lucide-react';
 import { Logo } from '@/components/brand';
+import { Sparkline } from '@/components/charts/mini';
 
 const points = [
   'Log an expense in a few seconds, on web or phone',
@@ -9,7 +10,9 @@ const points = [
   'Budgets that warn you before you overspend',
 ];
 
-/** Quiet brand panel on desktop, compact header on phones. */
+const trend = [220, 180, 410, 260, 300, 520, 240, 380, 290, 610, 330, 420, 300, 480, 390, 700];
+
+/** Midnight brand panel on desktop, compact header on phones. */
 export function AuthShell({
   title,
   subtitle,
@@ -22,36 +25,48 @@ export function AuthShell({
   footer?: ReactNode;
 }) {
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1fr_1.1fr]">
-      <aside className="hidden flex-col justify-between border-r border-border bg-background p-10 lg:flex">
-        <Link href="/" aria-label="PaiPai home" className="w-fit">
-          <Logo />
+    <div className="grid min-h-dvh bg-background lg:grid-cols-[1fr_1.05fr]">
+      <aside className="relative hidden flex-col justify-between overflow-hidden bg-hero p-10 text-hero-foreground lg:flex">
+        <div aria-hidden className="ledger-grid absolute inset-0" />
+        <div aria-hidden className="saffron-glow absolute inset-0" />
+        <Link href="/" aria-label="PaiPai home" className="relative w-fit">
+          <Logo className="text-hero-foreground" />
         </Link>
-        <div className="max-w-sm">
-          <p className="text-sm font-medium text-accent">Paai-paai ka hisaab</p>
-          <p className="mt-3 text-3xl font-semibold leading-tight tracking-tight">
-            Every rupee accounted for.
+
+        <div className="relative max-w-md">
+          <p className="font-display text-[3.25rem] leading-[1.02] tracking-[-0.02em]">
+            Every rupee,
+            <br />
+            <em className="text-brand">accounted for.</em>
           </p>
           <ul className="mt-8 space-y-3">
             {points.map((p) => (
-              <li key={p} className="flex gap-3 text-sm text-muted-foreground">
-                <Check className="mt-0.5 size-4 shrink-0 text-foreground" aria-hidden />
+              <li key={p} className="flex gap-3 text-sm text-hero-muted">
+                <Check className="mt-0.5 size-4 shrink-0 text-brand" aria-hidden />
                 {p}
               </li>
             ))}
           </ul>
+
+          <div className="mt-10 rounded-2xl border border-hero-border bg-hero-surface/80 p-5 backdrop-blur">
+            <p className="text-xs text-hero-muted">Spent in November</p>
+            <p className="tabular mt-1 text-3xl font-semibold tracking-tight">₹12,480</p>
+            <Sparkline values={trend} className="mt-3 h-14" label="" />
+          </div>
         </div>
-        <p className="text-xs text-muted-foreground">
+
+        <p className="relative text-xs text-hero-muted">
           No bank connection needed. Your data is never sold or shared.
         </p>
       </aside>
-      <main className="flex flex-col bg-surface px-4 py-6 sm:px-8">
+
+      <main className="flex flex-col px-4 py-6 sm:px-8">
         <Link href="/" className="w-fit lg:hidden" aria-label="PaiPai home">
           <Logo />
         </Link>
         <div className="mx-auto flex w-full max-w-sm flex-1 flex-col justify-center py-10">
-          <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
-          <div className="mt-1.5 text-sm text-muted-foreground">{subtitle}</div>
+          <h1 className="font-display text-[2.6rem] leading-[1.05] tracking-[-0.01em]">{title}</h1>
+          <div className="mt-2 text-sm text-muted-foreground">{subtitle}</div>
           <div className="mt-8">{children}</div>
           {footer && <div className="mt-8 text-center text-sm text-muted-foreground">{footer}</div>}
         </div>

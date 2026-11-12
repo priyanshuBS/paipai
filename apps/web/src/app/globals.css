@@ -27,6 +27,34 @@
   }
 }
 
+@layer utilities {
+  /* Signature textures for the midnight hero surfaces only. */
+  .ledger-grid {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.035) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .saffron-glow {
+    background-image: radial-gradient(
+      55% 70% at 88% 0%,
+      rgb(var(--pp-brand) / 0.32),
+      transparent 70%
+    );
+  }
+  .saffron-glow-soft {
+    background-image: radial-gradient(
+      70% 40% at 100% 0%,
+      rgb(var(--pp-brand) / 0.16),
+      transparent 70%
+    );
+  }
+  .font-display {
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

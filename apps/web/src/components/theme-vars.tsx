@@ -17,10 +17,11 @@ function vars(colors: Record<string, string>): string {
 /** Emits the shared design tokens as CSS variables (single source of truth: @paipai/shared). */
 export function ThemeVars() {
   const css =
-    `:root{${vars({ ...lightColors })}color-scheme:light;--radius-card:12px;` +
-    // Elevation is reserved for things that float (menus, dialogs, toasts).
-    `--shadow-pop:0 1px 2px rgb(9 9 11/.05),0 12px 32px -8px rgb(9 9 11/.16)}` +
+    `:root{${vars({ ...lightColors })}color-scheme:light;--radius-card:16px;` +
+    `--shadow-card:0 1px 2px rgb(11 16 32/.04),0 2px 8px -2px rgb(11 16 32/.05);` +
+    `--shadow-pop:0 1px 2px rgb(11 16 32/.06),0 16px 40px -12px rgb(11 16 32/.22)}` +
     `.dark{${vars({ ...darkColors })}color-scheme:dark;` +
-    `--shadow-pop:0 1px 2px rgb(0 0 0/.4),0 12px 32px -8px rgb(0 0 0/.6)}`;
+    `--shadow-card:0 1px 2px rgb(0 0 0/.3);` +
+    `--shadow-pop:0 1px 2px rgb(0 0 0/.4),0 16px 40px -12px rgb(0 0 0/.7)}`;
   return <style id="pp-theme" dangerouslySetInnerHTML={{ __html: css }} />;
 }

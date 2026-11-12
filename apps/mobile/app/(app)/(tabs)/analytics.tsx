@@ -267,12 +267,12 @@ export default function AnalyticsScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={() => void onRefresh()}
-            tintColor={palette.cobalt}
+            tintColor={palette.saffron}
           />
         }
       >
         <View className="flex-row items-center justify-between px-5 pt-4">
-          <Text weight="semibold" className="text-2xl tracking-tight" accessibilityRole="header">
+          <Text weight="display" className="text-[34px] leading-[40px]" accessibilityRole="header">
             Analytics
           </Text>
           <Segmented

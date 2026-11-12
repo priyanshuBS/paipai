@@ -5,17 +5,23 @@ import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 export const buttonVariants = cva(
-  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg font-medium transition-colors disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
+  'inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[10px] font-medium transition-[background-color,border-color,color,box-shadow,transform] active:translate-y-px disabled:pointer-events-none disabled:opacity-50 [&_svg]:size-4 [&_svg]:shrink-0',
   {
     variants: {
       variant: {
-        /** Ink button (white in dark mode): the one main action on a screen. */
-        primary: 'bg-primary text-primary-foreground hover:bg-primary/90',
+        /** Midnight ink button (paper in dark mode): the main action on a screen. */
+        primary:
+          'bg-primary text-primary-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.12),0_1px_2px_rgb(11_16_32/.2)] hover:bg-primary/90',
+        /** Saffron brand button: hero and marketing calls to action. */
+        brand:
+          'bg-brand text-brand-foreground shadow-[inset_0_1px_0_rgb(255_255_255/.25),0_1px_2px_rgb(11_16_32/.2)] hover:brightness-105',
         /** Bordered neutral button for secondary actions. */
         secondary:
-          'border border-border bg-surface text-foreground hover:border-border-strong hover:bg-surface-muted',
+          'border border-border bg-surface text-foreground shadow-[var(--shadow-card)] hover:border-border-strong hover:bg-surface-muted',
         /** Accent-tinted button for a highlighted secondary action. */
         soft: 'bg-accent-soft text-accent hover:bg-accent/15',
+        /** For use on the midnight hero surfaces. */
+        hero: 'border border-hero-border bg-hero-surface text-hero-foreground hover:bg-hero-border',
         outline:
           'border border-border bg-surface text-foreground hover:border-border-strong hover:bg-surface-muted',
         ghost: 'text-foreground hover:bg-surface-muted',

@@ -12,7 +12,10 @@ export const Card = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div
       ref={ref}
-      className={cn('rounded-card border border-border bg-surface p-5', className)}
+      className={cn(
+        'rounded-card border border-border bg-surface p-5 shadow-[var(--shadow-card)]',
+        className,
+      )}
       {...props}
     />
   ),
@@ -44,7 +47,7 @@ export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputE
     <input
       ref={ref}
       className={cn(
-        'h-10 w-full rounded-lg border border-border-strong bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-60 aria-[invalid=true]:border-expense',
+        'h-10 w-full rounded-[10px] border border-border-strong bg-surface px-3 text-sm text-foreground placeholder:text-muted-foreground transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20 disabled:opacity-60 aria-[invalid=true]:border-expense',
         className,
       )}
       {...props}
@@ -58,7 +61,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
     <select
       ref={ref}
       className={cn(
-        'h-10 rounded-lg border border-border-strong bg-surface pl-3 pr-9 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20',
+        'h-10 rounded-[10px] border border-border-strong bg-surface pl-3 pr-9 text-sm text-foreground focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20',
         className,
       )}
       {...props}
@@ -101,7 +104,7 @@ export function Chip({
       type="button"
       aria-pressed={selected}
       className={cn(
-        'inline-flex h-8 min-w-10 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium transition-colors',
+        'inline-flex h-8 min-w-10 items-center justify-center gap-1.5 rounded-full border px-3.5 text-sm font-medium transition-colors',
         selected
           ? 'border-accent bg-accent-soft text-accent'
           : 'border-border bg-surface text-muted-foreground hover:border-border-strong hover:text-foreground',

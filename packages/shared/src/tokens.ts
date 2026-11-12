@@ -2,19 +2,21 @@
  * PaiPai design tokens. Single source of truth for colours, radii, spacing and
  * typography, consumed by the Tailwind (web) and NativeWind (mobile) configs.
  *
- * Direction: neutral and quiet. Zinc surfaces with hairline borders, ink for
- * primary actions, one cobalt accent (links, focus, selection, main chart
- * series). Green only means income; red only means over-budget or errors.
+ * Direction, "midnight ledger": a warm paper canvas, midnight-navy ink and hero
+ * surfaces, and one saffron brand accent. Green only means income; red only
+ * means over-budget or errors; yellow only means "getting close".
  */
 
 export const palette = {
-  ink: '#18181B',
+  ink: '#0B1020',
   white: '#FFFFFF',
-  cobalt: '#2E5BDA',
-  cobaltLight: '#7C9CF5',
+  /** Brand saffron, for fills, highlights and the main chart series. */
+  saffron: '#F26B1D',
+  /** Darker saffron that passes AA as text on white. */
+  saffronDeep: '#C2410C',
   expense: '#DC2626',
   income: '#15803D',
-  warning: '#B45309',
+  warning: '#A16207',
 } as const;
 
 export interface ThemeColors {
@@ -26,57 +28,82 @@ export interface ThemeColors {
   borderStrong: string;
   text: string;
   textSecondary: string;
-  /** Primary action (buttons): ink in light mode, near-white in dark mode. */
+  /** Primary action (buttons): midnight ink in light mode, paper in dark mode. */
   primary: string;
   primaryForeground: string;
-  /** The single accent: links, focus rings, selected states, main chart series. */
+  /** Text-safe brand colour: links, focus rings, selected states. */
   accent: string;
   accentForeground: string;
   accentSoft: string;
+  /** Brand saffron fill: highlights, chart series, the add button. */
+  brand: string;
+  brandForeground: string;
   /** Negative / danger (over budget, errors, destructive). Not used for ordinary expenses. */
   expense: string;
   income: string;
   warning: string;
   /** Neutral fill for chart bars that aren't highlighted. */
   chartMuted: string;
+  /** The midnight "ledger" surfaces (hero cards, sidebar), same in both themes. */
+  hero: string;
+  heroSurface: string;
+  heroBorder: string;
+  heroText: string;
+  heroMuted: string;
 }
 
+const hero = {
+  hero: '#0B1020',
+  heroSurface: '#151C36',
+  heroBorder: '#252E50',
+  heroText: '#F7F6F3',
+  heroMuted: '#9AA1B9',
+};
+
 export const lightColors: ThemeColors = {
-  background: '#FAFAFA',
+  background: '#F7F6F3',
   surface: '#FFFFFF',
-  surfaceMuted: '#F4F4F5',
-  border: '#E4E4E7',
-  borderStrong: '#D4D4D8',
-  text: '#09090B',
-  textSecondary: '#71717A',
+  surfaceMuted: '#F1EFEA',
+  border: '#E8E5DE',
+  borderStrong: '#D6D2C8',
+  text: '#0B1020',
+  textSecondary: '#6B6A72',
   primary: palette.ink,
-  primaryForeground: '#FAFAFA',
-  accent: palette.cobalt,
+  primaryForeground: '#FFFFFF',
+  accent: palette.saffronDeep,
   accentForeground: '#FFFFFF',
-  accentSoft: '#EEF2FC',
+  accentSoft: '#FDEEE3',
+  brand: palette.saffron,
+  brandForeground: palette.ink,
   expense: palette.expense,
   income: palette.income,
   warning: palette.warning,
-  chartMuted: '#E4E4E7',
+  chartMuted: '#E8E5DE',
+  ...hero,
 };
 
 export const darkColors: ThemeColors = {
-  background: '#09090B',
-  surface: '#111113',
-  surfaceMuted: '#1C1C1F',
-  border: '#27272A',
-  borderStrong: '#3F3F46',
-  text: '#FAFAFA',
-  textSecondary: '#A1A1AA',
-  primary: '#FAFAFA',
-  primaryForeground: '#09090B',
-  accent: palette.cobaltLight,
-  accentForeground: '#09090B',
-  accentSoft: '#172038',
+  background: '#070A14',
+  surface: '#0E1324',
+  surfaceMuted: '#161C31',
+  border: '#212945',
+  borderStrong: '#323C5E',
+  text: '#F4F3EF',
+  textSecondary: '#9A9DAD',
+  primary: '#F4F3EF',
+  primaryForeground: palette.ink,
+  accent: '#FF9A57',
+  accentForeground: palette.ink,
+  accentSoft: '#2B1B12',
+  brand: '#FF8A3D',
+  brandForeground: palette.ink,
   expense: '#F87171',
   income: '#4ADE80',
-  warning: '#FBBF24',
-  chartMuted: '#27272A',
+  warning: '#FACC15',
+  chartMuted: '#212945',
+  ...hero,
+  hero: '#10162C',
+  heroSurface: '#1A2242',
 };
 
 /** Category identity colours (stored per category). Rendered through chartColorFor() so they stay legible. */
@@ -98,10 +125,10 @@ export const categoryColors = [
 ] as const;
 
 export const radii = {
-  sm: 6,
-  md: 8,
-  lg: 12,
-  xl: 16,
+  sm: 8,
+  md: 10,
+  lg: 14,
+  xl: 20,
   pill: 9999,
 } as const;
 
@@ -116,6 +143,8 @@ export const spacing = {
 
 export const typography = {
   fontFamily: 'Inter',
+  /** Editorial serif for headlines and hero titles (never for amounts: no ₹ glyph). */
+  displayFamily: 'Instrument Serif',
   balance: { size: 34, weight: '600' },
   h1: { size: 24, weight: '600' },
   h2: { size: 18, weight: '600' },

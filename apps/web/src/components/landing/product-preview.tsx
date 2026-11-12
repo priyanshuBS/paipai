@@ -1,12 +1,26 @@
 import { ChartColumn, FileText, House, ListOrdered, Plus, Repeat, Target } from 'lucide-react';
-import { LogoMark } from '@/components/brand';
+import { chartColorFor } from '@paipai/shared/tokens';
 import { CategoryIcon } from '@/components/category-icon';
+import { Logo } from '@/components/brand';
+import { Ring, Sparkline } from '@/components/charts/mini';
 import { cn } from '@/lib/utils';
 
 /**
- * Static, non-interactive rendering of the real dashboard, used on the landing
- * page instead of a stock phone mockup. Built from the same tokens and pieces.
+ * Static rendering of the real dashboard for the landing page, built from the
+ * same components and tokens as the app (not a stock mockup).
  */
+
+const trend = [
+  220, 180, 410, 260, 300, 520, 240, 380, 290, 610, 330, 420, 300, 260, 480, 350, 390, 700, 420,
+  380,
+];
+
+const cats = [
+  { name: 'Food & Dining', icon: 'utensils', color: '#FFB38A', amount: '₹4,120', pct: 33 },
+  { name: 'Travel', icon: 'bus', color: '#7CC4FA', amount: '₹2,860', pct: 23 },
+  { name: 'Groceries', icon: 'shopping-basket', color: '#9BE3A8', amount: '₹2,240', pct: 18 },
+  { name: 'Bills & Utilities', icon: 'receipt', color: '#FFD66B', amount: '₹1,780', pct: 14 },
+];
 
 const recent = [
   {
@@ -44,12 +58,8 @@ const recent = [
   },
 ];
 
-// Smooth-ish daily spend curve for the month (viewBox 0..300 x 0..80).
-const LINE =
-  'M0,62 C15,60 25,48 40,50 S65,64 80,58 S105,30 120,34 S145,56 160,52 S185,40 200,44 S225,20 240,24 S270,46 300,38';
-
 const nav = [
-  { label: 'Overview', icon: House, active: true },
+  { label: 'Home', icon: House, active: true },
   { label: 'Transactions', icon: ListOrdered },
   { label: 'Analytics', icon: ChartColumn },
   { label: 'Budgets', icon: Target },
@@ -61,125 +71,129 @@ export function ProductPreview({ className }: { className?: string }) {
   return (
     <div
       role="img"
-      aria-label="PaiPai dashboard: ₹12,480 spent this month, recent transactions and budget progress"
+      aria-label="PaiPai dashboard: ₹12,480 spent this month, a daily trend, top categories, budget progress and recent transactions"
       className={cn(
-        'overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow-pop)]',
+        'overflow-hidden rounded-2xl border border-hero-border/60 bg-surface shadow-[0_40px_80px_-30px_rgb(11_16_32/.55)] ring-1 ring-black/5',
         className,
       )}
     >
-      {/* Window chrome */}
-      <div aria-hidden className="flex items-center gap-1.5 border-b border-border px-4 py-2.5">
-        <span className="size-2.5 rounded-full bg-border-strong" />
-        <span className="size-2.5 rounded-full bg-border-strong" />
-        <span className="size-2.5 rounded-full bg-border-strong" />
-        <span className="mx-auto rounded-md bg-surface-muted px-3 py-0.5 text-[11px] text-muted-foreground">
-          paipai.priyanshusingh.co.in
-        </span>
-      </div>
-
       <div aria-hidden className="flex text-left">
         {/* Sidebar */}
-        <div className="hidden w-48 shrink-0 flex-col gap-0.5 border-r border-border bg-background p-3 md:flex">
-          <div className="mb-3 flex items-center gap-2 px-2 py-1">
-            <LogoMark className="size-5 text-foreground" title="" />
-            <span className="text-sm font-semibold">PaiPai</span>
-          </div>
-          <div className="mb-3 flex h-8 items-center gap-2 rounded-lg bg-primary px-2.5 text-xs font-medium text-primary-foreground">
+        <div className="saffron-glow-soft hidden w-48 shrink-0 flex-col gap-0.5 bg-hero p-3 md:flex">
+          <Logo
+            className="mb-4 px-2 py-1 text-hero-foreground [&>span]:text-sm"
+            markClassName="size-5"
+          />
+          <div className="mb-4 flex h-8 items-center gap-2 rounded-lg bg-brand px-2.5 text-xs font-medium text-brand-foreground">
             <Plus className="size-3.5" /> Add expense
           </div>
           {nav.map((n) => (
             <div
               key={n.label}
               className={cn(
-                'flex h-8 items-center gap-2 rounded-md px-2.5 text-xs',
+                'relative flex h-8 items-center gap-2 rounded-lg px-2.5 text-xs',
                 n.active
-                  ? 'bg-surface font-medium text-foreground shadow-sm ring-1 ring-border'
-                  : 'text-muted-foreground',
+                  ? 'bg-hero-surface font-medium text-hero-foreground before:absolute before:inset-y-2 before:left-0 before:w-[2px] before:rounded-full before:bg-brand'
+                  : 'text-hero-muted',
               )}
             >
-              <n.icon className="size-3.5" /> {n.label}
+              <n.icon className={cn('size-3.5', n.active && 'text-brand')} /> {n.label}
             </div>
           ))}
         </div>
 
         {/* Content */}
         <div className="min-w-0 flex-1 bg-background p-4 sm:p-6">
-          <p className="text-base font-semibold tracking-tight">Good morning, Priya</p>
-          <p className="text-xs text-muted-foreground">Thursday, 12 November</p>
+          <p className="font-display text-2xl leading-none">Good morning, Priya</p>
+          <p className="mt-1 text-[11px] text-muted-foreground">Thursday, 12 November</p>
 
           <div className="mt-4 grid gap-3 lg:grid-cols-[1.6fr_1fr]">
-            <div className="rounded-lg border border-border bg-surface p-4">
-              <p className="text-xs text-muted-foreground">Spent in November</p>
-              <p className="tabular mt-0.5 text-2xl font-semibold tracking-tight">₹12,480</p>
-              <svg viewBox="0 0 300 80" className="mt-2 h-16 w-full" preserveAspectRatio="none">
-                <path d={`${LINE} L300,80 L0,80 Z`} className="fill-accent/10" />
-                <path
-                  d={LINE}
-                  className="stroke-accent"
-                  fill="none"
-                  strokeWidth="2"
-                  vectorEffect="non-scaling-stroke"
-                />
-              </svg>
-              <div className="mt-3 grid grid-cols-2 gap-3 border-t border-border pt-3">
-                <div>
-                  <p className="text-[11px] text-muted-foreground">Income</p>
-                  <p className="tabular text-sm font-medium text-income">₹45,000</p>
+            {/* Hero */}
+            <div className="relative overflow-hidden rounded-xl bg-hero p-4 text-hero-foreground">
+              <div className="ledger-grid absolute inset-0" />
+              <div className="saffron-glow absolute inset-0" />
+              <div className="relative">
+                <p className="text-[11px] text-hero-muted">Spent in November</p>
+                <div className="mt-0.5 flex items-end gap-2">
+                  <p className="tabular text-2xl font-semibold tracking-tight">₹12,480</p>
+                  <span className="mb-0.5 rounded-full bg-emerald-400/15 px-1.5 py-0.5 text-[10px] font-medium text-emerald-300">
+                    ↓ 8% less than last month
+                  </span>
                 </div>
-                <div>
-                  <p className="text-[11px] text-muted-foreground">Net balance</p>
-                  <p className="tabular text-sm font-medium">₹32,520</p>
+                <Sparkline values={trend} className="mt-3 h-14" label="" />
+                <div className="mt-3 grid grid-cols-3 gap-2 border-t border-hero-border pt-3">
+                  {[
+                    ['Income', '₹45,000', 'text-emerald-300'],
+                    ['Net balance', '₹32,520', ''],
+                    ['Today', '₹86', ''],
+                  ].map(([l, v, c]) => (
+                    <div key={l}>
+                      <p className="text-[10px] text-hero-muted">{l}</p>
+                      <p className={cn('tabular text-xs font-medium', c)}>{v}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
-              <div className="rounded-lg border border-border bg-surface p-4">
-                <div className="flex items-baseline justify-between">
-                  <p className="text-xs font-semibold">Monthly budget</p>
-                  <p className="tabular text-[11px] text-muted-foreground">62%</p>
-                </div>
-                <div className="mt-2 h-1.5 rounded-full bg-surface-muted">
-                  <div className="h-full w-[62%] rounded-full bg-accent" />
-                </div>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  ₹7,520 left · 18 days to go
-                </p>
-              </div>
-              <div className="hidden rounded-lg border border-border bg-surface sm:block">
-                {[
-                  ['Today', '₹86'],
-                  ['This week', '₹2,140'],
-                  ['This month', '₹12,480'],
-                ].map(([l, v]) => (
-                  <div
-                    key={l}
-                    className="flex justify-between border-b border-border px-4 py-2 text-xs last:border-0"
-                  >
-                    <span className="text-muted-foreground">{l}</span>
-                    <span className="tabular font-medium">{v}</span>
+
+            {/* Where it went */}
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-card)]">
+              <p className="text-xs font-semibold">Where it went</p>
+              <div className="mt-3 space-y-3">
+                {cats.map((c) => (
+                  <div key={c.name} className="flex items-center gap-2">
+                    <CategoryIcon icon={c.icon} color={c.color} size="sm" className="size-7" />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex justify-between text-[11px]">
+                        <span className="truncate">{c.name}</span>
+                        <span className="tabular font-medium">{c.amount}</span>
+                      </div>
+                      <div className="mt-1 h-1 rounded-full bg-surface-muted">
+                        <div
+                          className="h-full rounded-full"
+                          style={{ width: `${c.pct * 2.4}%`, background: chartColorFor(c.color) }}
+                        />
+                      </div>
+                    </div>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="mt-3 rounded-lg border border-border bg-surface p-2">
-            <p className="px-2 pb-1 pt-1 text-xs font-semibold">Recent activity</p>
-            {recent.map((r) => (
-              <div key={r.title} className="flex items-center gap-3 rounded-md px-2 py-2">
-                <CategoryIcon icon={r.icon} color={r.color} size="sm" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-xs font-medium">{r.title}</p>
-                  <p className="truncate text-[11px] text-muted-foreground">{r.meta}</p>
+          <div className="mt-3 grid gap-3 lg:grid-cols-[1.6fr_1fr]">
+            <div className="rounded-xl border border-border bg-surface p-2 shadow-[var(--shadow-card)]">
+              <p className="px-2 pb-1 pt-1.5 text-xs font-semibold">Recent activity</p>
+              {recent.map((r) => (
+                <div key={r.title} className="flex items-center gap-3 rounded-md px-2 py-1.5">
+                  <CategoryIcon icon={r.icon} color={r.color} size="sm" className="size-7" />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-xs font-medium">{r.title}</p>
+                    <p className="truncate text-[10px] text-muted-foreground">{r.meta}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className={cn('tabular text-xs font-medium', r.income && 'text-income')}>
+                      {r.amt}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground">{r.cat}</p>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className={cn('tabular text-xs font-medium', r.income && 'text-income')}>
-                    {r.amt}
+              ))}
+            </div>
+            <div className="hidden rounded-xl border border-border bg-surface p-4 shadow-[var(--shadow-card)] sm:block">
+              <p className="text-xs font-semibold">Monthly budget</p>
+              <div className="mt-3 flex items-center gap-3">
+                <Ring percent={62} tone="ok" size={64} stroke={6}>
+                  <span className="tabular text-xs font-semibold">62%</span>
+                </Ring>
+                <div className="text-[11px] text-muted-foreground">
+                  <p>
+                    <span className="tabular font-medium text-foreground">₹12,480</span> of ₹20,000
                   </p>
-                  <p className="text-[11px] text-muted-foreground">{r.cat}</p>
+                  <p className="mt-0.5">₹7,520 left · 18 days to go</p>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </div>

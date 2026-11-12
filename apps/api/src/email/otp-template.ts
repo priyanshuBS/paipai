@@ -38,10 +38,10 @@ export function otpEmailHtml(otp: string, expiresInMinutes: number): string {
   const logo = `
     <table role="presentation" cellpadding="0" cellspacing="0"><tr>
       <td style="vertical-align:middle">
-        <table role="presentation" cellpadding="0" cellspacing="0" style="width:28px;height:28px;background:${palette.ink};border-radius:7px"><tr>
-          <td style="padding:8px 7px 0;line-height:0"><div style="width:14px;height:3px;background:#FAFAFA;border-radius:2px"></div></td>
+        <table role="presentation" cellpadding="0" cellspacing="0" style="width:28px;height:28px;background:${palette.saffron};border-radius:7px"><tr>
+          <td style="padding:8px 7px 0;line-height:0"><div style="width:14px;height:3px;background:#0B1020;border-radius:2px"></div></td>
         </tr><tr>
-          <td style="padding:5px 7px 9px;line-height:0"><div style="width:8px;height:3px;background:#A1A1AA;border-radius:2px"></div></td>
+          <td style="padding:5px 7px 9px;line-height:0"><div style="width:8px;height:3px;background:#0B1020;opacity:.55;border-radius:2px"></div></td>
         </tr></table>
       </td>
       <td style="vertical-align:middle;padding-left:10px;font-size:18px;font-weight:600;letter-spacing:-0.3px;color:${palette.ink};font-family:${FONT}">${brand.name}</td>

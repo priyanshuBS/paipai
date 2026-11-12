@@ -32,7 +32,7 @@ export function AuthLayout({
         >
           <Logo />
           <View className="flex-1 justify-center py-8">
-            <Text weight="semibold" className="text-[26px] leading-8 tracking-tight">
+            <Text weight="display" className="text-[40px] leading-[44px]">
               {title}
             </Text>
             <View className="mt-2">

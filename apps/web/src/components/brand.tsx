@@ -1,8 +1,8 @@
 import { cn } from '@/lib/utils';
 
 /**
- * Mark: an ink tile with two stacked bars of decreasing length, a ledger
- * line and its running total. Uses currentColor so it follows the theme.
+ * Mark: a saffron tile with two midnight ledger bars of decreasing length.
+ * Fixed colours, so it reads the same on paper, dark and the navy hero surfaces.
  */
 export function LogoMark({ className, title = 'PaiPai' }: { className?: string; title?: string }) {
   return (
@@ -13,9 +13,9 @@ export function LogoMark({ className, title = 'PaiPai' }: { className?: string; 
       aria-label={title || undefined}
       aria-hidden={title ? undefined : true}
     >
-      <rect width="24" height="24" rx="6" fill="currentColor" />
-      <rect x="6" y="7" width="12" height="3" rx="1.5" className="fill-background" />
-      <rect x="6" y="14" width="7" height="3" rx="1.5" className="fill-background" opacity="0.6" />
+      <rect width="24" height="24" rx="7" fill="#F26B1D" />
+      <rect x="6" y="7" width="12" height="3" rx="1.5" fill="#0B1020" />
+      <rect x="6" y="14" width="7" height="3" rx="1.5" fill="#0B1020" opacity="0.55" />
     </svg>
   );
 }

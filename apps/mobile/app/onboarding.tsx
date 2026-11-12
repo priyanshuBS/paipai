@@ -12,13 +12,13 @@ import { useTheme } from '@/theme/theme';
 function useArt() {
   const { colors } = useTheme();
   return {
-    card: colors.surface,
-    line: colors.border,
-    muted: colors.surfaceMuted,
-    text: colors.text,
-    sub: colors.textSecondary,
-    accent: colors.accent,
-    bar: colors.chartMuted,
+    card: colors.heroSurface,
+    line: colors.heroBorder,
+    muted: colors.hero,
+    text: colors.heroText,
+    sub: colors.heroMuted,
+    accent: colors.brand,
+    bar: colors.heroBorder,
   };
 }
 
@@ -143,16 +143,16 @@ export default function Onboarding() {
   };
 
   return (
-    <SafeAreaView className="flex-1 bg-background" edges={['top', 'bottom']}>
+    <SafeAreaView className="flex-1 bg-hero" edges={['top', 'bottom']}>
       <View className="flex-row items-center justify-between px-6 pt-2">
-        <Logo />
+        <Logo onHero />
         {index < SLIDES.length - 1 && (
           <Pressable
             accessibilityRole="button"
             onPress={() => void finish('/signup')}
             className="h-11 justify-center px-2"
           >
-            <Text weight="medium" muted>
+            <Text weight="medium" className="text-hero-muted">
               Skip
             </Text>
           </Pressable>
@@ -172,12 +172,12 @@ export default function Onboarding() {
           <View style={{ width }} className="flex-1 items-center justify-center px-8">
             <item.Art />
             <Text
-              weight="semibold"
-              className="mt-8 text-center text-[26px] leading-8 tracking-tight"
+              weight="display"
+              className="mt-8 text-center text-[38px] leading-[42px] text-hero-foreground"
             >
               {item.title}
             </Text>
-            <Text muted className="mt-3 text-center text-[15px] leading-6">
+            <Text className="mt-3 text-center text-[15px] leading-6 text-hero-muted">
               {item.body}
             </Text>
           </View>
@@ -194,7 +194,7 @@ export default function Onboarding() {
               key={s.key}
               className={cn(
                 'h-1.5 rounded-full',
-                i === index ? 'w-5 bg-foreground' : 'w-1.5 bg-border-strong',
+                i === index ? 'w-5 bg-brand' : 'w-1.5 bg-hero-border',
               )}
             />
           ))}
@@ -202,6 +202,7 @@ export default function Onboarding() {
         {index < SLIDES.length - 1 ? (
           <Button
             title="Next"
+            variant="brand"
             size="lg"
             className="w-full"
             onPress={() => list.current?.scrollToIndex({ index: index + 1 })}
@@ -209,6 +210,7 @@ export default function Onboarding() {
         ) : (
           <Button
             title="Get started"
+            variant="brand"
             size="lg"
             className="w-full"
             onPress={() => void finish('/signup')}
@@ -219,8 +221,11 @@ export default function Onboarding() {
           onPress={() => void finish('/login')}
           className="h-11 justify-center"
         >
-          <Text muted>
-            Already have an account? <Text weight="semibold">Log in</Text>
+          <Text className="text-hero-muted">
+            Already have an account?{' '}
+            <Text weight="semibold" className="text-hero-foreground">
+              Log in
+            </Text>
           </Text>
         </Pressable>
       </View>
