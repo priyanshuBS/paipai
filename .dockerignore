@@ -1,0 +1,16 @@
+**/node_modules
+**/dist
+**/.next
+**/.turbo
+**/.expo
+**/*.tsbuildinfo
+**/coverage
+.git
+.vscode
+.env
+.env.*
+**/.env
+**/.env.*
+!**/.env.example
+apps/mobile/assets
+apps/web/public

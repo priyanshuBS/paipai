@@ -17,7 +17,8 @@
     "db:generate": "pnpm --filter @paipai/db db:generate",
     "db:migrate": "pnpm --filter @paipai/db db:migrate",
     "db:seed": "pnpm --filter @paipai/db db:seed",
-    "db:studio": "pnpm --filter @paipai/db db:studio"
+    "db:studio": "pnpm --filter @paipai/db db:studio",
+    "e2e": "pnpm --filter @paipai/e2e e2e"
   },
   "devDependencies": {
     "@types/node": "^24.19.2",

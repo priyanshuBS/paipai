@@ -3,7 +3,7 @@ import { cors } from 'hono/cors';
 import { requestId } from 'hono/request-id';
 import { secureHeaders } from 'hono/secure-headers';
 import { bodyLimit } from 'hono/body-limit';
-import type { Database } from '@paipai/db';
+import { sql, type Database } from '@paipai/db';
 import { createAuth } from './auth';
 import { createConsoleMailer, createResendMailer, type Mailer } from './email/mailer';
 import { trustedOrigins, type Env } from './env';
@@ -92,7 +92,17 @@ export function createApp({ env, db, mailer, notifier, storage }: CreateAppOptio
     }),
   );
 
+  // Liveness: the process is up. Readiness: it can reach the database too.
   app.get('/health', (c) => c.json({ ok: true, service: 'paipai-api' }));
+  app.get('/health/ready', async (c) => {
+    const started = Date.now();
+    try {
+      await db.execute(sql`select 1`);
+      return c.json({ ok: true, db: 'up', latencyMs: Date.now() - started });
+    } catch {
+      return c.json({ ok: false, db: 'down' }, 503);
+    }
+  });
 
   // Better Auth: email OTP, Google OAuth, sessions, sign-out, revoke-sessions …
   app.on(['GET', 'POST'], '/api/auth/*', (c) => auth.handler(c.req.raw));

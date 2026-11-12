@@ -1,0 +1,13 @@
+{
+  "name": "@paipai/e2e",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Headless browser walkthroughs of the website against the local sandbox API.",
+  "scripts": {
+    "e2e": "node run.mjs"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.65.0"
+  }
+}

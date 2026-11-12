@@ -28,3 +28,6 @@ apps/mobile/android/
 .vercel
 .pglite/
 .vscode/
+
+# e2e artifacts
+e2e/.output/

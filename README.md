@@ -1,172 +1,149 @@
 # PaiPai — _Paai-paai ka hisaab_
 
-Personal finance and expense tracking for India (₹ INR, Asia/Kolkata). PaiPai has:
+[![CI](https://github.com/priyanshuBS/paipai/actions/workflows/ci.yml/badge.svg)](https://github.com/priyanshuBS/paipai/actions/workflows/ci.yml)
 
-- a **Next.js website**
-- an **Expo mobile app**
-- one **Hono API** and one **Neon Postgres** database, shared by both
+Personal finance and expense tracking, built for India (₹ INR, Asia/Kolkata by default). Log an expense in two taps, see where your money goes, and stay inside your budgets: on the web and on your phone.
 
-> Status: **Phase 5 done**: everything from Phases 1–4, plus budgets with alerts, recurring transactions, categories management, CSV/PDF export and monthly reports, settings (currency, timezone, theme synced to your account), receipts (when R2 is configured), and on mobile: a daily reminder, biometric app lock and an offline queue. Phase 6 covers tests, polish and deployment.
+- **Website**: Next.js 16 (App Router), Tailwind CSS, Recharts
+- **Mobile app**: Expo SDK 58 (Android + iOS), Expo Router, NativeWind
+- **API**: Hono + Better Auth (email OTP + Google), one API shared by both apps
+- **Database**: Neon Postgres with Drizzle ORM
 
-## Phase 5 features
+## Features
 
-| Feature               | How it works                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Budgets**           | Overall or per-category, weekly/monthly/yearly. Progress is computed in SQL for the current period in the user's timezone. Saving an expense returns `budgetAlerts` when a budget crosses its threshold (default 80%) or 100%. Each level fires **once per period**, recorded atomically, and is also sent as an **Expo push** to the user's devices. The overall monthly budget stays in sync with `users.monthly_budget`.                                                    |
-| **Recurring**         | Rules with daily/weekly/monthly/yearly frequency. Dates are computed from the original start, so a rule on the 31st lands on 29 Feb and then 31 Mar. The runner creates missed occurrences (capped) and locks rows with `FOR UPDATE SKIP LOCKED`, so concurrent runs never double-create. It runs in-process every 10 minutes, and `POST /api/cron/recurring` (with `Authorization: Bearer $CRON_SECRET`) is available for serverless hosts (set `DISABLE_SCHEDULER=1` there). |
-| **Export**            | `GET /api/export?format=csv\|pdf&from=&to=`. CSV has a UTF-8 BOM for Excel, negative expenses, and formula-injection guarding. The PDF is a branded statement with Inter embedded (so ₹ renders), a summary, a category breakdown and the transaction table.                                                                                                                                                                                                                   |
-| **Reports**           | `GET /api/reports/monthly?month=YYYY-MM` gives totals, % change, daily chart, categories, top items, monthly budgets, the biggest expense and the per-day average.                                                                                                                                                                                                                                                                                                             |
-| **Receipts / avatar** | `POST /api/uploads/presign` returns a presigned R2 `PUT` URL (images only, max 5 MB, stored in a per-user folder). The API only accepts receipt/avatar URLs that point at your own bucket and folder. **Hidden entirely when the `R2_*` variables are empty.**                                                                                                                                                                                                                 |
-| **Mobile extras**     | Daily reminder (local notification, configurable time; tapping it opens Quick Add). Biometric app lock (locks on launch and after 30s in the background). Offline queue: new expenses saved with no signal are stored with a client UUID and replayed idempotently when the connection returns.                                                                                                                                                                                |
+| Area                 | What you get                                                                                                                                                                             |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sign-in**          | Email + 6-digit OTP (no passwords) or Continue with Google. Codes expire in 10 minutes, lock after 5 wrong tries, and have resend cooldowns.                                             |
+| **Quick Add**        | Amount, title with autocomplete (remembers the category and payment method), category grid, UPI/Card/Cash/Bank chips, date, expense or income. **N** on the web, centre **+** on mobile. |
+| **Transactions**     | Grouped by day with daily totals, search, filters, sort, infinite scroll, edit, duplicate, delete with Undo.                                                                             |
+| **Analytics**        | Day / week / month / year / custom periods, % change, trend charts, categories, item-wise totals and history, payment methods, day-of-week and hour patterns, 12-month overview.         |
+| **Budgets**          | Overall or per category, weekly / monthly / yearly. Alerts at your threshold (80% by default) and at 100%, once per period, as in-app toasts and push notifications.                     |
+| **Recurring**        | Rent, SIPs, subscriptions: daily to yearly. Missed runs are caught up, month-ends handled (31 Jan → 29 Feb → 31 Mar), never duplicated.                                                  |
+| **Reports & export** | Monthly summary, CSV (opens cleanly in Excel) and a branded PDF statement.                                                                                                               |
+| **Personalisation**  | Custom categories (icon + colour, reorder, archive), currency, timezone, light/dark theme synced to your account.                                                                        |
+| **Mobile extras**    | Works offline (queued and synced later, without duplicates), Face ID / fingerprint lock, daily reminder, receipt photos.                                                                 |
+
+## Quick start
+
+**Prerequisites:** Node.js ≥ 20.18 (developed on 24) and pnpm 10 (`npm i -g pnpm@10`).
+
+```bash
+pnpm install
+cp .env.example .env     # then fill in the values: see docs/SETUP-KEYS.md
+pnpm db:migrate          # create tables in Neon
+pnpm db:seed             # default categories
+```
+
+Then run each in its own terminal:
+
+```bash
+pnpm --filter @paipai/api dev       # API on http://localhost:8787
+pnpm --filter @paipai/web dev       # website on http://localhost:3000
+pnpm --filter @paipai/mobile start  # Expo: scan the QR code with Expo Go
+```
+
+**No keys yet?** `pnpm --filter @paipai/api dev:local` runs the API on in-memory Postgres (PGlite) and prints OTP codes in the terminal instead of emailing them. Nothing touches Neon or Resend, and the data resets when you stop it.
+
+📄 **[docs/SETUP-KEYS.md](docs/SETUP-KEYS.md)**: which keys you need and where to get them (Neon, Better Auth, Google, Resend, R2).
+🚀 **[docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)**: production on Vercel + Render + EAS, step by step.
 
 ## Repo layout
 
 ```
 apps/
-  api/        Hono REST API + Better Auth          (Phase 2)
-  web/        Next.js App Router website            (Phase 3)
-  mobile/     Expo Router app                       (Phase 4)
+  api/        Hono REST API + Better Auth, scheduler, PDF/CSV export   → Render / Docker
+  web/        Next.js website                                         → Vercel
+  mobile/     Expo app                                                → EAS Build
 packages/
-  config/     shared tsconfig, ESLint, Prettier
-  shared/     Zod schemas, types, design tokens, money (paise) + timezone date helpers, default categories
-  db/         Drizzle schema, Neon client, SQL migrations, seed, PGlite test harness
+  shared/     Zod schemas, typed API client, money (paise) + timezone helpers, design tokens, categories
+  db/         Drizzle schema, migrations, seed, SQL helpers, PGlite test harness
+  config/     shared tsconfig + ESLint
+e2e/          headless browser walkthroughs of the website
+docs/         keys + deployment guides
 ```
-
-## Principles
-
-- **Money is integer paise.** For example, ₹30 is stored as `3000` (Postgres `bigint`, `CHECK amount > 0`). User input is parsed from strings, never through floats.
-- **Timestamps are UTC.** Day, week, month and year buckets are computed in SQL with `date_trunc(... AT TIME ZONE <user tz>)`. Weeks start on Monday.
-- **Every request is validated** with the Zod schemas in `@paipai/shared`.
-
-## Prerequisites
-
-- Node.js ≥ 20.18 (developed on 24)
-- pnpm 10: `npm i -g pnpm@10`
-
-## Setup
-
-```bash
-pnpm install
-cp packages/db/.env.example packages/db/.env   # then fill DATABASE_URL
-pnpm db:migrate                                 # apply SQL migrations to Neon
-pnpm db:seed                                    # insert default categories
-```
-
-See **[docs/SETUP-KEYS.md](docs/SETUP-KEYS.md)** for step-by-step instructions on getting each key (Neon, Google OAuth, Resend, R2).
 
 ## Scripts
 
-| Command            | What it does                                                            |
-| ------------------ | ----------------------------------------------------------------------- |
-| `pnpm typecheck`   | Strict TypeScript across all workspaces                                 |
-| `pnpm lint`        | ESLint (flat config, no `any`)                                          |
-| `pnpm test`        | Vitest unit + DB tests (DB tests use in-process PGlite, no Neon needed) |
-| `pnpm db:generate` | Generate a new SQL migration after editing the Drizzle schema           |
-| `pnpm db:migrate`  | Apply migrations to `DATABASE_URL`                                      |
-| `pnpm db:seed`     | Upsert system categories (idempotent)                                   |
-| `pnpm db:studio`   | Open Drizzle Studio                                                     |
-| `pnpm format`      | Prettier                                                                |
+| Command                                     | What it does                                                             |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| `pnpm turbo run lint typecheck test build`  | Everything CI runs (except E2E)                                          |
+| `pnpm test`                                 | Unit + database tests (in-process PGlite: no Neon or keys needed)        |
+| `pnpm e2e`                                  | Browser E2E (build the website first: `pnpm --filter @paipai/web build`) |
+| `pnpm lint` / `pnpm typecheck`              | ESLint (no `any`) / strict TypeScript                                    |
+| `pnpm format` / `pnpm format:check`         | Prettier                                                                 |
+| `pnpm db:generate`                          | New SQL migration after editing the Drizzle schema                       |
+| `pnpm db:migrate` / `pnpm db:seed`          | Apply migrations / upsert default categories (idempotent)                |
+| `pnpm db:studio`                            | Drizzle Studio                                                           |
+| `pnpm --filter @paipai/mobile doctor`       | expo-doctor                                                              |
+| `pnpm --filter @paipai/mobile bundle:check` | Metro bundle for Android + iOS                                           |
+
+## Testing
+
+| Layer    | What's covered                                                                                                                                                                                                         |
+| -------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shared` | Money parsing and formatting (paise, never floats), timezone period math, recurrence rules, schemas                                                                                                                    |
+| `db`     | Schema constraints, cascades and SQL helpers on a real Postgres engine (PGlite)                                                                                                                                        |
+| `api`    | Every route end-to-end through Hono: OTP limits and lockout, sessions, ownership checks, analytics in the user's timezone, budget alerts, concurrent recurring runs, export, cron auth, CORS, production config checks |
+| `mobile` | Chart geometry, offline queue (ordering, idempotent replay, 401/4xx handling)                                                                                                                                          |
+| `e2e`    | 26 browser steps: sign-up with OTP, quick add, autocomplete, transactions, analytics, item detail, budgets and alerts, recurring, categories, CSV/PDF export, settings, dark mode, phone layout                        |
+
+The E2E runner starts the sandbox API itself (and `next start` if the website isn't already running), uses the installed Edge (Windows) or Chrome, and saves screenshots to `e2e/.output/`. Set `E2E_BROWSER_PATH` to use another Chromium browser.
+
+## How it works
+
+- **Money is integer paise.** ₹30 is stored as `3000` (`bigint`, `CHECK amount > 0`). Input is parsed from strings, never through floats.
+- **Timestamps are UTC**, and every day / week / month bucket is computed in SQL in the user's timezone. Weeks start on Monday.
+- **Everything is validated** with the Zod schemas in `@paipai/shared`, used by the API and both apps. The apps share one typed API client.
+- **Sessions:** HTTP-only cookies on the web (`SameSite=Lax`, so web and API share one domain in production) and SecureStore on mobile via Better Auth's Expo plugin.
+- **Safety:** rate limits per IP and per email, ownership checks on every row, soft deletes with undo, formula-injection-safe CSV, uploads restricted to your own bucket folder, security headers, structured JSON logs with request IDs, and an API that refuses to start with an unsafe production config.
 
 ## Database
 
-| Table                                                  | Notes                                                                               |
-| ------------------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `users`                                                | Better Auth user, plus `currency`, `timezone`, `monthly_budget` (paise), `theme`    |
-| `sessions`, `accounts`, `verifications`, `rate_limits` | Better Auth tables                                                                  |
-| `categories`                                           | `user_id NULL` means a system default; system rows have a stable `key`              |
-| `transactions`                                         | paise `amount`, `type`, `payment_method`, `tags text[]`, soft delete (`deleted_at`) |
-| `budgets`                                              | overall (`category_id NULL`) or per category; one per user/category/period          |
-| `recurring_transactions`                               | template + `frequency` + `next_run_at`                                              |
-| `push_tokens`                                          | Expo push tokens for budget alerts                                                  |
+| Table                                                  | Notes                                                                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `users`                                                | Better Auth user + `currency`, `timezone`, `monthly_budget` (paise), `theme`                |
+| `sessions`, `accounts`, `verifications`, `rate_limits` | Better Auth                                                                                 |
+| `categories`                                           | `user_id NULL` = system default with a stable `key`; custom ones can be archived            |
+| `transactions`                                         | paise `amount`, `type`, `payment_method`, `tags text[]`, receipt URL, soft delete           |
+| `budgets`                                              | overall (`category_id NULL`) or per category; `last_alert_level` for once-per-period alerts |
+| `recurring_transactions`                               | template + `frequency` + `next_run_at`                                                      |
+| `push_tokens`                                          | Expo push tokens                                                                            |
 
-Indexes: `(user_id, occurred_at desc)`, `(user_id, category_id)`, `(user_id, lower(title))`, GIN on `tags`, and a partial index on active recurring `next_run_at`.
+Indexes: `(user_id, occurred_at desc)`, `(user_id, category_id)`, `(user_id, lower(title))`, GIN on `tags`, and a partial index on active recurring `next_run_at`. Deleting a user removes all of their data.
 
-Deleting a user cascades and removes all of their data.
+## API reference
 
-## Running locally
+All routes are under `/api` and need a session, except `/api/auth/*`, `/health`, `/health/ready` and the cron endpoint. Errors look like `{ "error": { "code", "message", "details?" } }`. Amounts are paise.
 
-```bash
-pnpm --filter @paipai/api dev        # API on http://localhost:8787 (Neon + Resend from the repo-root .env)
-pnpm --filter @paipai/web dev        # Website on http://localhost:3000
-```
+| Route                                                                                                      | Purpose                                                                                                                                                 |
+| ---------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `POST /api/auth/email-otp/send-verification-otp`                                                           | Send a sign-in code (60s cooldown + hourly limit per email, IP limits)                                                                                  |
+| `POST /api/auth/sign-in/email-otp`                                                                         | Verify the code; new emails must include `name` (`NAME_REQUIRED`)                                                                                       |
+| `POST /api/auth/sign-in/social`                                                                            | Google (`{ provider: "google" }`), linked by email                                                                                                      |
+| `POST /api/auth/sign-out`, `/api/auth/revoke-sessions`                                                     | Log out / log out everywhere                                                                                                                            |
+| `GET · PATCH · DELETE /api/me`                                                                             | Profile and preferences; DELETE removes the account and all data                                                                                        |
+| `GET · POST /api/transactions`                                                                             | List (`q, from, to, type, categoryId, paymentMethod, tags, minAmount, maxAmount, sort, cursor, limit`) with day totals; create (idempotent client `id`) |
+| `GET · PATCH · DELETE /api/transactions/:id`, `POST /:id/restore`, `/:id/duplicate`                        | Single transaction; soft delete and undo                                                                                                                |
+| `GET /api/transactions/titles?q=`                                                                          | Autocomplete with last-used category and payment method                                                                                                 |
+| `GET · POST /api/categories`, `PATCH · DELETE /:id`, `POST /reorder`                                       | Custom categories (in-use ones are archived, not deleted)                                                                                               |
+| `GET /api/analytics/summary · timeseries · categories · items · items/:title · payment-methods · patterns` | All in the user's timezone. Ranges: `period=day\|week\|month\|year&date=` or `period=custom&from=&to=`                                                  |
+| `GET · POST /api/budgets`, `PATCH · DELETE /:id`                                                           | Budgets with live progress                                                                                                                              |
+| `GET · POST /api/recurring`, `PATCH · DELETE /:id`                                                         | Recurring rules (pause / resume via PATCH)                                                                                                              |
+| `GET /api/reports/monthly?month=YYYY-MM`                                                                   | Monthly report                                                                                                                                          |
+| `GET /api/export?format=csv\|pdf&from=&to=`                                                                | Download CSV or PDF statement                                                                                                                           |
+| `GET /api/uploads/config`, `POST /api/uploads/presign`                                                     | Receipt / avatar upload to R2 (hidden when R2 isn't configured)                                                                                         |
+| `POST · DELETE /api/push-tokens`                                                                           | Register / remove a device for push                                                                                                                     |
+| `POST /api/cron/recurring`                                                                                 | Run due recurring transactions (`Authorization: Bearer $CRON_SECRET`)                                                                                   |
+| `GET /health`, `GET /health/ready`                                                                         | Liveness / readiness (checks the database)                                                                                                              |
 
-**Offline sandbox:** `pnpm --filter @paipai/api dev:local` runs the API on in-memory Postgres (PGlite). OTP codes are printed to the terminal instead of emailed. It doesn't touch Neon or Resend, and the data resets when you stop it.
+## Mobile app notes
 
-## Mobile app (apps/mobile)
+- In development the app finds the API at `http://<your computer's LAN IP>:8787` automatically (same host as the Expo dev server). Phone and computer must be on the **same Wi-Fi**, and Windows Firewall must allow Node.js on private networks.
+- **Email OTP** works in Expo Go. **Google sign-in**, **push notifications** and PaiPai's own Face ID prompt need the deployed HTTPS API and an EAS build: see [DEPLOYMENT.md §6](docs/DEPLOYMENT.md#6-mobile-app-with-eas-build).
+- App id `com.paipai.app`, URL scheme `paipai://`.
 
-Built with Expo SDK 58, Expo Router, NativeWind 4 (Tailwind v3), TanStack Query (with the cache persisted to AsyncStorage), Better Auth's Expo plugin (session kept in `expo-secure-store`), and `react-native-svg` charts. App name **PaiPai**, scheme `paipai`, bundle/package id `com.paipai.app`.
+## Notes for this codebase
 
-```bash
-pnpm --filter @paipai/api dev          # terminal 1: API (must be running)
-pnpm --filter @paipai/mobile start     # terminal 2: Expo, then scan the QR code with Expo Go
-```
-
-- Your phone and computer must be on the **same Wi-Fi**. In development the app reaches the API at `http://<your-computer's-LAN-IP>:8787` automatically, using the same host as the Expo dev server. To use a different API, set `EXPO_PUBLIC_API_URL` in `apps/mobile/.env`.
-- If Windows Firewall asks whether to let Node.js accept connections, allow it on **Private networks**.
-- **Email OTP** works on a phone over Wi-Fi. **Google sign-in on a phone** needs the API on a public HTTPS URL, because Google redirects to `BETTER_AUTH_URL`, and `localhost` on your phone isn't your computer. It will work once the API is deployed (Phase 6), or through a tunnel such as `cloudflared` or ngrok, with the tunnel URL added to the Google OAuth client.
-
-| Screen                       | What it does                                                                                                                                                                                     |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Onboarding                   | 3 illustrated slides, then **Get Started**, or "Already have an account? Login"                                                                                                                  |
-| Sign up / Log in / Verify    | Name + email, then the 6-digit OTP (autofill, 60s resend timer); Continue with Google                                                                                                            |
-| Home                         | Greeting, balance card (hide/show, count-up), today/week/month, budget bar, quick actions, recent activity                                                                                       |
-| Quick Add (centre **+** tab) | ₹ amount with numeric keypad, title autocomplete (fills in the category), note, category grid, payment chips, Today/Yesterday + date-time picker, expense/income; haptic on save                 |
-| Transactions                 | Grouped by day with daily totals, search, filter & sort sheet, pull to refresh, infinite scroll, swipe left to edit/delete (with Undo)                                                           |
-| Analytics                    | Day/Week/Month/Year/Custom, "Nov 2026" month picker, % change, area chart, weekly bars, category donut, item-wise totals with item detail, payment methods, day/hour patterns, 12-month overview |
-| Budgets                      | Monthly budget progress (amber at 80%, red at 100%) and this month by category                                                                                                                   |
-| Profile                      | Account details, Light/Dark/System theme, log out, log out from all devices, delete account                                                                                                      |
-
-Checks: `pnpm --filter @paipai/mobile typecheck`, `lint`, `test`, `doctor` (expo-doctor) and `bundle:check` (Metro bundle for Android + iOS).
-
-## Website (apps/web)
-
-This is a pure Next.js 16 App Router app (no Expo, no react-native-web) using Tailwind CSS, Radix-based shadcn-style components, Recharts and TanStack Query.
-
-| Route                          | What it is                                                                                                                                      |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `/`                            | Marketing landing page: lime hero, features, app mockups, FAQ, footer. Has SEO metadata, an Open Graph image and a favicon                      |
-| `/signup`, `/login`            | Email + 6-digit OTP (name required at sign-up, 60s resend timer), or Continue with Google                                                       |
-| `/app`                         | Dashboard: balance card with hide/show and count-up, today/week/month, budget bar (amber at 80%, red at 100%), recent activity                  |
-| `/app/transactions`            | Grouped by day with daily totals, plus search, filters, sorting, infinite scroll, edit/duplicate/delete with Undo                               |
-| `/app/analytics`               | Day/Week/Month/Year/Custom, % change, area/bar/donut charts, item-wise totals, top 5, payment methods, day and hour patterns, 12-month overview |
-| `/app/analytics/items/[title]` | History of a single item                                                                                                                        |
-| `/app/welcome`                 | Optional monthly budget after sign-up                                                                                                           |
-
-**Quick Add** opens with the **N** key (or the + buttons). It has the amount field, title autocomplete (fills in the last-used category), note, category grid, payment chips, a Today/Yesterday date picker, and an expense/income toggle.
-
-`/app/*` is protected by `src/proxy.ts` (an optimistic cookie check); the API still verifies every request. Every chart card has a "view as table" toggle. Category colours in charts come from a colour-blind-validated palette (`chartColorFor` in `@paipai/shared/tokens`).
-
-**Environment** (`apps/web/.env.local`, or set in Vercel):
-
-```
-NEXT_PUBLIC_API_URL="https://api.yourdomain.com"
-NEXT_PUBLIC_SITE_URL="https://yourdomain.com"
-```
-
-Both default to the localhost URLs in development.
-
-> **Note:** the site uses Tailwind CSS **v3** (pure JavaScript) on purpose. Tailwind v4 needs a native `.node` binary, and Windows Application Control blocks that binary on this machine, which silently produced empty CSS.
-
-## API (apps/api)
-
-All routes are under `/api` and require a session, except `/api/auth/*` and `/health`. Errors use the shape `{ error: { code, message, details? } }`. Amounts are paise.
-
-| Route                                                                                              | Purpose                                                                                                                                    |
-| -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `POST /api/auth/email-otp/send-verification-otp`                                                   | Send a 6-digit OTP. 60s resend cooldown and an hourly limit per email; IP limits too                                                       |
-| `POST /api/auth/sign-in/email-otp`                                                                 | Verify the OTP. New emails must include `name` (otherwise `NAME_REQUIRED`). Locks after 5 wrong attempts; codes expire in 10 min           |
-| `POST /api/auth/sign-in/social`                                                                    | Google OAuth (`{ provider: "google" }`). Links to an existing account with the same email                                                  |
-| `POST /api/auth/sign-out`, `POST /api/auth/revoke-sessions`                                        | Log out, or log out from all devices                                                                                                       |
-| `GET / PATCH / DELETE /api/me`                                                                     | Profile and preferences; DELETE removes the account and all its data                                                                       |
-| `GET / POST /api/transactions`                                                                     | Filters: `q, from, to, type, categoryId, paymentMethod, tags, minAmount, maxAmount, sort, cursor, limit`. Responses include per-day totals |
-| `GET / PATCH / DELETE /api/transactions/:id`                                                       | Soft delete; undo with `POST /:id/restore`; `POST /:id/duplicate` copies a transaction                                                     |
-| `GET /api/transactions/titles?q=`                                                                  | Autocomplete with last-used category and payment method                                                                                    |
-| `GET / POST /api/categories`, `PATCH / DELETE /api/categories/:id`, `POST /api/categories/reorder` | Custom categories. Default categories are read-only; deleting a category that's in use archives it instead                                 |
-| `GET /api/analytics/summary`                                                                       | Totals, net, % change vs the previous period, and today / this week / this month                                                           |
-| `GET /api/analytics/timeseries`                                                                    | Day, week or month buckets; empty buckets are filled with zero                                                                             |
-| `GET /api/analytics/categories`, `/items`, `/items/:title`                                         | Category breakdown, item-wise totals, and item history                                                                                     |
-| `GET /api/analytics/payment-methods`, `/patterns`                                                  | Payment-method split, plus day-of-week and hour-of-day spending                                                                            |
-
-Range queries take `period=day|week|month|year&date=YYYY-MM-DD`, or `period=custom&from=&to=`. All bucketing is done in the user's timezone.
-
-**Cookies:** the web app and the API must be on the same site, because session cookies are `SameSite=Lax`. Locally that's `localhost:3000` and `localhost:8787`. In production use subdomains of one domain, e.g. `paipai.app` and `api.paipai.app`. The mobile app sends its session via Better Auth's Expo plugin and stores it in SecureStore.
+- Tailwind CSS **v3** on purpose: v4 needs a native `.node` binary, which Windows Application Control blocks on the development machine.
+- React is pinned to one version across the workspace (`pnpm.overrides`); Expo breaks with two copies. `node-linker=hoisted` is required by Expo.
+- TypeScript is pinned to `~6.0` until typescript-eslint supports newer versions.

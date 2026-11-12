@@ -1,0 +1,56 @@
+# Render Blueprint for the PaiPai API (Dashboard -> New -> Blueprint -> pick this repo).
+# Secrets are marked `sync: false`: Render asks for them when you create the Blueprint.
+# Full walkthrough: docs/DEPLOYMENT.md
+services:
+  - type: web
+    name: paipai-api
+    runtime: node
+    region: singapore # closest Render region to India, same as Neon ap-southeast-1
+    plan: free # "starter" keeps it awake (no cold starts) and runs the scheduler continuously
+    buildCommand: >-
+      npm install -g pnpm@10.34.9 &&
+      pnpm install --frozen-lockfile --filter @paipai/api... &&
+      pnpm --filter @paipai/api build
+    # NODE_ENV is set here (not in envVars) so the build still installs devDependencies.
+    startCommand: cd apps/api && NODE_ENV=production node dist/index.js
+    healthCheckPath: /health/ready
+    autoDeploy: true
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/**
+        - pnpm-lock.yaml
+        - render.yaml
+    envVars:
+      - key: NODE_VERSION
+        value: '24'
+      - key: DATABASE_URL
+        sync: false
+      - key: BETTER_AUTH_SECRET
+        generateValue: true
+      - key: BETTER_AUTH_URL
+        sync: false # https://api.<your-domain>
+      - key: WEB_URL
+        sync: false # https://<your-domain>
+      - key: COOKIE_DOMAIN
+        sync: false # .<your-domain>
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: RESEND_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: CRON_SECRET
+        generateValue: true
+      - key: R2_ACCOUNT_ID
+        sync: false
+      - key: R2_ACCESS_KEY_ID
+        sync: false
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_BUCKET
+        sync: false
+      - key: R2_PUBLIC_URL
+        sync: false

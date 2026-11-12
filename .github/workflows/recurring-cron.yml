@@ -1,0 +1,31 @@
+# Runs due recurring transactions on the deployed API.
+# Needed when the API sleeps (Render free plan) or runs with DISABLE_SCHEDULER=1.
+# Repo -> Settings -> Secrets and variables -> Actions:
+#   secret   CRON_SECRET  (same value as on the API)
+#   variable API_URL      (e.g. https://api.paipai.example.in)
+# Does nothing until both are set.
+name: Recurring transactions
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Trigger the recurring runner
+        env:
+          API_URL: ${{ vars.API_URL }}
+          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+        run: |
+          if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then
+            echo "API_URL / CRON_SECRET not configured; skipping."
+            exit 0
+          fi
+          # Generous timeout: a sleeping free-tier instance can take ~60s to wake.
+          curl --fail-with-body --silent --show-error --max-time 120 --retry 2 --retry-delay 10 \
+            -X POST "$API_URL/api/cron/recurring" \
+            -H "Authorization: Bearer $CRON_SECRET"

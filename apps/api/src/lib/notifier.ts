@@ -33,15 +33,13 @@ export function createExpoNotifier(db: Database): Notifier {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
           body: JSON.stringify(
-            rows
-              .slice(0, 100)
-              .map((r) => ({
-                to: r.token,
-                sound: 'default',
-                title: message.title,
-                body: message.body,
-                data: message.data ?? {},
-              })),
+            rows.slice(0, 100).map((r) => ({
+              to: r.token,
+              sound: 'default',
+              title: message.title,
+              body: message.body,
+              data: message.data ?? {},
+            })),
           ),
         });
         const json = (await res.json().catch(() => null)) as { data?: ExpoTicket[] } | null;
