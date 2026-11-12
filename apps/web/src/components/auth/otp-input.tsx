@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef, type ClipboardEvent, type KeyboardEvent } from 'react';
+import { extractOtp } from '@paipai/shared/otp';
 import { cn } from '@/lib/utils';
 
 /** Six separate digit boxes with paste support and auto-advance. */
@@ -39,7 +40,9 @@ export function OtpInput({
 
   const onPaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
-    const clean = set(e.clipboardData.getData('text'));
+    // Accepts "482913", "482 913" or a whole pasted sentence from the email.
+    const text = e.clipboardData.getData('text');
+    const clean = set(extractOtp(text) ?? text);
     refs.current[Math.min(clean.length, length - 1)]?.focus();
   };
 

@@ -6,14 +6,24 @@
   "build": {
     "preview": {
       "distribution": "internal",
-      "environment": "preview",
-      "android": { "buildType": "apk" },
-      "ios": { "simulator": false }
+      "android": {
+        "buildType": "apk"
+      },
+      "ios": {
+        "simulator": false
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.paipai.priyanshusingh.co.in"
+      }
     },
     "production": {
-      "environment": "production",
       "autoIncrement": true,
-      "android": { "buildType": "app-bundle" }
+      "android": {
+        "buildType": "app-bundle"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_URL": "https://api.paipai.priyanshusingh.co.in"
+      }
     }
   },
   "submit": {

@@ -11,7 +11,7 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { SnackbarProvider } from '@/components/snackbar';
@@ -27,12 +27,20 @@ function RootNavigator() {
   const { data: session, isPending } = useSession();
   const { dark, colors } = useTheme();
   const signedIn = Boolean(session?.user);
+  // Better Auth re-checks the session whenever the app returns to the foreground,
+  // and while signed out each re-check reports isPending again. Gate only the very
+  // first check: unmounting the navigator later would throw the user back to /login
+  // (e.g. while they switch to their email app to copy the code).
+  const [booted, setBooted] = useState(false);
 
   useEffect(() => {
-    if (!isPending) void SplashScreen.hideAsync();
-  }, [isPending]);
+    if (!isPending && !booted) {
+      setBooted(true);
+      void SplashScreen.hideAsync();
+    }
+  }, [isPending, booted]);
 
-  if (isPending) return null;
+  if (!booted) return null;
 
   return (
     <>

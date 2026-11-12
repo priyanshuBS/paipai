@@ -73,7 +73,7 @@ export function ProductPreview({ className }: { className?: string }) {
         <span className="size-2.5 rounded-full bg-border-strong" />
         <span className="size-2.5 rounded-full bg-border-strong" />
         <span className="mx-auto rounded-md bg-surface-muted px-3 py-0.5 text-[11px] text-muted-foreground">
-          paipai.app/app
+          paipai.priyanshusingh.co.in
         </span>
       </div>
 

@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState, type FormEvent } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, ClipboardPaste } from 'lucide-react';
+import { extractOtp } from '@paipai/shared/otp';
 import { emailSchema, nameSchema, OTP_RESEND_COOLDOWN_SECONDS } from '@paipai/shared/schemas';
 import { Button } from '@/components/ui/button';
 import { FieldError, Input, Label } from '@/components/ui/primitives';
@@ -24,6 +25,39 @@ function GoogleIcon() {
     </svg>
   );
 }
+
+/**
+ * The code step survives the tab being reloaded or discarded (phones often do
+ * this while you switch to the email app). Per-tab, and only for 10 minutes,
+ * the lifetime of the code itself.
+ */
+const PENDING_KEY = 'paipai:pending-sign-in';
+const PENDING_TTL_MS = 10 * 60 * 1000;
+interface Pending {
+  mode: Mode;
+  email: string;
+  name: string;
+  sentAt: number;
+}
+
+function loadPending(mode: Mode): Pending | null {
+  try {
+    const p = JSON.parse(sessionStorage.getItem(PENDING_KEY) ?? 'null') as Pending | null;
+    return p && p.mode === mode && Date.now() - p.sentAt < PENDING_TTL_MS ? p : null;
+  } catch {
+    return null;
+  }
+}
+function savePending(p: Pending | null) {
+  try {
+    if (p) sessionStorage.setItem(PENDING_KEY, JSON.stringify(p));
+    else sessionStorage.removeItem(PENDING_KEY);
+  } catch {
+    /* storage unavailable: the flow still works, it just won't survive a reload */
+  }
+}
+const secondsLeft = (sentAt: number) =>
+  Math.max(0, Math.ceil(OTP_RESEND_COOLDOWN_SECONDS - (Date.now() - sentAt) / 1000));
 
 /** Safe in-app redirect target (no open redirects). */
 function safeNext(raw: string | null): string {
@@ -56,11 +90,49 @@ export function AuthFlow({ mode }: { mode: Mode }) {
       setErrors({ form: 'Google sign-in was cancelled or failed. Please try again.' });
   }, [params]);
 
+  // Resume the code step after a reload / discarded tab.
+  const [sentAt, setSentAt] = useState<number | null>(null);
+  useEffect(() => {
+    const p = loadPending(mode);
+    if (!p || (params.get('email') && params.get('email') !== p.email)) return;
+    setEmail(p.email);
+    setName(p.name);
+    setSentAt(p.sentAt);
+    setCooldown(secondsLeft(p.sentAt));
+    setStep('otp');
+    // Only on first load.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useEffect(() => {
     if (cooldown <= 0) return;
     const t = setTimeout(() => setCooldown((c) => c - 1), 1000);
     return () => clearTimeout(t);
   }, [cooldown]);
+
+  // Background tabs throttle timers; resync the countdown when the user comes back.
+  useEffect(() => {
+    if (sentAt === null) return;
+    const sync = () => document.visibilityState === 'visible' && setCooldown(secondsLeft(sentAt));
+    document.addEventListener('visibilitychange', sync);
+    return () => document.removeEventListener('visibilitychange', sync);
+  }, [sentAt]);
+
+  async function pasteCode() {
+    let text = '';
+    try {
+      text = (await navigator.clipboard?.readText()) ?? '';
+    } catch {
+      /* permission denied: fall through to the hint */
+    }
+    const code = extractOtp(text);
+    if (!code) {
+      setErrors({ otp: 'No 6-digit code found on the clipboard. Copy it from the email first.' });
+      return;
+    }
+    setOtp(code);
+    void verify(code);
+  }
 
   async function sendCode(): Promise<boolean> {
     setSending(true);
@@ -73,7 +145,10 @@ export function AuthFlow({ mode }: { mode: Mode }) {
       setErrors({ form: error.message ?? 'Could not send the code. Please try again.' });
       return false;
     }
+    const now = Date.now();
+    setSentAt(now);
     setCooldown(OTP_RESEND_COOLDOWN_SECONDS);
+    savePending({ mode, email, name: name.trim(), sentAt: now });
     return true;
   }
 
@@ -124,6 +199,7 @@ export function AuthFlow({ mode }: { mode: Mode }) {
       setOtp('');
       return;
     }
+    savePending(null);
     router.replace(mode === 'signup' ? '/app/welcome' : next);
     router.refresh();
   }
@@ -170,6 +246,15 @@ export function AuthFlow({ mode }: { mode: Mode }) {
             disabled={verifying}
           />
           <FieldError>{errors.otp}</FieldError>
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full"
+            onClick={() => void pasteCode()}
+            disabled={verifying}
+          >
+            <ClipboardPaste className="text-muted-foreground" aria-hidden /> Paste code
+          </Button>
           {errors.form && (
             <div role="alert" className="rounded-lg bg-warning/10 p-4 text-sm">
               {errors.form}{' '}
@@ -196,6 +281,7 @@ export function AuthFlow({ mode }: { mode: Mode }) {
             <button
               type="button"
               onClick={() => {
+                savePending(null);
                 setStep('details');
                 setErrors({});
               }}

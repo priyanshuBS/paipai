@@ -15,7 +15,8 @@
     "./schemas": "./src/schemas/index.ts",
     "./api-client": "./src/api-client.ts",
     "./recurrence": "./src/recurrence.ts",
-    "./settings": "./src/settings.ts"
+    "./settings": "./src/settings.ts",
+    "./otp": "./src/otp.ts"
   },
   "scripts": {
     "lint": "eslint src",

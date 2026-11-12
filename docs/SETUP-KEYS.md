@@ -73,4 +73,4 @@ A long random string that protects `POST /api/cron/recurring`. Generate it the s
 | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` | for Google sign-in      | Google Cloud → Credentials (Web) |
 | `R2_*` (5 values)                          | for receipts / avatars  | Cloudflare → R2                  |
 | `CRON_SECRET`                              | for external cron       | generate locally                 |
-| `COOKIE_DOMAIN`                            | production, split hosts | e.g. `.paipai.example.in`        |
+| `COOKIE_DOMAIN`                            | production, split hosts | `.paipai.priyanshusingh.co.in`   |

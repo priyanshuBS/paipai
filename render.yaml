@@ -29,11 +29,11 @@ services:
       - key: BETTER_AUTH_SECRET
         generateValue: true
       - key: BETTER_AUTH_URL
-        sync: false # https://api.<your-domain>
+        value: https://api.paipai.priyanshusingh.co.in
       - key: WEB_URL
-        sync: false # https://<your-domain>
+        value: https://paipai.priyanshusingh.co.in
       - key: COOKIE_DOMAIN
-        sync: false # .<your-domain>
+        value: .paipai.priyanshusingh.co.in
       - key: GOOGLE_CLIENT_ID
         sync: false
       - key: GOOGLE_CLIENT_SECRET
@@ -41,7 +41,7 @@ services:
       - key: RESEND_API_KEY
         sync: false
       - key: EMAIL_FROM
-        sync: false
+        value: PaiPai <hello@email.priyanshusingh.co.in>
       - key: CRON_SECRET
         generateValue: true
       - key: R2_ACCOUNT_ID

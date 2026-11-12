@@ -15,7 +15,9 @@ export function otpEmailSubject(otp: string): string {
 
 export function otpEmailText(otp: string, expiresInMinutes: number): string {
   return [
-    `Your PaiPai verification code is: ${otp}`,
+    'Your PaiPai sign-in code:',
+    '',
+    otp,
     '',
     `It expires in ${expiresInMinutes} minutes. If you didn't request this, you can ignore this email.`,
     '',
@@ -26,13 +28,11 @@ export function otpEmailText(otp: string, expiresInMinutes: number): string {
 /** Quiet, email-client-safe (table layout, inline styles) OTP email. */
 export function otpEmailHtml(otp: string, expiresInMinutes: number): string {
   const c = lightColors;
-  const digits = escapeHtml(otp)
-    .split('')
-    .map(
-      (d) =>
-        `<td style="padding:0 3px"><div style="width:42px;height:52px;line-height:52px;border-radius:8px;border:1px solid ${c.border};background:${c.surfaceMuted};color:${c.text};font-size:24px;font-weight:600;text-align:center;font-family:${FONT}">${d}</div></td>`,
-    )
-    .join('');
+  const code = escapeHtml(otp);
+  // One unbroken string (letter-spacing is visual only), so a double-tap or
+  // long-press selects and copies exactly "482913". user-select:all makes a
+  // single click select the whole code in clients that support it.
+  const codeBlock = `<div style="display:inline-block;padding:14px 22px 14px 28px;border-radius:10px;border:1px solid ${c.border};background:${c.surfaceMuted};color:${c.text};font-size:32px;line-height:40px;font-weight:600;letter-spacing:6px;font-family:'SF Mono',Menlo,Consolas,'Roboto Mono',monospace;-webkit-user-select:all;user-select:all">${code}</div>`;
 
   // Mark: ink tile with two ledger bars (same as the app icon).
   const logo = `
@@ -56,15 +56,16 @@ export function otpEmailHtml(otp: string, expiresInMinutes: number): string {
 <title>${escapeHtml(otpEmailSubject(otp))}</title>
 </head>
 <body style="margin:0;padding:0;background:${c.background};font-family:${FONT}">
-  <div style="display:none;max-height:0;overflow:hidden">Your code is ${escapeHtml(otp)}. It expires in ${expiresInMinutes} minutes.</div>
+  <div style="display:none;max-height:0;overflow:hidden">${code} is your PaiPai sign-in code. It expires in ${expiresInMinutes} minutes.</div>
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${c.background};padding:40px 16px">
     <tr><td align="center">
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:460px">
         <tr><td style="padding:0 4px 20px">${logo}</td></tr>
         <tr><td style="background:#ffffff;border:1px solid ${c.border};border-radius:12px;padding:32px 28px">
           <h1 style="margin:0 0 8px;font-size:20px;font-weight:600;letter-spacing:-0.3px;color:${c.text}">Your sign-in code</h1>
-          <p style="margin:0 0 24px;font-size:15px;line-height:22px;color:${c.textSecondary}">Enter this code in PaiPai to continue. It expires in ${expiresInMinutes} minutes.</p>
-          <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 24px"><tr>${digits}</tr></table>
+          <p style="margin:0 0 20px;font-size:15px;line-height:22px;color:${c.textSecondary}">Enter this code in PaiPai to continue. It expires in ${expiresInMinutes} minutes.</p>
+          ${codeBlock}
+          <p style="margin:12px 0 24px;font-size:13px;line-height:20px;color:${c.textSecondary}">Tap and hold the code to copy it, then tap <strong style="color:${c.text};font-weight:600">Paste code</strong> in the app.</p>
           <p style="margin:0;padding-top:20px;border-top:1px solid ${c.border};font-size:13px;line-height:20px;color:${c.textSecondary}">Didn't request this? You can ignore this email. Someone may have typed your address by mistake.</p>
         </td></tr>
         <tr><td style="padding:20px 4px;font-size:12px;color:${c.textSecondary}">${brand.name} · ${brand.tagline}</td></tr>

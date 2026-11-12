@@ -2,8 +2,8 @@
 # Needed when the API sleeps (Render free plan) or runs with DISABLE_SCHEDULER=1.
 # Repo -> Settings -> Secrets and variables -> Actions:
 #   secret   CRON_SECRET  (same value as on the API)
-#   variable API_URL      (e.g. https://api.paipai.example.in)
-# Does nothing until both are set.
+#   variable API_URL      (optional; defaults to https://api.paipai.priyanshusingh.co.in)
+# Does nothing until CRON_SECRET is set.
 name: Recurring transactions
 
 on:
@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Trigger the recurring runner
         env:
-          API_URL: ${{ vars.API_URL }}
+          API_URL: ${{ vars.API_URL || 'https://api.paipai.priyanshusingh.co.in' }}
           CRON_SECRET: ${{ secrets.CRON_SECRET }}
         run: |
           if [ -z "$API_URL" ] || [ -z "$CRON_SECRET" ]; then

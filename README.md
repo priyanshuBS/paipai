@@ -2,6 +2,8 @@
 
 [![CI](https://github.com/priyanshuBS/paipai/actions/workflows/ci.yml/badge.svg)](https://github.com/priyanshuBS/paipai/actions/workflows/ci.yml)
 
+**Live:** [paipai.priyanshusingh.co.in](https://paipai.priyanshusingh.co.in) · API: `api.paipai.priyanshusingh.co.in`
+
 Personal finance and expense tracking, built for India (₹ INR, Asia/Kolkata by default). Log an expense in two taps, see where your money goes, and stay inside your budgets: on the web and on your phone.
 
 - **Website**: Next.js 16 (App Router), Tailwind CSS, Recharts

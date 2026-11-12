@@ -25,6 +25,14 @@ export async function run(s) {
     await page.getByText(/Resend in \d+s/).waitFor();
   });
 
+  await step('code screen survives a reload (e.g. after switching to the email app)', async () => {
+    await page.reload();
+    await page.getByRole('heading', { name: 'Enter the code' }).waitFor();
+    await page.getByText(email).waitFor();
+    await page.getByText(/Resend in \d+s/).waitFor();
+    await page.getByRole('button', { name: 'Paste code' }).waitFor();
+  });
+
   await step('wrong OTP is rejected, right OTP signs in', async () => {
     const otp = await readOtp(email);
     await page.getByLabel('Digit 1').fill('');

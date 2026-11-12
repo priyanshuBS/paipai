@@ -1,5 +1,5 @@
 import { Link, router } from 'expo-router';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Path } from 'react-native-svg';
@@ -7,6 +7,7 @@ import { emailSchema, nameSchema } from '@paipai/shared/schemas';
 import { Logo } from '@/components/brand';
 import { Button, FieldError, Input, Label, Text } from '@/components/ui';
 import { authClient } from '@/lib/auth-client';
+import { loadPendingSignIn, savePendingSignIn } from '@/lib/pending-sign-in';
 
 export function AuthLayout({
   title,
@@ -72,6 +73,22 @@ export function AuthDetailsForm({
   const [sending, setSending] = useState(false);
   const [google, setGoogle] = useState(false);
 
+  // Came back after the app was closed mid sign-in? Resume on the code screen.
+  useEffect(() => {
+    void loadPendingSignIn().then((p) => {
+      if (!p) return;
+      router.push({
+        pathname: '/verify',
+        params: {
+          email: p.email,
+          mode: p.mode,
+          sentAt: String(p.sentAt),
+          ...(p.name ? { name: p.name } : {}),
+        },
+      });
+    });
+  }, []);
+
   async function submit() {
     const next: typeof errors = {};
     if (isSignup) {
@@ -93,9 +110,22 @@ export function AuthDetailsForm({
       setErrors({ form: error.message ?? 'Could not send the code. Please try again.' });
       return;
     }
+    const sentAt = Date.now();
+    const trimmed = isSignup ? name.trim() : undefined;
+    await savePendingSignIn({
+      email: em.data,
+      mode,
+      sentAt,
+      ...(trimmed ? { name: trimmed } : {}),
+    });
     router.push({
       pathname: '/verify',
-      params: { email: em.data, mode, ...(isSignup ? { name: name.trim() } : {}) },
+      params: {
+        email: em.data,
+        mode,
+        sentAt: String(sentAt),
+        ...(trimmed ? { name: trimmed } : {}),
+      },
     });
   }
 

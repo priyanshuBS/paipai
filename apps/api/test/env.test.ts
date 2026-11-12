@@ -21,6 +21,19 @@ describe('production configuration checks', () => {
     expect(productionProblems(prod())).toEqual([]);
   });
 
+  it('accepts the real PaiPai production addresses', () => {
+    expect(
+      productionProblems(
+        prod({
+          BETTER_AUTH_URL: 'https://api.paipai.priyanshusingh.co.in',
+          WEB_URL: 'https://paipai.priyanshusingh.co.in',
+          COOKIE_DOMAIN: '.paipai.priyanshusingh.co.in',
+          EMAIL_FROM: 'PaiPai <hello@email.priyanshusingh.co.in>',
+        }),
+      ),
+    ).toEqual([]);
+  });
+
   it('never complains outside production', () => {
     expect(
       productionProblems({ ...prod(), NODE_ENV: 'development', WEB_URL: 'http://localhost:3000' }),
