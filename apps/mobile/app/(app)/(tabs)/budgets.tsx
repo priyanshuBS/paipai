@@ -25,6 +25,7 @@ import {
 import { ApiError } from '@/lib/api';
 import { useBudgetMutations, useBudgets, useCategories } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
+import { useActionErrorHandler } from '@/lib/action-errors';
 
 const PERIODS: { value: BudgetPeriod; label: string }[] = [
   { value: 'weekly', label: 'Weekly' },
@@ -244,6 +245,7 @@ export default function Budgets() {
   const q = useBudgets();
   const m = useBudgetMutations();
   const snack = useSnackbar();
+  const onActionError = useActionErrorHandler();
   const [form, setForm] = useState<{ open: boolean; editing: BudgetView | null }>({
     open: false,
     editing: null,
@@ -258,7 +260,11 @@ export default function Budgets() {
       {
         text: 'Delete',
         style: 'destructive',
-        onPress: () => void m.remove.mutateAsync(b.id).then(() => snack('Budget deleted')),
+        onPress: () =>
+          void m.remove.mutateAsync(b.id).then(
+            () => snack('Budget deleted'),
+            (err: unknown) => onActionError(err),
+          ),
       },
     ]);
 

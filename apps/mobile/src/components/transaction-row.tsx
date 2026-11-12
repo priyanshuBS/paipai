@@ -12,21 +12,34 @@ import { useDeleteTransaction, useRestoreTransaction } from '@/lib/queries';
 import { CategoryIcon } from './category-icon';
 import { Amount } from './money';
 import { useSnackbar } from './snackbar';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { Skeleton, Text } from './ui';
 
 export function useDeleteWithUndo() {
   const del = useDeleteTransaction();
   const restore = useRestoreTransaction();
   const snack = useSnackbar();
-  return async (t: Transaction) => {
-    await del.mutateAsync(t.id);
+  const onError = useActionErrorHandler();
+  /** Never throws: failures become a message. Resolves true when deleted. */
+  return async (t: Transaction): Promise<boolean> => {
+    try {
+      await del.mutateAsync(t.id);
+    } catch (err) {
+      onError(err, 'Could not delete. Please try again.');
+      return false;
+    }
     void Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
     snack({
       message: `Deleted “${t.title}”`,
       actionLabel: 'Undo',
       durationMs: 6000,
-      onAction: () => void restore.mutateAsync(t.id).then(() => snack('Restored')),
+      onAction: () =>
+        void restore.mutateAsync(t.id).then(
+          () => snack('Restored'),
+          (err: unknown) => onError(err, 'Could not undo. Please try again.'),
+        ),
     });
+    return true;
   };
 }
 

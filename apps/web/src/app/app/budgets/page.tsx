@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/primitives';
 import { ApiError } from '@/lib/api';
 import { useBudgetMutations, useBudgets, useCategories } from '@/lib/queries';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { cn } from '@/lib/utils';
 
 const PERIOD_LABEL: Record<BudgetPeriod, string> = {
@@ -247,10 +248,15 @@ export default function BudgetsPage() {
   });
   const budgets = q.data ?? [];
   const alerts = budgets.filter((b) => b.status !== 'ok');
+  const onActionError = useActionErrorHandler();
 
   async function remove(b: BudgetView) {
-    await m.remove.mutateAsync(b.id);
-    toast(`Deleted ${b.categoryName ?? 'overall'} budget`);
+    try {
+      await m.remove.mutateAsync(b.id);
+      toast(`Deleted ${b.categoryName ?? 'overall'} budget`);
+    } catch (err) {
+      onActionError(err, 'Could not delete the budget. Please try again.');
+    }
   }
 
   return (

@@ -40,6 +40,7 @@ import {
   useRecurringMutations,
 } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
+import { useActionErrorHandler } from '@/lib/action-errors';
 
 function RecurringForm({
   editing,
@@ -205,6 +206,7 @@ export default function RecurringScreen() {
   const m = useRecurringMutations();
   const categories = useCategoryMap();
   const snack = useSnackbar();
+  const onActionError = useActionErrorHandler();
   const [form, setForm] = useState<{ open: boolean; editing: RecurringView | null }>({
     open: false,
     editing: null,
@@ -220,7 +222,11 @@ export default function RecurringScreen() {
         {
           text: 'Delete',
           style: 'destructive',
-          onPress: () => void m.remove.mutateAsync(r.id).then(() => snack('Deleted')),
+          onPress: () =>
+            void m.remove.mutateAsync(r.id).then(
+              () => snack('Deleted'),
+              (err: unknown) => onActionError(err),
+            ),
         },
       ],
     );
@@ -277,7 +283,9 @@ export default function RecurringScreen() {
                     accessibilityRole="button"
                     accessibilityLabel={r.isActive ? `Pause ${r.title}` : `Resume ${r.title}`}
                     onPress={() =>
-                      void m.update.mutateAsync({ id: r.id, body: { isActive: !r.isActive } })
+                      void m.update
+                        .mutateAsync({ id: r.id, body: { isActive: !r.isActive } })
+                        .catch((err: unknown) => onActionError(err))
                     }
                     className="h-11 w-11 items-center justify-center"
                   >

@@ -49,6 +49,7 @@ import { enqueueTransaction, isOfflineError } from '@/lib/offline-queue';
 import { ReceiptPicker } from '@/features/receipts/receipt-picker';
 import { useCategories, useDuplicateTransaction, useMe, useSaveTransaction } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
+import { useActionErrorHandler } from '@/lib/action-errors';
 
 const METHODS: PaymentMethod[] = ['cash', 'upi', 'card', 'bank', 'other'];
 
@@ -127,6 +128,7 @@ function QuickAddForm({
   const save = useSaveTransaction();
   const duplicate = useDuplicateTransaction();
   const deleteWithUndo = useDeleteWithUndo();
+  const onActionError = useActionErrorHandler();
   const snack = useSnackbar();
 
   const [type, setType] = useState<TransactionType>(editing?.type ?? initialType);
@@ -522,10 +524,13 @@ function QuickAddForm({
                 accessibilityRole="button"
                 accessibilityLabel="Duplicate"
                 onPress={() =>
-                  void duplicate.mutateAsync(editing.id).then(() => {
-                    snack('Duplicated as a new entry for now');
-                    router.back();
-                  })
+                  void duplicate.mutateAsync(editing.id).then(
+                    () => {
+                      snack('Duplicated as a new entry for now');
+                      router.back();
+                    },
+                    (err: unknown) => onActionError(err, 'Could not duplicate. Please try again.'),
+                  )
                 }
                 className="h-14 w-14 items-center justify-center rounded-full border border-border"
               >
@@ -534,7 +539,7 @@ function QuickAddForm({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel="Delete"
-                onPress={() => void deleteWithUndo(editing).then(() => router.back())}
+                onPress={() => void deleteWithUndo(editing).then((ok) => ok && router.back())}
                 className="h-14 w-14 items-center justify-center rounded-full border border-border"
               >
                 <Trash2 size={20} color={colors.expense} />

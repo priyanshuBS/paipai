@@ -7,6 +7,7 @@ import { formatTime } from '@paipai/shared/date';
 import { PAYMENT_METHOD_LABELS, type Category, type Transaction } from '@paipai/shared/schemas';
 import { CategoryIcon } from '@/components/category-icon';
 import { Amount } from '@/components/money';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { useDuplicateTransaction } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 import { useDeleteWithUndo } from './quick-add-dialog';
@@ -28,6 +29,7 @@ export function TransactionRow({
   const { openEdit } = useQuickAdd();
   const duplicate = useDuplicateTransaction();
   const deleteWithUndo = useDeleteWithUndo();
+  const onActionError = useActionErrorHandler();
   const subtitle = [t.note, timeLabel ?? formatTime(t.occurredAt, tz)].filter(Boolean).join(' · ');
 
   const item =
@@ -74,7 +76,10 @@ export function TransactionRow({
               <DropdownMenu.Item
                 className={item}
                 onSelect={() =>
-                  void duplicate.mutateAsync(t.id).then(() => toast.success('Duplicated'))
+                  void duplicate.mutateAsync(t.id).then(
+                    () => toast.success('Duplicated'),
+                    (err: unknown) => onActionError(err, 'Could not duplicate. Please try again.'),
+                  )
                 }
               >
                 <Copy className="size-4" aria-hidden /> Duplicate

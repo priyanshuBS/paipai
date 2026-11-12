@@ -31,6 +31,7 @@ import {
   Skeleton,
 } from '@/components/ui/primitives';
 import { api, ApiError } from '@/lib/api';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { useCategoryMutations } from '@/lib/queries';
 import { cn } from '@/lib/utils';
 
@@ -176,19 +177,29 @@ export default function CategoriesPage() {
   const custom = all.filter((c) => !c.isSystem && !c.isArchived);
   const archived = all.filter((c) => !c.isSystem && c.isArchived);
 
+  const onActionError = useActionErrorHandler();
+
   async function move(i: number, dir: -1 | 1) {
     const ids = custom.map((c) => c.id);
     const j = i + dir;
     if (j < 0 || j >= ids.length) return;
     [ids[i], ids[j]] = [ids[j] as string, ids[i] as string];
-    await m.reorder.mutateAsync(ids);
+    try {
+      await m.reorder.mutateAsync(ids);
+    } catch (err) {
+      onActionError(err, 'Could not reorder. Please try again.');
+    }
     void q.refetch();
   }
 
   async function setArchived(c: Category, isArchived: boolean) {
-    await m.update.mutateAsync({ id: c.id, body: { isArchived } });
+    try {
+      await m.update.mutateAsync({ id: c.id, body: { isArchived } });
+      toast(isArchived ? `Archived “${c.name}”` : `Restored “${c.name}”`);
+    } catch (err) {
+      onActionError(err);
+    }
     void q.refetch();
-    toast(isArchived ? `Archived “${c.name}”` : `Restored “${c.name}”`);
   }
 
   return (

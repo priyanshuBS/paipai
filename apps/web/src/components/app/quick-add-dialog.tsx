@@ -43,6 +43,7 @@ import {
   useRestoreTransaction,
   useSaveTransaction,
 } from '@/lib/queries';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { cn } from '@/lib/utils';
 
 const METHODS: PaymentMethod[] = ['cash', 'upi', 'card', 'bank', 'other'];
@@ -93,17 +94,28 @@ export function QuickAddDialog({ open, onOpenChange, initialType, editing }: Pro
 export function useDeleteWithUndo() {
   const del = useDeleteTransaction();
   const restore = useRestoreTransaction();
-  return async (t: Transaction) => {
-    await del.mutateAsync(t.id);
+  const onError = useActionErrorHandler();
+  /** Never throws: failures become a toast. Resolves true when deleted. */
+  return async (t: Transaction): Promise<boolean> => {
+    try {
+      await del.mutateAsync(t.id);
+    } catch (err) {
+      onError(err, 'Could not delete. Please try again.');
+      return false;
+    }
     toast(`Deleted “${t.title}”`, {
       action: {
         label: 'Undo',
         onClick: () => {
-          void restore.mutateAsync(t.id).then(() => toast.success('Restored'));
+          void restore.mutateAsync(t.id).then(
+            () => toast.success('Restored'),
+            (err: unknown) => onError(err, 'Could not undo. Please try again.'),
+          );
         },
       },
       duration: 6000,
     });
+    return true;
   };
 }
 
@@ -122,6 +134,7 @@ function QuickAddForm({
   const save = useSaveTransaction();
   const duplicate = useDuplicateTransaction();
   const deleteWithUndo = useDeleteWithUndo();
+  const onActionError = useActionErrorHandler();
 
   const [type, setType] = useState<TransactionType>(editing?.type ?? initialType);
   const [amount, setAmount] = useState(editing ? paiseToInputString(editing.amount) : '');
@@ -563,10 +576,13 @@ function QuickAddForm({
               size="icon"
               aria-label="Duplicate"
               onClick={() =>
-                void duplicate.mutateAsync(editing.id).then(() => {
-                  toast.success('Duplicated as a new entry for now');
-                  onDone();
-                })
+                void duplicate.mutateAsync(editing.id).then(
+                  () => {
+                    toast.success('Duplicated as a new entry for now');
+                    onDone();
+                  },
+                  (err: unknown) => onActionError(err, 'Could not duplicate. Please try again.'),
+                )
               }
             >
               <Copy />
@@ -577,7 +593,7 @@ function QuickAddForm({
               size="icon"
               aria-label="Delete"
               className="text-expense"
-              onClick={() => void deleteWithUndo(editing).then(onDone)}
+              onClick={() => void deleteWithUndo(editing).then((ok) => ok && onDone())}
             >
               <Trash2 />
             </Button>

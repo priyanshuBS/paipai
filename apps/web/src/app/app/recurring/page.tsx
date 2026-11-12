@@ -44,6 +44,7 @@ import {
   useRecurring,
   useRecurringMutations,
 } from '@/lib/queries';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { cn } from '@/lib/utils';
 
 function RecurringDialog({
@@ -232,6 +233,7 @@ export default function RecurringPage() {
   const tz = me?.timezone ?? DEFAULT_TIMEZONE;
   const q = useRecurring();
   const m = useRecurringMutations();
+  const onActionError = useActionErrorHandler();
   const categories = useCategoryMap();
   const [dialog, setDialog] = useState<{ open: boolean; editing: RecurringView | null }>({
     open: false,
@@ -316,7 +318,10 @@ export default function RecurringPage() {
                       onClick={() =>
                         void m.update
                           .mutateAsync({ id: r.id, body: { isActive: !r.isActive } })
-                          .then(() => toast(r.isActive ? 'Paused' : 'Resumed'))
+                          .then(
+                            () => toast(r.isActive ? 'Paused' : 'Resumed'),
+                            (err: unknown) => onActionError(err),
+                          )
                       }
                     >
                       {r.isActive ? <Pause /> : <Play />}
@@ -335,7 +340,10 @@ export default function RecurringPage() {
                       className="text-expense"
                       aria-label={`Delete ${r.title}`}
                       onClick={() =>
-                        void m.remove.mutateAsync(r.id).then(() => toast(`Deleted “${r.title}”`))
+                        void m.remove.mutateAsync(r.id).then(
+                          () => toast(`Deleted “${r.title}”`),
+                          (err: unknown) => onActionError(err),
+                        )
                       }
                     >
                       <Trash2 />

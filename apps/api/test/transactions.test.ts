@@ -104,6 +104,29 @@ describe('transactions CRUD', () => {
     expect((await t.call(`/api/transactions/${id}`, { cookie: alice })).status).toBe(200);
   });
 
+  it('delete and restore are idempotent (double clicks, retries)', async () => {
+    const del = () => t.call(`/api/transactions/${id}`, { method: 'DELETE', cookie: alice });
+    const restore = () =>
+      t.call<Transaction>(`/api/transactions/${id}/restore`, { method: 'POST', cookie: alice });
+    expect((await del()).status).toBe(200);
+    expect((await del()).status).toBe(200); // already deleted: still fine
+    expect((await restore()).status).toBe(200);
+    const again = await restore(); // already restored: returns the live row
+    expect(again.status).toBe(200);
+    expect(again.body.id).toBe(id);
+    // Unknown ids and other users' transactions are still 404.
+    const unknown = '00000000-0000-4000-8000-000000000000';
+    expect(
+      (await t.call(`/api/transactions/${unknown}`, { method: 'DELETE', cookie: alice })).status,
+    ).toBe(404);
+    expect(
+      (await t.call(`/api/transactions/${id}`, { method: 'DELETE', cookie: bob })).status,
+    ).toBe(404);
+    expect(
+      (await t.call(`/api/transactions/${id}/restore`, { method: 'POST', cookie: bob })).status,
+    ).toBe(404);
+  });
+
   it("isolates users from each other's data", async () => {
     expect((await t.call(`/api/transactions/${id}`, { cookie: bob })).status).toBe(404);
     expect(

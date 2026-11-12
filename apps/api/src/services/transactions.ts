@@ -135,16 +135,30 @@ export async function updateTransaction(
   return toTransaction(row);
 }
 
+/** Any of the user's transactions, deleted or not (for idempotent delete/restore). */
+const mine = (userId: string, id: string) =>
+  and(eq(transactions.id, id), eq(transactions.userId, userId));
+
+/**
+ * Soft delete. Idempotent: deleting an already-deleted transaction succeeds
+ * (double clicks, retries from the offline queue). Unknown ids are still 404.
+ */
 export async function softDeleteTransaction(db: Database, ctx: UserCtx, id: string): Promise<void> {
   const res = await db
     .update(transactions)
     .set({ deletedAt: new Date() })
     .where(owned(ctx.userId, id))
     .returning({ id: transactions.id });
-  if (res.length === 0) throw notFound('Transaction');
+  if (res.length > 0) return;
+  const [existing] = await db
+    .select({ id: transactions.id })
+    .from(transactions)
+    .where(mine(ctx.userId, id))
+    .limit(1);
+  if (!existing) throw notFound('Transaction');
 }
 
-/** Undo a soft delete. */
+/** Undo a soft delete. Idempotent: restoring a live transaction just returns it. */
 export async function restoreTransaction(
   db: Database,
   ctx: UserCtx,
@@ -161,8 +175,10 @@ export async function restoreTransaction(
       ),
     )
     .returning();
-  if (!row) throw notFound('Transaction');
-  return toTransaction(row);
+  if (row) return toTransaction(row);
+  const [live] = await db.select().from(transactions).where(owned(ctx.userId, id)).limit(1);
+  if (!live) throw notFound('Transaction');
+  return toTransaction(live);
 }
 
 export async function duplicateTransaction(

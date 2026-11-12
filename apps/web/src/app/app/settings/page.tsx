@@ -37,6 +37,7 @@ import {
 } from '@/components/ui/primitives';
 import { ApiError, api } from '@/lib/api';
 import { authClient } from '@/lib/auth-client';
+import { useActionErrorHandler } from '@/lib/action-errors';
 import { uploadImage, useMe, useUpdateMe, useUploadsEnabled } from '@/lib/queries';
 
 function Row({
@@ -134,6 +135,7 @@ function DeleteAccountDialog({
 export default function SettingsPage() {
   const { data: me } = useMe();
   const update = useUpdateMe();
+  const onActionError = useActionErrorHandler();
   const uploads = useUploadsEnabled();
   const { setTheme } = useTheme();
   const router = useRouter();
@@ -267,9 +269,10 @@ export default function SettingsPage() {
                 className="w-full"
                 value={me.currency}
                 onChange={(e) =>
-                  void update
-                    .mutateAsync({ currency: e.target.value })
-                    .then(() => toast.success('Currency updated'))
+                  void update.mutateAsync({ currency: e.target.value }).then(
+                    () => toast.success('Currency updated'),
+                    (err: unknown) => onActionError(err),
+                  )
                 }
               >
                 {CURRENCIES.map((c) => (
@@ -286,9 +289,10 @@ export default function SettingsPage() {
                 className="w-full"
                 value={me.timezone}
                 onChange={(e) =>
-                  void update
-                    .mutateAsync({ timezone: e.target.value })
-                    .then(() => toast.success('Time zone updated'))
+                  void update.mutateAsync({ timezone: e.target.value }).then(
+                    () => toast.success('Time zone updated'),
+                    (err: unknown) => onActionError(err),
+                  )
                 }
               >
                 {tzOptions.map((t) => (

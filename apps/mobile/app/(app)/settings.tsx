@@ -12,6 +12,7 @@ import { useAppLock } from '@/lib/app-lock';
 import { getReminder, setReminder, type ReminderSettings } from '@/lib/notifications';
 import { useMe, useUpdateMe, useUploadsEnabled } from '@/lib/queries';
 import { useTheme } from '@/theme/theme';
+import { useActionErrorHandler } from '@/lib/action-errors';
 
 function PickerModal<T extends string>({
   visible,
@@ -89,6 +90,7 @@ export default function SettingsScreen() {
   const lock = useAppLock();
   const { setPreference, colors } = useTheme();
   const snack = useSnackbar();
+  const onActionError = useActionErrorHandler();
   const [name, setName] = useState<string | null>(null);
   const [picker, setPicker] = useState<null | 'currency' | 'timezone'>(null);
   const [reminder, setReminderState] = useState<ReminderSettings | null>(null);
@@ -308,7 +310,10 @@ export default function SettingsScreen() {
         options={CURRENCIES.map((c) => ({ value: c.code as string, label: c.label }))}
         value={me.currency}
         onSelect={(v) =>
-          void update.mutateAsync({ currency: v }).then(() => snack('Currency updated'))
+          void update.mutateAsync({ currency: v }).then(
+            () => snack('Currency updated'),
+            (err: unknown) => onActionError(err),
+          )
         }
         onClose={() => setPicker(null)}
       />
@@ -318,7 +323,10 @@ export default function SettingsScreen() {
         options={tzOptions}
         value={me.timezone}
         onSelect={(v) =>
-          void update.mutateAsync({ timezone: v }).then(() => snack('Time zone updated'))
+          void update.mutateAsync({ timezone: v }).then(
+            () => snack('Time zone updated'),
+            (err: unknown) => onActionError(err),
+          )
         }
         onClose={() => setPicker(null)}
       />
