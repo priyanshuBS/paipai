@@ -3,11 +3,13 @@ import {
   ArrowRight,
   Check,
   CloudOff,
+  Download,
   Fingerprint,
   Plus,
   Repeat,
   Search,
   ShieldCheck,
+  Smartphone,
 } from 'lucide-react';
 import { Logo } from '@/components/brand';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -15,6 +17,7 @@ import { CategoryIcon } from '@/components/category-icon';
 import { Ring } from '@/components/charts/mini';
 import { ProductPreview } from '@/components/landing/product-preview';
 import { buttonVariants } from '@/components/ui/button';
+import { ANDROID_APP_URL, AUTHOR_URL } from '@/lib/config';
 import { cn } from '@/lib/utils';
 
 const faqs = [
@@ -419,6 +422,43 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Mobile app download */}
+        <section className="px-4 pb-24 sm:px-6" aria-labelledby="app-title">
+          <div className="mx-auto grid max-w-6xl gap-8 rounded-[28px] border border-border bg-surface p-8 shadow-[var(--shadow-card)] sm:p-12 md:grid-cols-[1.4fr_1fr] md:items-center">
+            <div>
+              <p className="inline-flex items-center gap-2 text-sm font-medium text-accent">
+                <Smartphone className="size-4" aria-hidden /> Mobile app
+              </p>
+              <h2
+                id="app-title"
+                className="mt-3 font-display text-[2.4rem] leading-[1.05] tracking-[-0.01em] sm:text-5xl"
+              >
+                PaiPai in your <em className="text-accent">pocket.</em>
+              </h2>
+              <p className="mt-4 max-w-md leading-relaxed text-muted-foreground">
+                Add expenses the moment you pay, even offline. Same account, same data, synced with
+                the website. Lock it with your fingerprint and get budget alerts as notifications.
+              </p>
+            </div>
+            <div className="flex flex-col gap-3 md:items-end">
+              <a
+                href={ANDROID_APP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={cn(
+                  buttonVariants({ variant: 'primary', size: 'lg' }),
+                  'w-full md:w-auto',
+                )}
+              >
+                <Download /> Download for Android
+              </a>
+              <p className="text-xs text-muted-foreground md:text-right">
+                Opens the Expo build page: tap Install on your phone, or scan its QR code.
+              </p>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer className="border-t border-border">
@@ -437,8 +477,26 @@ export default function LandingPage() {
             <a href="#faq" className="hover:text-foreground">
               FAQ
             </a>
+            <a
+              href={ANDROID_APP_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-foreground"
+            >
+              Android app
+            </a>
           </div>
-          <p>© {new Date().getFullYear()} PaiPai</p>
+          <p>
+            © {new Date().getFullYear()} PaiPai · Built by{' '}
+            <a
+              href={AUTHOR_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-foreground underline-offset-4 hover:underline"
+            >
+              Priyanshu Singh
+            </a>
+          </p>
         </div>
       </footer>
     </div>
